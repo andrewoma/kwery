@@ -3,7 +3,7 @@ jdk:
 - oraclejdk8
 
 before_install:
-- pushd; cd /tmp; git clone https://github.com/andrewoma/kommon.git; cd kommon; ./gradlew install; popd
+- travis/install-kommon.sh
 
 before_script:
 - psql -c 'create database kwery;' -U postgres
