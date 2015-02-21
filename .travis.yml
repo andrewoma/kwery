@@ -2,8 +2,10 @@ language: java
 jdk:
 - oraclejdk8
 
-before_script:
+before_install:
 - cd /tmp; git clone https://github.com/andrewoma/kommon.git; cd kommon; ./gradlew install
+
+before_script:
 - psql -c 'create database kwery;' -U postgres
 
 addons:
