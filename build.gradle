@@ -1,0 +1,118 @@
+buildscript {
+    ext {
+        kotlinVersion = '0.10.770'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+    }
+}
+
+allprojects {
+    group = 'com.github.andrewoma.kwery'
+    version = '0.1-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'maven'
+    apply plugin: 'java'
+    apply plugin: 'kotlin'
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile 'org.slf4j:slf4j-api:1.7.7'
+        testCompile 'junit:junit:4.11'
+    }
+
+    task coverage(dependsOn: 'jacocoTestReport') << {
+        def reports = new File(project.buildDir, '/reports/jacoco/test/html')
+        def indexFile = new File(reports, 'index.html')
+        if (!indexFile.exists()) return
+        def index = indexFile.getText('UTF-8')
+        def footer = '<div class="footer">'
+        def result = new StringBuilder(index.substring(0, index.indexOf(footer)))
+
+        reports.eachDirMatch({ !new File(it).name.startsWith(".") }) { dir ->
+            def moduleIndex = new File(dir, 'index.source.html')
+            def content = moduleIndex.getText('UTF-8')
+                    .replaceAll('\\.\\./\\.resources', '.resources')
+                    .replaceAll('href="', "href=\"${dir.name}/")
+            result.append(content.substring(content.indexOf('<h1>'), content.indexOf(footer)))
+        }
+        result.append(index.substring(index.indexOf(footer)))
+
+        def output = new File(reports, 'index.source.html')
+
+        output.delete()
+        output << result.toString()
+        println("open $output.path")
+    }
+
+    test {
+        exclude '**/Abstract*'
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
+}
+
+project(':fetcher') {
+    dependencies {
+        testCompile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
+    }
+}
+
+project(':mapper') {
+    dependencies {
+        compile project(':core')
+        compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
+        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.15'
+        testCompile 'org.apache.logging.log4j:log4j-core:2.1'
+        testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.1'
+        testCompile 'org.hsqldb:hsqldb:2.3.2'
+        testCompile project(':fetcher')
+    }
+}
+
+project(':core') {
+    dependencies {
+        compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
+        testCompile 'com.h2database:h2:1.4.182'
+        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.15'
+        testCompile 'org.apache.logging.log4j:log4j-core:2.1'
+        testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.1'
+        testCompile 'org.hsqldb:hsqldb:2.3.2'
+        testCompile 'org.postgresql:postgresql:9.3-1102-jdbc4'
+    }
+}
+
+/*
+task kommon() {
+    def kommonDir = new File(buildDir, "kommon")
+    kommonDir.deleteDir()
+    kommonDir.mkdirs()
+    exec {
+        executable "git"
+        workingDir buildDir
+        args "clone", "https://github.com/andrewoma/kommon.git"
+    }
+
+    exec {
+        executable "./gradlew"
+        workingDir kommonDir
+        args "clean", "install"
+    }
+}*/

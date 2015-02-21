@@ -1,0 +1,17 @@
+*~
+.gradle
+*.iml
+*.ipr
+*.iws
+*.classpath
+*.project
+*.settings
+.DS_Store
+.textmate
+.idea
+*.sublime-*
+.nb-gradle
+/core/build
+/example/build
+/fetcher/build
+/mapper/build
