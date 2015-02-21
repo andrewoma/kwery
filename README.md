@@ -66,7 +66,7 @@ val inserted = dao.insert(Actor(1, Name("Kate", "Beckinsale"), LocalDateTime.now
 val actors = dao.findAll()
 ```
 
-See the [FilmDao.kt](/mapper/src/test/kotlin/com/github/andrewoma/kwery/mappertest/example/FilmDao.kt) for
+See [FilmDao.kt](/mapper/src/test/kotlin/com/github/andrewoma/kwery/mappertest/example/FilmDao.kt) for
 a more comprehensive example.
 
 #### Graph Fetcher
