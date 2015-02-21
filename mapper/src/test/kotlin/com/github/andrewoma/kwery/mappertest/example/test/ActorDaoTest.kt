@@ -41,8 +41,8 @@ class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
     override val data = listOf(
             Actor(Name("John", "Wayne")),
             Actor(Name("Meg", "Ryan")),
-            Actor(Name("Jeff", "Bridges"), -500),
-            Actor(Name("Yvonne", "Strahovsky"), -501)
+            Actor(Name("Jeff", "Bridges"), ++staticId),
+            Actor(Name("Yvonne", "Strahovsky"), ++staticId)
     )
 
     override fun mutateContents(t: Actor) = t.copy(name = Name("Bradley", "Cooper"))

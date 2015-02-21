@@ -53,6 +53,7 @@ abstract class AbstractFilmDaoTest<T, ID, D : AbstractDao<T, ID>> : AbstractDaoT
     }
 
     val sd = d
+    var staticId = -500
 
     override fun afterSessionSetup() {
         initialise("AbstractFilmDaoTest") {
@@ -96,18 +97,20 @@ abstract class AbstractFilmDaoTest<T, ID, D : AbstractDao<T, ID>> : AbstractDaoT
                 session.update(statement)
             }
 
+            // Use negative ids for static content
+            var id = -1000
             val actorDao = ActorDao(session, FilmActorDao(session))
-            d.actorBrad = actorDao.insert(Actor(Name("Brad", "Pitt"), -1000, LocalDateTime.now()), generateKeys = false)
-            d.actorKate = actorDao.insert(Actor(Name("Kate", "Beckinsale"), -1001, LocalDateTime.now()), generateKeys = false)
+            d.actorBrad = actorDao.insert(Actor(Name("Brad", "Pitt"), --id, LocalDateTime.now()), false)
+            d.actorKate = actorDao.insert(Actor(Name("Kate", "Beckinsale"), --id, LocalDateTime.now()), false)
 
             val languageDao = LanguageDao(session)
-            d.languageEnglish = languageDao.insert(Language(-2000, "English", LocalDateTime.now()))
-            d.languageSpanish = languageDao.insert(Language(-2001, "Spanish", LocalDateTime.now()))
+            d.languageEnglish = languageDao.insert(Language(--id, "English", LocalDateTime.now()), false)
+            d.languageSpanish = languageDao.insert(Language(--id, "Spanish", LocalDateTime.now()), false)
 
             val filmDao = FilmDao(session)
-            d.filmUnderworld = filmDao.insert(Film(-1, "Underworld", 2003, sd.languageEnglish, null, Duration.ofMinutes(121),
+            d.filmUnderworld = filmDao.insert(Film(--id, "Static Underworld", 2003, sd.languageEnglish, null, Duration.ofMinutes(121),
                     FilmRating.NC_17, LocalDateTime.now(), listOf("Commentaries", "Behind the Scenes")))
-            d.filmUnderworld2 = filmDao.insert(Film(-1, "Underworld: Evolution", 2006, sd.languageEnglish, null,
+            d.filmUnderworld2 = filmDao.insert(Film(--id, "Static Underworld: Evolution", 2006, sd.languageEnglish, null,
                     Duration.ofMinutes(106), FilmRating.R, LocalDateTime.now(), listOf("Behind the Scenes")))
         }
 
