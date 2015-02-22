@@ -28,11 +28,11 @@ import kotlin.properties.Delegates
 
 class FilmActorDaoTest : AbstractFilmDaoTest<FilmActor, FilmActor.Id, FilmActorDao>() {
     override var dao: FilmActorDao by Delegates.notNull()
-    override val emptyKey = null
 
     override fun afterSessionSetup() {
         dao = FilmActorDao(session)
         super<AbstractFilmDaoTest>.afterSessionSetup()
+        dao.session.update("delete from ${dao.table.name}")
     }
 
     override val data by Delegates.lazy {

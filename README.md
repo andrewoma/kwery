@@ -156,7 +156,6 @@ DAO:
 * Add listeners to allow for cache invalidation on transaction boundaries
 * Add support for fetching a block of ids
 * Add support for using arrays as a parameter in place of in clauses for findByIds
-* Add auto-detection for generated keys
 
 Fetcher:
 * General review - code seems overly complicated for what it does

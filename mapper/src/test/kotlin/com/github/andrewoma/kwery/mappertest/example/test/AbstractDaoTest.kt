@@ -39,15 +39,13 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
 
     abstract val data: List<T>
 
-    abstract val emptyKey: ID?
-
     abstract fun mutateContents(t: T): T
 
     abstract fun contentsEqual(t1: T, t2: T): Boolean
 
-    val dataWithKeys: List<T> by Delegates.lazy { data.filter { id(it) != emptyKey } }
+    val dataWithKeys: List<T> by Delegates.lazy { data.filter { id(it) != dao.defaultId } }
 
-    val dataWithoutKeys: List<T> by Delegates.lazy { data.filter { id(it) == emptyKey } }
+    val dataWithoutKeys: List<T> by Delegates.lazy { data.filter { id(it) == dao.defaultId } }
 
     fun id(value: T) = dao.id(value)
 
@@ -59,7 +57,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         if (dataWithoutKeys.isEmpty()) return
 
         val created = dataWithoutKeys.first()
-        val inserted = dao.insert(created, generateKeys = true)
+        val inserted = dao.insert(created, KeyStrategy.Generated)
         val found = dao.findById(id(inserted))
         println("found: $found")
 
@@ -71,7 +69,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         if (dataWithKeys.isEmpty()) return
 
         val created = dataWithKeys.first()
-        val inserted = dao.insert(created, generateKeys = false)
+        val inserted = dao.insert(created, KeyStrategy.Explicit)
         val updated = dao.update(inserted, mutateContents(inserted))
         val found = dao.findById(id(updated))
 
@@ -114,7 +112,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     test fun `Insert batch with generated keys should return keys`() {
         if (dataWithoutKeys.isEmpty()) return
 
-        val inserted = dao.batchInsert(dataWithoutKeys, generateKeys = true)
+        val inserted = dao.batchInsert(dataWithoutKeys, KeyStrategy.Generated)
 
         assertEquals(dataWithoutKeys.size(), inserted.size())
         for ((old, new) in dataWithoutKeys.zip(inserted)) {
@@ -126,7 +124,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     test fun `Insert batch with ids return ids`() {
         if (dataWithKeys.isEmpty()) return
 
-        val inserted = dao.batchInsert(dataWithKeys, generateKeys = false)
+        val inserted = dao.batchInsert(dataWithKeys, KeyStrategy.Explicit)
         assertEquals(dataWithKeys.size(), inserted.size())
         for ((old, new) in dataWithKeys.zip(inserted)) {
             assertTrue(contentsEqual(old, new))
@@ -140,7 +138,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     fun insert(count: Int): List<T> {
         val result = arrayListOf<T>()
         for (value in data) {
-            result.add(dao.insert(value, generateKeys = id(value) == emptyKey))
+            result.add(dao.insert(value, KeyStrategy.Auto))
             if (count != -1 && result.size() == count) return result
         }
 

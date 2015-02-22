@@ -40,7 +40,6 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
     var filmActorDao: FilmActorDao by Delegates.notNull()
 
     override var dao: FilmDao by Delegates.notNull()
-    override val emptyKey = -1
 
     override fun afterSessionSetup() {
         dao = FilmDao(session)
@@ -77,7 +76,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
 
         val actors = listOf(sd.actorKate, sd.actorBrad)
         for (actor in actors) {
-            filmActorDao.insert(FilmActor(FilmActor.Id(film.id, actor.id), LocalDateTime.now()), false)
+            filmActorDao.insert(FilmActor(FilmActor.Id(film.id, actor.id), LocalDateTime.now()))
         }
 
         val found = dao.findWithActors(film.title, film.releaseYear)!!
@@ -115,7 +114,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         val actors = listOf(sd.actorKate, sd.actorBrad)
         for (film in films) {
             for (actor in actors) {
-                filmActorDao.insert(FilmActor(FilmActor.Id(film.id, actor.id), LocalDateTime.now()), false)
+                filmActorDao.insert(FilmActor(FilmActor.Id(film.id, actor.id), LocalDateTime.now()))
             }
         }
 

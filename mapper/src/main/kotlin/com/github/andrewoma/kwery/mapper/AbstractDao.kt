@@ -29,10 +29,30 @@ import com.github.andrewoma.kwery.core.UpdateOptions
 import java.util.HashMap
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 
-abstract class AbstractDao<T : Any, ID : Any>(
+public enum class KeyStrategy {
+    /**
+     * Auto will automatically set the strategy to Generated or Explicit based on whether a
+     * non-default id value is provided in the value inserted
+     */
+    Auto
+
+    /**
+     * Forces the use of generated keys
+     */
+    Generated
+
+    /**
+     * Inserts the id from the value explicitly, not using generated keys
+     */
+    Explicit
+}
+
+public abstract class AbstractDao<T : Any, ID : Any>(
         val session: Session,
         val table: Table<T, ID>,
-        val id: (T) -> ID
+        val id: (T) -> ID,
+        override val defaultKeyStrategy: KeyStrategy = KeyStrategy.Auto,
+        val defaultId: ID? = null
 ) : Dao<T, ID> {
 
     protected val nf: (Column<T, *>) -> String = { it.name }
@@ -81,6 +101,15 @@ abstract class AbstractDao<T : Any, ID : Any>(
             "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
         }
         return session.select(sql, exampleMap, selectOptions(name), table.rowMapper(columns))
+    }
+
+    private fun isGeneratedKey(value: T?, strategy: KeyStrategy): Boolean = when(strategy) {
+        KeyStrategy.Explicit -> false
+        KeyStrategy.Generated -> true
+        KeyStrategy.Auto -> {
+            checkNotNull(value, "Cannot calculate key strategy with null value")
+            id(value!!) == defaultId
+        }
     }
 
     override fun update(oldValue: T, newValue: T, deltaOnly: Boolean): T {
@@ -153,7 +182,9 @@ abstract class AbstractDao<T : Any, ID : Any>(
         throw UnsupportedOperationException("TODO") // TODO
     }
 
-    override fun batchInsert(values: List<T>, generateKeys: Boolean): List<T> {
+    override fun batchInsert(values: List<T>, keyStrategy: KeyStrategy): List<T> {
+        val generateKeys = isGeneratedKey(values.firstOrNull(), keyStrategy)
+
         if (generateKeys && table.idColumns.size() > 1) {
             throw UnsupportedOperationException("Batch insert with generated compound keys is unsupported")
         }
@@ -181,8 +212,9 @@ abstract class AbstractDao<T : Any, ID : Any>(
         }
     }
 
-    override fun insert(value: T, generateKeys: Boolean): T {
-        // TODO ... Auto set generatedKeys if the id columns are default values
+    override fun insert(value: T, keyStrategy: KeyStrategy): T {
+        val generateKeys = isGeneratedKey(value, keyStrategy)
+
         val name = "insert"
         val columns = if (generateKeys) table.dataColumns else table.allColumns
         val sql = sql(name to columns) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }

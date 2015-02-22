@@ -100,12 +100,12 @@ abstract class AbstractFilmDaoTest<T, ID, D : AbstractDao<T, ID>> : AbstractDaoT
             // Use negative ids for static content
             var id = -1000
             val actorDao = ActorDao(session, FilmActorDao(session))
-            d.actorBrad = actorDao.insert(Actor(Name("Brad", "Pitt"), --id, LocalDateTime.now()), false)
-            d.actorKate = actorDao.insert(Actor(Name("Kate", "Beckinsale"), --id, LocalDateTime.now()), false)
+            d.actorBrad = actorDao.insert(Actor(Name("Brad", "Pitt"), --id, LocalDateTime.now()))
+            d.actorKate = actorDao.insert(Actor(Name("Kate", "Beckinsale"), --id, LocalDateTime.now()))
 
             val languageDao = LanguageDao(session)
-            d.languageEnglish = languageDao.insert(Language(--id, "English", LocalDateTime.now()), false)
-            d.languageSpanish = languageDao.insert(Language(--id, "Spanish", LocalDateTime.now()), false)
+            d.languageEnglish = languageDao.insert(Language(--id, "English", LocalDateTime.now()))
+            d.languageSpanish = languageDao.insert(Language(--id, "Spanish", LocalDateTime.now()))
 
             val filmDao = FilmDao(session)
             d.filmUnderworld = filmDao.insert(Film(--id, "Static Underworld", 2003, sd.languageEnglish, null, Duration.ofMinutes(121),

@@ -29,7 +29,6 @@ import java.time.LocalDateTime
 
 class LanguageDaoTest : AbstractFilmDaoTest<Language, Int, LanguageDao>() {
     override var dao: LanguageDao by Delegates.notNull()
-    override val emptyKey = -1
 
     override fun afterSessionSetup() {
         dao = LanguageDao(session)

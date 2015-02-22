@@ -31,7 +31,6 @@ import kotlin.test.assertFalse
 
 class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
     override var dao: ActorDao by Delegates.notNull()
-    override val emptyKey = -1
 
     override fun afterSessionSetup() {
         dao = ActorDao(session, FilmActorDao(session))
@@ -63,5 +62,19 @@ class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
         val names = dao.findByLastNames(listOf("Ryan", "Bridges")).map { it.name }
         assertTrue(names.containsAll(setOf(Name("Jeff", "Bridges"), Name("Meg", "Ryan"))))
         assertFalse(names.contains(Name("Yvonne", "Strahovsky")))
+    }
+
+    test fun `Insert with default key should result in a generated key`() {
+        val actor = data[0]
+        val inserted = dao.insert(actor)
+        assertTrue(contentsEqual(actor, inserted))
+        assertFalse(actor.id == inserted.id)
+    }
+
+    test fun `Insert with non-default key should insert given key`() {
+        val actor = data[3]
+        val inserted = dao.insert(actor)
+        assertTrue(contentsEqual(actor, inserted))
+        assertTrue(actor.id == inserted.id)
     }
 }
