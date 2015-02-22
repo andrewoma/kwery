@@ -57,7 +57,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         if (dataWithoutKeys.isEmpty()) return
 
         val created = dataWithoutKeys.first()
-        val inserted = dao.insert(created, KeyStrategy.Generated)
+        val inserted = dao.insert(created, IdStrategy.Generated)
         val found = dao.findById(id(inserted))
         println("found: $found")
 
@@ -69,7 +69,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         if (dataWithKeys.isEmpty()) return
 
         val created = dataWithKeys.first()
-        val inserted = dao.insert(created, KeyStrategy.Explicit)
+        val inserted = dao.insert(created, IdStrategy.Explicit)
         val updated = dao.update(inserted, mutateContents(inserted))
         val found = dao.findById(id(updated))
 
@@ -112,7 +112,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     test fun `Insert batch with generated keys should return keys`() {
         if (dataWithoutKeys.isEmpty()) return
 
-        val inserted = dao.batchInsert(dataWithoutKeys, KeyStrategy.Generated)
+        val inserted = dao.batchInsert(dataWithoutKeys, IdStrategy.Generated)
 
         assertEquals(dataWithoutKeys.size(), inserted.size())
         for ((old, new) in dataWithoutKeys.zip(inserted)) {
@@ -124,7 +124,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     test fun `Insert batch with ids return ids`() {
         if (dataWithKeys.isEmpty()) return
 
-        val inserted = dao.batchInsert(dataWithKeys, KeyStrategy.Explicit)
+        val inserted = dao.batchInsert(dataWithKeys, IdStrategy.Explicit)
         assertEquals(dataWithKeys.size(), inserted.size())
         for ((old, new) in dataWithKeys.zip(inserted)) {
             assertTrue(contentsEqual(old, new))
@@ -138,7 +138,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     fun insert(count: Int): List<T> {
         val result = arrayListOf<T>()
         for (value in data) {
-            result.add(dao.insert(value, KeyStrategy.Auto))
+            result.add(dao.insert(value, IdStrategy.Auto))
             if (count != -1 && result.size() == count) return result
         }
 

@@ -25,7 +25,7 @@ package com.github.andrewoma.kwery.mapper
 
 public trait Dao<T : Any, ID : Any> {
     public val defaultColumns: Set<Column<T, *>>
-    public val defaultKeyStrategy: KeyStrategy
+    public val defaultIdStrategy: IdStrategy
 
     public fun findById(id: ID, columns: Set<Column<T, *>> = defaultColumns): T?
 
@@ -41,9 +41,9 @@ public trait Dao<T : Any, ID : Any> {
 
     public fun unsafeUpdate(newValue: T)
 
-    public fun insert(value: T, keyStrategy: KeyStrategy = defaultKeyStrategy): T
+    public fun insert(value: T, idStrategy: IdStrategy = defaultIdStrategy): T
 
-    public fun batchInsert(values: List<T>, keyStrategy: KeyStrategy = defaultKeyStrategy): List<T>
+    public fun batchInsert(values: List<T>, idStrategy: IdStrategy = defaultIdStrategy): List<T>
 
     public fun batchUpdate(values: List<T>): List<T>
 }

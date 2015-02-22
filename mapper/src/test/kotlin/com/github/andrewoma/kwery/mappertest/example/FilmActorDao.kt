@@ -38,7 +38,7 @@ object filmActorTable : Table<FA, FA.Id>("film_actor", tableConfig), VersionedWi
     override fun create(value: Value<FA>) = FA(FA.Id(value of FilmId, value of ActorId), value of LastUpdate)
 }
 
-class FilmActorDao(session: Session) : AbstractDao<FA, FA.Id>(session, filmActorTable, { it.id }, KeyStrategy.Explicit) {
+class FilmActorDao(session: Session) : AbstractDao<FA, FA.Id>(session, filmActorTable, { it.id }, IdStrategy.Explicit) {
 
     fun findByFilmIds(ids: Collection<Int>): List<FilmActor> {
         val name = "findByFilmIds"
