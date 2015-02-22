@@ -58,13 +58,13 @@ public class ThreadLocalSession(val dataSource: DataSource,
             }
         }
 
-        public fun initialise(name: String = defaultThreadLocalSessionName, startTransaction: Boolean = true) {
+        public fun initialise(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
             check(!configs.containsKey(name), "A session is already initialised for this thread")
             configs.put(name, SessionConfig(startTransaction, null, null))
         }
 
-        public fun finalise(name: String, commitTransaction: Boolean) {
+        public fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
             val config = configs.get(name) ?: error("A session has not been initialised for this thread")
             try {
@@ -92,8 +92,11 @@ public class ThreadLocalSession(val dataSource: DataSource,
         }
     }
 
-    override val currentTransaction: Transaction? by Delegates.lazy { session.currentTransaction }
-    override val connection: Connection by Delegates.lazy { session.connection }
+    override val currentTransaction: Transaction?
+            get() = session.currentTransaction
+
+    override val connection: Connection
+            get() = session.connection
 
     private val session: DefaultSession
         get() {
