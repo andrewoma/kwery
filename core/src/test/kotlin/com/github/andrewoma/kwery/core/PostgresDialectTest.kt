@@ -39,6 +39,13 @@ class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDial
               blob_col      bytea,
               clob_col      TEXT,
               array_col     INT ARRAY
+            );
+
+            DROP TABLE IF EXISTS test;
+
+            CREATE TABLE test (
+              id            VARCHAR(255),
+              value         VARCHAR(255)
             )
         """
 }

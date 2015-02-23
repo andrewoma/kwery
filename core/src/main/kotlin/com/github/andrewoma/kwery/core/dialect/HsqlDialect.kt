@@ -35,10 +35,14 @@ public open class HsqlDialect : Dialect {
         is Timestamp -> timestampFormat.get().format(value)
         is Date -> "'$value'"
         is Time -> "'$value'"
-        is java.sql.Array -> bindArray(value, "ARRAY[", "]")
+        is java.sql.Array -> bindArray(value, "array[", "]")
         is Blob -> standardBlob(value)
         is ByteArray -> standardByteArray(value)
         is Clob -> escapeSingleQuotedString(value.getSubString(1, value.length().toInt()))
         else -> value.toString()
     }
+
+    override val supportsArrayBasedIn = true
+
+    override fun arrayBasedIn(name: String) = "in(unnest(:$name))"
 }

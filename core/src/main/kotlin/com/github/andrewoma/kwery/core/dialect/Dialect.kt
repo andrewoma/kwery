@@ -30,13 +30,19 @@ public trait Dialect {
     fun bind(value: Any): String
 
     fun bindArray(value: java.sql.Array, prefix: String = "", postfix: String = "") =
-            (value.getArray() as Array<*>).stream().map { if (it == null) "null" else bind(it) }.joinToString(",", prefix, postfix)
+            (value.getArray() as Array<*>).stream().map {
+                if (it == null) "null" else bind(it)
+            }.joinToString(",", prefix, postfix)
+
+    val supportsArrayBasedIn: Boolean
+
+    fun arrayBasedIn(name: String): String {
+        throw UnsupportedOperationException()
+    }
 }
 
 val timestampFormat = object : ThreadLocal<SimpleDateFormat>() {
-    override fun initialValue(): SimpleDateFormat? {
-        return SimpleDateFormat("''yyyy-MM-dd HH:mm:ss.SSS''")
-    }
+    override fun initialValue() = SimpleDateFormat("''yyyy-MM-dd HH:mm:ss.SSS''")
 }
 
 fun standardBlob(blob: Blob): String {

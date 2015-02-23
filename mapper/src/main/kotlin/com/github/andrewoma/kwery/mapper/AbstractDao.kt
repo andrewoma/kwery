@@ -51,6 +51,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val session: Session,
         val table: Table<T, ID>,
         val id: (T) -> ID,
+        val idSqlType: String? = null,
         override val defaultIdStrategy: IdStrategy = IdStrategy.Auto,
         val defaultId: ID? = null
 ) : Dao<T, ID> {
@@ -103,7 +104,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         return session.select(sql, exampleMap, selectOptions(name), table.rowMapper(columns))
     }
 
-    private fun isGeneratedKey(value: T?, strategy: IdStrategy): Boolean = when(strategy) {
+    private fun isGeneratedKey(value: T?, strategy: IdStrategy): Boolean = when (strategy) {
         IdStrategy.Explicit -> false
         IdStrategy.Generated -> true
         IdStrategy.Auto -> {
@@ -237,18 +238,24 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
         val name = "findByIds"
 
-        if (table.idColumns.size() == 1) {
+        if (table.idColumns.size() != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
+
+        val (sql, idsParam) = if (session.dialect.supportsArrayBasedIn) {
             val sql = sql(name to columns) {
-                // TODO ... support array-based parameters where supported
-                "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
+                "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} " +
+                        session.dialect.arrayBasedIn("ids")
             }
 
-            val idsParam = ids.map { table.idMap(session, it, nf).values().first() }
-            val values = session.select(sql, mapOf("ids" to idsParam), selectOptions(name), table.rowMapper(columns))
-            return values.map { id(it) to it }.toMap()
+            sql to session.connection.createArrayOf(idSqlType, ids.copyToArray<Any>())
         } else {
-            throw UnsupportedOperationException("TODO") // TODO
+            val sql = sql(name to columns) {
+                "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
+            }
+            sql to ids.map { table.idMap(session, it, nf).values().first() }
         }
+
+        val values = session.select(sql, mapOf("ids" to idsParam), selectOptions(name), table.rowMapper(columns))
+        return values.map { id(it) to it }.toMap()
     }
 
     protected inline fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, f)

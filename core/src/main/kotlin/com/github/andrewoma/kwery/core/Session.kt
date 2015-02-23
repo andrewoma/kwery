@@ -23,13 +23,17 @@
 package com.github.andrewoma.kwery.core
 
 import java.sql.Connection
+import com.github.andrewoma.kwery.core.dialect.Dialect
 
 trait Session {
     public val currentTransaction: Transaction?
 
     public val connection: Connection
 
+    public val dialect: Dialect
+
     val defaultSelectOptions: SelectOptions
+
     val defaultUpdateOptions: UpdateOptions
 
     public fun <R> select(sql: String, parameters: Map<String, Any?> = mapOf(), options: SelectOptions = defaultSelectOptions, mapper: (Row) -> R): List<R>

@@ -27,8 +27,6 @@ import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
     //language=SQL
     override val sql = """
-            drop table dialect_test if exists;
-
             create table dialect_test (
               id            varchar(255),
               time_col      time,
@@ -39,6 +37,11 @@ class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
               blob_col      blob,
               clob_col      clob,
               array_col     int array
+            );
+
+            create table test (
+              id            varchar(255),
+              value         varchar(255)
             )
         """
 }

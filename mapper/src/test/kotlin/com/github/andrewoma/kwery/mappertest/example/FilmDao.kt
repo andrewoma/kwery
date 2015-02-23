@@ -49,7 +49,7 @@ object filmTable : Table<F, Int>("film", tableConfig), VersionedWithTimestamp {
             value of SpecialFeatures)
 }
 
-class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.id }, defaultId = -1) {
+class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.id }, "int", defaultId = -1) {
     val f = filmTable.prefixed("f")
     val a = actorTable.prefixed("a")
     val l = languageTable.prefixed("l")

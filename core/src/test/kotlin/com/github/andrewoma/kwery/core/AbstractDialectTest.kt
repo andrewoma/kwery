@@ -45,6 +45,26 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
                      val varchar: String, val blob: String, val clob: String, val ints: List<Int>) {
     }
 
+    test fun `Array based select should work inlined`() {
+        if (!dialect.supportsArrayBasedIn) return
+
+        session.update("delete from test")
+
+        for (id in listOf("a", "b", "c", "d")) {
+            session.update("insert into test(id) values(:id)", mapOf("id" to id))
+        }
+
+        val sql = "select id from test where id " + dialect.arrayBasedIn("ids")
+        val ids = setOf("b", "c")
+        val idsArray = session.connection.createArrayOf("varchar", ids.copyToArray())
+        val bound = session.bindParameters(sql, mapOf("ids" to idsArray))
+
+        val actual = session.select(bound) { row ->
+            row.string("id")
+        }
+        assertEquals(ids, actual.toSet())
+    }
+
     test fun `Bindings to literals should return the same values when fetched`() {
         val now = System.currentTimeMillis()
         val value = Value(Time(now), Date(now), Timestamp(now), "binary",

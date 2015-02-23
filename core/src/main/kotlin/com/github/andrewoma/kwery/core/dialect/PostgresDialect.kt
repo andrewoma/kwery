@@ -34,8 +34,12 @@ public open class PostgresDialect : Dialect {
         is Timestamp -> timestampFormat.get().format(value)
         is Date -> "'$value'"
         is Time -> "'$value'"
-        is java.sql.Array -> bindArray(value, "'{", "}'")
+        is java.sql.Array -> bindArray(value, "array[", "]")
         is ByteArray -> "decode('${DatatypeConverter.printBase64Binary(value)}','base64')"
         else -> value.toString()
     }
+
+    override fun arrayBasedIn(name: String) = "= any(:$name)"
+
+    override val supportsArrayBasedIn = true
 }

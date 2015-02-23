@@ -43,7 +43,7 @@ import javax.sql.DataSource
 private val defaultThreadLocalSessionName = "default"
 
 public class ThreadLocalSession(val dataSource: DataSource,
-                                val dialect: Dialect,
+                                override val dialect: Dialect,
                                 val interceptors: List<StatementInterceptor> = listOf(),
                                 val name: String = defaultThreadLocalSessionName,
                                 override val defaultSelectOptions: SelectOptions = SelectOptions(),

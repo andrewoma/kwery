@@ -35,7 +35,7 @@ import com.github.andrewoma.kommon.lang.trimMargin
 
 
 public class DefaultSession(override val connection: Connection,
-                            val dialect: Dialect,
+                            override val dialect: Dialect,
                             val interceptors: List<StatementInterceptor> = listOf(),
                             override val defaultSelectOptions: SelectOptions = SelectOptions(),
                             override val defaultUpdateOptions: UpdateOptions = UpdateOptions()) : Session {

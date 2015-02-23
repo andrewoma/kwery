@@ -42,7 +42,8 @@ object actorTable : Table<A, Int>("actor", tableConfig), VersionedWithTimestamp 
             value.of(ActorId), value.of(LastUpdate))
 }
 
-class ActorDao(session: Session, val filmActorDao: FilmActorDao) : AbstractDao<A, Int>(session, actorTable, { it.id }, defaultId = -1) {
+class ActorDao(session: Session, val filmActorDao: FilmActorDao) :
+        AbstractDao<A, Int>(session, actorTable, { it.id }, "int", defaultId = -1) {
 
     fun findByLastNames(lastNames: List<String>): List<A> {
         val sql = "select $columns from ${table.name} where last_name in (:last_names)"

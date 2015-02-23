@@ -38,4 +38,4 @@ object languageTable : Table<L, Int>("language", tableConfig), VersionedWithTime
     override fun create(value: Value<L>) = L(value.of(LanguageId), value.of(Name), value.of(LastUpdate))
 }
 
-class LanguageDao(session: Session) : AbstractDao<L, Int>(session, languageTable, { it.id }, defaultId = -1)
+class LanguageDao(session: Session) : AbstractDao<L, Int>(session, languageTable, { it.id }, "int", defaultId = -1)
