@@ -32,6 +32,7 @@ import com.github.andrewoma.kwery.core.interceptor.StatementInterceptorChain
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import java.util.ArrayList
 import com.github.andrewoma.kommon.lang.trimMargin
+import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
 
 /**
  * DefaultSession is NOT thread safe. It seems the underlying JDBC drivers are patchy with thread safety
@@ -39,25 +40,19 @@ import com.github.andrewoma.kommon.lang.trimMargin
  *
  * Typically, use a ThreadLocalSession in server environments. Alternatively, use a connection pool
  * and create a new session per thread.
- *
- * TODO - Make construction light weight as a new instance will be created per request in
- * ThreadLocalSessions. Move cache to class local
  */
 public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
-                            val interceptors: List<StatementInterceptor> = listOf(),
+                            val interceptor: StatementInterceptor = noOpStatementInterceptor,
                             override val defaultSelectOptions: SelectOptions = SelectOptions(),
                             override val defaultUpdateOptions: UpdateOptions = UpdateOptions()) : Session {
 
     class object {
-        class NoOpStatementInterceptor : StatementInterceptor
+        private val namedQueryCache = ConcurrentHashMap<StatementCacheKey, BoundQuery>()
     }
 
     override public val currentTransaction: Transaction?
         get() = transaction
-
-    private val namedQueryCache = ConcurrentHashMap<StatementCacheKey, BoundQuery>()
-    private val interceptor = if (interceptors.isEmpty()) NoOpStatementInterceptor() else StatementInterceptorChain(interceptors)
 
     var transaction: Transaction? = null
 

@@ -27,6 +27,7 @@ import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import kotlin.properties.Delegates
 import javax.sql.DataSource
+import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
 
 /**
  * ThreadLocalSession creates sessions on a per thread basis. It allows services
@@ -44,7 +45,7 @@ private val defaultThreadLocalSessionName = "default"
 
 public class ThreadLocalSession(val dataSource: DataSource,
                                 override val dialect: Dialect,
-                                val interceptors: List<StatementInterceptor> = listOf(),
+                                val interceptor: StatementInterceptor = noOpStatementInterceptor,
                                 val name: String = defaultThreadLocalSessionName,
                                 override val defaultSelectOptions: SelectOptions = SelectOptions(),
                                 override val defaultUpdateOptions: UpdateOptions = UpdateOptions()) : Session {
@@ -103,7 +104,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
             val configs = threadLocalSession.get()
             val config = configs.get(name) ?: error("A session has not been initialised for this thread")
             return if (config.session == null) {
-                val session = DefaultSession(dataSource.getConnection(), dialect, interceptors, defaultSelectOptions, defaultUpdateOptions)
+                val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultSelectOptions, defaultUpdateOptions)
                 val transaction = if (!config.startTransaction) null else session.manualTransaction()
                 configs.put(name, SessionConfig(config.startTransaction, session, transaction))
                 session

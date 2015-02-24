@@ -45,7 +45,7 @@ class SessionInfoDao(val session: Session) {
 class ThreadLocalSessionTest {
     class object {
         var initialised = false
-        val threadLocalSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), listOf(LoggingInterceptor()))
+        val threadLocalSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), LoggingInterceptor())
         val dao = SessionInfoDao(threadLocalSession) // Test shared dao singleton
     }
 
@@ -67,7 +67,7 @@ class ThreadLocalSessionTest {
     fun <R> withSession(f: (Session) -> R): R {
         val connection = hsqlDataSource.getConnection()
         try {
-            val defaultSession = DefaultSession(connection, HsqlDialect(), listOf(LoggingInterceptor()))
+            val defaultSession = DefaultSession(connection, HsqlDialect(), LoggingInterceptor())
             return defaultSession.transaction {
                 f(defaultSession)
             }

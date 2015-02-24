@@ -47,7 +47,7 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
     rule public fun name(): TestName = name // Annotating val directly doesn't work
 
     before public fun setUp() {
-        session = DefaultSession(dataSource.getConnection(), dialect, listOf(LoggingInterceptor()))
+        session = DefaultSession(dataSource.getConnection(), dialect, LoggingInterceptor())
         if (startTransactionByDefault) {
             transaction = session.manualTransaction()
         }

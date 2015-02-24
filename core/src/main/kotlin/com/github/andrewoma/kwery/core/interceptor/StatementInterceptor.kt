@@ -41,3 +41,5 @@ public trait StatementInterceptor {
     public fun exception(statement: ExecutingStatement, e: Exception): Unit {
     }
 }
+
+object noOpStatementInterceptor : StatementInterceptor
