@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
 import com.github.andrewoma.kwery.core.UpdateOptions
 import java.util.HashMap
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
+import com.github.andrewoma.kwery.mapper.listener.*
 
 public enum class IdStrategy {
     /**
@@ -62,6 +63,20 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     override val defaultColumns = table.defaultColumns
 
     val columns = table.defaultColumns.join()
+
+    private val listeners = linkedSetOf<Listener>()
+
+    public fun addListener(listener: Listener) {
+        listeners.add(listener)
+    }
+
+    public fun removeListener(listener: Listener) {
+        listeners.remove(listener)
+    }
+
+    protected fun fireEvent(events: List<Event>) {
+        listeners.forEach { it.onEvent(session, events) }
+    }
 
     protected fun <T1, T2> List<Pair<T1, T2>>.join(apply: (T1, List<T2>) -> T1): List<T1> {
         return this.groupBy { it.first }.map { apply(it.key, it.value.map { it.second }) }
@@ -160,6 +175,8 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             throw OptimisticLockException("The same version (${oldMap[versionCol]}) of ${table.name} with id ${id(oldValue)} has been updated by another transaction")
         }
 
+        fireEvent(listOf(UpdateEvent(table, id(oldValue), result, oldValue)))
+
         return result
     }
 
@@ -175,6 +192,8 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val name = "delete"
         val sql = sql(name) { "delete from ${table.name} where ${table.idColumns.equate(" and ")}" }
         val count = session.update(sql, table.idMap(session, id, nf), updateOptions(name))
+
+        fireEvent(listOf(DeleteEvent(table, id, null)))
 
         return count
     }
@@ -194,14 +213,14 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val columns = if (generateKeys) table.dataColumns else table.allColumns
         val sql = sql(name) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
 
-        if (generateKeys) {
+        val inserted = if (generateKeys) {
             val list = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name),
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) {(sum, value) -> sum + value }
             check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
 
-            return values.zip(list.map { it.second }).map {
+            values.zip(list.map { it.second }).map {
                 val (value, idValue) = it
                 table.copy(value, table.idColumns((id(idValue))).toMap())
             }
@@ -209,8 +228,12 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name))
             val count = counts.fold(0) {(sum, value) -> sum + value }
             check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
-            return values
+            values
         }
+
+        fireEvent(inserted.map { InsertEvent(table, id(it), it) })
+
+        return inserted
     }
 
     override fun insert(value: T, idStrategy: IdStrategy): T {
@@ -230,6 +253,9 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             count to value
         }
         check(count == 1, "${name} failed to insert any rows")
+
+        fireEvent(listOf(InsertEvent(table, id(inserted), inserted)))
+
         return inserted
     }
 

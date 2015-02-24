@@ -35,85 +35,89 @@ import java.time.Duration
 import com.github.andrewoma.kwery.mappertest.example.FilmRating
 import com.github.andrewoma.kwery.mapper.AbstractDao
 import com.github.andrewoma.kwery.mappertest.example.FilmActorDao
+import com.github.andrewoma.kwery.core.Session
 
 abstract class AbstractFilmDaoTest<T, ID, D : AbstractDao<T, ID>> : AbstractDaoTest<T, ID, D>() {
-    class object {
-        fun <T> notNull() = Delegates.notNull<T>()
 
-        object d {
-            var actorBrad: Actor by notNull()
-            var actorKate: Actor by notNull()
-
-            var languageEnglish: Language by notNull()
-            var languageSpanish: Language by notNull()
-
-            var filmUnderworld: Film by notNull()
-            var filmUnderworld2: Film by notNull()
-        }
-    }
-
-    val sd = d
+    var sd : FilmData by Delegates.notNull()
     var staticId = -500
 
     override fun afterSessionSetup() {
-        initialise("AbstractFilmDaoTest") {
-            //language=SQL
-            val sql = """
-            CREATE TABLE actor (
-                actor_id INTEGER IDENTITY,
-                first_name CHARACTER VARYING(255) NOT NULL,
-                last_name CHARACTER VARYING(255) NULL,
-                last_update TIMESTAMP NOT NULL
-            );
-
-            CREATE TABLE film (
-                film_id INTEGER IDENTITY,
-                title CHARACTER VARYING(255) NOT NULL,
-                release_year INTEGER,
-                language_id INTEGER NOT NULL ,
-                original_language_id INTEGER,
-                LENGTH INTEGER,
-                rating CHARACTER VARYING (255),
-                last_update TIMESTAMP NOT NULL,
-                special_features VARCHAR(255) ARRAY
-            );
-
-            CREATE TABLE language (
-                language_id INTEGER IDENTITY,
-                name CHARACTER VARYING(255) NOT NULL,
-                last_update TIMESTAMP NOT NULL
-            );
-
-            CREATE TABLE film_actor (
-                film_id INTEGER NOT NULL,
-                actor_id INTEGER NOT NULL,
-                last_update TIMESTAMP NOT NULL,
-                PRIMARY KEY(film_id, actor_id)
-            )
-        """
-
-            //language=Kotlin
-            for (statement in sql.split(";")) {
-                session.update(statement)
-            }
-
-            // Use negative ids for static content
-            var id = -1000
-            val actorDao = ActorDao(session, FilmActorDao(session))
-            d.actorBrad = actorDao.insert(Actor(Name("Brad", "Pitt"), --id, LocalDateTime.now()))
-            d.actorKate = actorDao.insert(Actor(Name("Kate", "Beckinsale"), --id, LocalDateTime.now()))
-
-            val languageDao = LanguageDao(session)
-            d.languageEnglish = languageDao.insert(Language(--id, "English", LocalDateTime.now()))
-            d.languageSpanish = languageDao.insert(Language(--id, "Spanish", LocalDateTime.now()))
-
-            val filmDao = FilmDao(session)
-            d.filmUnderworld = filmDao.insert(Film(--id, "Static Underworld", 2003, sd.languageEnglish, null, Duration.ofMinutes(121),
-                    FilmRating.NC_17, LocalDateTime.now(), listOf("Commentaries", "Behind the Scenes")))
-            d.filmUnderworld2 = filmDao.insert(Film(--id, "Static Underworld: Evolution", 2006, sd.languageEnglish, null,
-                    Duration.ofMinutes(106), FilmRating.R, LocalDateTime.now(), listOf("Behind the Scenes")))
-        }
-
+        sd = initialise("filmSchema") { initialiseFilmSchema(it) }
         super.afterSessionSetup()
     }
+}
+
+//language=SQL
+val filmSchema = """
+    CREATE TABLE actor (
+        actor_id INTEGER IDENTITY,
+        first_name CHARACTER VARYING(255) NOT NULL,
+        last_name CHARACTER VARYING(255) NULL,
+        last_update TIMESTAMP NOT NULL
+    );
+
+    CREATE TABLE film (
+        film_id INTEGER IDENTITY,
+        title CHARACTER VARYING(255) NOT NULL,
+        release_year INTEGER,
+        language_id INTEGER NOT NULL ,
+        original_language_id INTEGER,
+        LENGTH INTEGER,
+        rating CHARACTER VARYING (255),
+        last_update TIMESTAMP NOT NULL,
+        special_features VARCHAR(255) ARRAY
+    );
+
+    CREATE TABLE language (
+        language_id INTEGER IDENTITY,
+        name CHARACTER VARYING(255) NOT NULL,
+        last_update TIMESTAMP NOT NULL
+    );
+
+    CREATE TABLE film_actor (
+        film_id INTEGER NOT NULL,
+        actor_id INTEGER NOT NULL,
+        last_update TIMESTAMP NOT NULL,
+        PRIMARY KEY(film_id, actor_id)
+    )
+        """
+
+class FilmData {
+    fun <T> notNull() = Delegates.notNull<T>()
+
+    var actorBrad: Actor by notNull()
+    var actorKate: Actor by notNull()
+
+    var languageEnglish: Language by notNull()
+    var languageSpanish: Language by notNull()
+
+    var filmUnderworld: Film by notNull()
+    var filmUnderworld2: Film by notNull()
+}
+
+fun initialiseFilmSchema(session: Session): FilmData {
+    for (statement in filmSchema.split(";")) {
+        session.update(statement)
+    }
+
+    // Use negative ids for static content
+    var id = -1000
+
+    val d = FilmData()
+    val actorDao = ActorDao(session, FilmActorDao(session))
+    d.actorBrad = actorDao.insert(Actor(Name("Brad", "Pitt"), --id, LocalDateTime.now()))
+    d.actorKate = actorDao.insert(Actor(Name("Kate", "Beckinsale"), --id, LocalDateTime.now()))
+
+    val languageDao = LanguageDao(session)
+    d.languageEnglish = languageDao.insert(Language(--id, "English", LocalDateTime.now()))
+    d.languageSpanish = languageDao.insert(Language(--id, "Spanish", LocalDateTime.now()))
+
+    val filmDao = FilmDao(session)
+    d.filmUnderworld = filmDao.insert(Film(--id, "Static Underworld", 2003, d.languageEnglish, null, Duration.ofMinutes(121),
+            FilmRating.NC_17, LocalDateTime.now(), listOf("Commentaries", "Behind the Scenes")))
+    d.filmUnderworld2 = filmDao.insert(Film(--id, "Static Underworld: Evolution", 2006, d.languageEnglish, null,
+            Duration.ofMinutes(106), FilmRating.R, LocalDateTime.now(), listOf("Behind the Scenes")))
+
+    return  d
 }

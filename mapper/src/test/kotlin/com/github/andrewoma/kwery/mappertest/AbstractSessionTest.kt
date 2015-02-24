@@ -45,7 +45,7 @@ private val testDataSource: DataSource by Delegates.lazy {
 
 abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDataSource, val dialect: Dialect = HsqlDialect()) {
     class object {
-        val initialised: MutableSet<String> = hashSetOf()
+        val initialised = hashMapOf<String, Any?>()
     }
 
     var transaction: ManualTransaction by Delegates.notNull()
@@ -70,10 +70,9 @@ abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDa
     open fun afterSessionSetup() {
     }
 
-    fun initialise(token: String, f: () -> Unit) {
-        if (initialised.contains(token)) return
-        initialised.add(token)
-        f()
+    [suppress("UNCHECKED_CAST")]
+    fun <R> initialise(token: String, f: (Session) -> R): R {
+        return initialised.getOrPut(token) { f(session) } as R
     }
 
     after public fun tearDown() {

@@ -54,9 +54,11 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     public val idColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filter { it.id }) }
     public val dataColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filterNot { it.id }) }
     public val versionColumn: Column<T, *>? by Delegates.lazy { initialise(); allColumns.firstOrNull { it.version } }
+    public val type: Class<T> by Delegates.lazy { initialise(); lazyType!! }
 
     private val columnName: (Column<T, *>) -> String = { it.name }
     private var initialised = false
+    private var lazyType: Class<T>? = null
 
     public abstract fun create(value: Value<T>): T
     public abstract fun idColumns(id: ID): Set<Pair<Column<T, *>, *>>
@@ -71,11 +73,13 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     private fun initialise() {
         synchronized(this) {
             if (initialised) return
-            create(object : Value<T> {
+
+            val instance = create(object : Value<T> {
                 override fun <R> of(column: Column<T, R>): R {
                     return column.defaultValue
                 }
             })
+            lazyType = instance.javaClass
             initialised = true
         }
     }

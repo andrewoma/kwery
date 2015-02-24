@@ -153,7 +153,6 @@ Core:
 * Support direct execution (currently everything is via a PreparedStatement)
 
 DAO:
-* Add listeners to allow for cache invalidation on transaction boundaries
 * Add support for fetching a block of ids
 
 Fetcher:

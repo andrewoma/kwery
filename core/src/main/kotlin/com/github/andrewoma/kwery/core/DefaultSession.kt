@@ -33,7 +33,16 @@ import com.github.andrewoma.kwery.core.dialect.Dialect
 import java.util.ArrayList
 import com.github.andrewoma.kommon.lang.trimMargin
 
-
+/**
+ * DefaultSession is NOT thread safe. It seems the underlying JDBC drivers are patchy with thread safety
+ * on a single connection, so it seems a little pointless to make this safe.
+ *
+ * Typically, use a ThreadLocalSession in server environments. Alternatively, use a connection pool
+ * and create a new session per thread.
+ *
+ * TODO - Make construction light weight as a new instance will be created per request in
+ * ThreadLocalSessions. Move cache to class local
+ */
 public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
                             val interceptors: List<StatementInterceptor> = listOf(),
@@ -99,7 +108,7 @@ public class DefaultSession(override val connection: Connection,
             while (rs.next()) {
                 keys.add(f(Row(rs)))
             }
-            require(keys.size() == parametersList.size(), "Expected ${parametersList.size()} keys but received ${keys.size()}")
+            require(keys.size() == parametersList.size()) { "Expected ${parametersList.size()} keys but received ${keys.size()}" }
             statement.copy(rowsCounts = rowsAffected) to rowsAffected.zip(keys)
         }
     }
