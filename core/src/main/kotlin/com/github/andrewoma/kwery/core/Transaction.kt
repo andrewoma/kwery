@@ -22,11 +22,15 @@
 
 package com.github.andrewoma.kwery.core
 
+trait SessionCallback {
+    fun invoke(session: Session)
+}
+
 public trait Transaction {
     public var rollbackOnly: Boolean
-    public fun preCommitHandler(name: String, ifAbsent: () -> () -> Unit): () -> Unit
-    public fun postCommitHandler(name: String, ifAbsent: () -> () -> Unit): () -> Unit
-    public fun postRollbackHandler(name: String, ifAbsent: () -> () -> Unit): () -> Unit
+    public fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+    public fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+    public fun postRollbackHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
 }
 
 public trait ManualTransaction : Transaction {
@@ -41,26 +45,26 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
         session.transaction = this
     }
 
-    override fun postCommitHandler(name: String, ifAbsent: () -> () -> Unit): () -> Unit {
+    override fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
         return handler(name, postCommitHandlers, ifAbsent)
     }
 
-    override fun preCommitHandler(name: String, ifAbsent: () -> () -> Unit): () -> Unit {
+    override fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
         return handler(name, preCommitHandlers, ifAbsent)
     }
 
-    override fun postRollbackHandler(name: String, ifAbsent: () -> () -> Unit): () -> Unit {
+    override fun postRollbackHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
         return handler(name, postRollbackHandlers, ifAbsent)
     }
 
     [suppress("UNCHECKED_CAST")]
-    fun handler(name: String, handlers: MutableMap<String, () -> Unit>, ifAbsent: () -> () -> Unit): () -> Unit {
+    fun handler(name: String, handlers: MutableMap<String, SessionCallback>, ifAbsent: () -> SessionCallback): SessionCallback {
         return handlers.getOrPut(name) { ifAbsent() }
     }
 
-    private val preCommitHandlers = hashMapOf<String, () -> Unit>()
-    private val postCommitHandlers = hashMapOf<String, () -> Unit>()
-    private val postRollbackHandlers = hashMapOf<String, () -> Unit>()
+    private val preCommitHandlers = hashMapOf<String, SessionCallback>()
+    private val postCommitHandlers = hashMapOf<String, SessionCallback>()
+    private val postRollbackHandlers = hashMapOf<String, SessionCallback>()
 
     override public var rollbackOnly: Boolean = false // Can only set to true, can never unset
         set(value) {
@@ -69,16 +73,16 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
 
     override fun commit() {
         check(!rollbackOnly, "Invalid attempt to call commit after transaction is set to rollback only")
-        preCommitHandlers.values().forEach { it() }
+        preCommitHandlers.values().forEach { it(session) }
         session.connection.commit()
         session.transaction = null
-        postCommitHandlers.values().forEach { it() }
+        postCommitHandlers.values().forEach { it(session) }
     }
 
     override fun rollback() {
         session.transaction = null
         session.connection.rollback()
-        postRollbackHandlers.values().forEach { it() }
+        postRollbackHandlers.values().forEach { it(session) }
     }
 
     fun <R> withTransaction(f: (Transaction) -> R): R {

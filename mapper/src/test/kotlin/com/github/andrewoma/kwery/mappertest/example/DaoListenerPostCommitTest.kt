@@ -30,6 +30,7 @@ import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 import org.junit.Ignore
+import com.github.andrewoma.kwery.core.Session
 
 class DaoListenerPostCommitTest : AbstractSessionTest() {
     var dao: ActorDao by Delegates.notNull()
@@ -38,9 +39,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
     override var startTransactionByDefault = false
 
     override fun afterSessionSetup() {
-        initialise("filmSchema") {
-            initialiseFilmSchema(session)
-        }
+        initialise("filmSchema") { initialiseFilmSchema(it) }
         super.afterSessionSetup()
 
         dao = ActorDao(session, FilmActorDao(session))
@@ -126,8 +125,8 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         cache.values().forEach { assertEquals(tommy, it.name) }
     }
 
-    inner class CacheHandler : PostCommitEventHandler() {
-        override fun invoke() {
+    inner class CacheHandler : DeferredEventHandler() {
+        override fun invoke(session: Session) {
             println("Post commit invoked")
             for (event in events) {
                 println(event)

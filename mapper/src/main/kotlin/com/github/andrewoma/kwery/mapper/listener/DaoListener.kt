@@ -26,6 +26,8 @@ import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.Table
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.lang
+import com.github.andrewoma.kwery.core.Transaction
+import com.github.andrewoma.kwery.core.SessionCallback
 
 public trait Listener {
     fun onEvent(session: Session, events: List<Event>)
@@ -36,17 +38,28 @@ public data class InsertEvent(table: Table<*, *>, id: Any, val value: Any): Even
 public data class DeleteEvent(table: Table<*, *>, id: Any, val value: Any?): Event(table, id)
 public data class UpdateEvent(table: Table<*, *>, id: Any, val new: Any?, val old: Any?): Event(table, id)
 
-public class PostCommitListener(val handlerFactory: () -> PostCommitEventHandler) : Listener {
+public class PostCommitListener(handlerFactory: () -> DeferredEventHandler) : DeferredListener(handlerFactory) {
+    override fun handler(transaction: Transaction) =
+            transaction.postCommitHandler(handlerFactory.javaClass.getName()) { handlerFactory() } as DeferredEventHandler
+}
+
+public class PreCommitListener(handlerFactory: () -> DeferredEventHandler) : DeferredListener(handlerFactory) {
+    override fun handler(transaction: Transaction) =
+            transaction.preCommitHandler(handlerFactory.javaClass.getName()) { handlerFactory() } as DeferredEventHandler
+}
+
+abstract  class DeferredListener(val handlerFactory: () -> DeferredEventHandler) : Listener {
     override fun onEvent(session: Session, events: List<Event>) {
         val transaction = session.currentTransaction
         if (transaction == null) return
 
-        val handler = transaction.postCommitHandler(handlerFactory.javaClass.getName(), handlerFactory) as PostCommitEventHandler
-        for (event in events) handler.addEvent(event)
+        for (event in events) handler(transaction).addEvent(event)
     }
+
+    abstract fun handler(transaction: Transaction): DeferredEventHandler
 }
 
-public abstract class PostCommitEventHandler: () -> Unit {
+public abstract class DeferredEventHandler : SessionCallback {
     protected val events: MutableList<Event> = arrayListOf()
 
     public open fun supports(event: Event): Boolean = true
