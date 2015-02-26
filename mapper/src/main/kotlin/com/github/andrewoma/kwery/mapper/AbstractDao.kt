@@ -198,8 +198,13 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         return count
     }
 
-    override fun unsafeUpdate(newValue: T) {
-        throw UnsupportedOperationException("TODO") // TODO
+    override fun unsafeUpdate(newValue: T): Int {
+        val name = "unsafeUpdate"
+        val sql = sql(name) {
+            "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
+        }
+        val newMap = table.objectMap(session, newValue, table.allColumns)
+        return session.update(sql, newMap, updateOptions(name))
     }
 
     override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {
@@ -286,8 +291,55 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     protected inline fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, f)
 
-    override fun batchUpdate(values: List<T>): List<T> {
+    override fun unsafeBatchUpdate(values: List<T>): List<Int> {
         // TODO
         throw UnsupportedOperationException()
+    }
+
+    protected fun version(value: T): Any {
+        return table.objectMap(session, value, setOf(table.versionColumn!!)).values().first()!!
+    }
+
+    override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
+        val name = "batchUpdate"
+        check(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
+        val versionColumn = table.versionColumn!!
+        val versionCol = versionColumn.name
+        val oldVersionParam = "old__${versionCol}"
+
+        val updates = values.map {
+            val (old, new) = it
+            check(id(old) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(old)} ${id(new)}" }
+
+            [suppress("UNCHECKED_CAST")]
+            val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(old))
+
+            val result = table.copy(new, mapOf(versionColumn to newVersion))
+            val newMap = table.objectMap(session, result, table.dataColumns)
+
+            val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size() + table.idColumns.size() + 1)
+            parameters.putAll(newMap)
+            parameters.putAll(table.idMap(session, id(new), nf))
+            parameters[oldVersionParam] = version(old)
+            parameters to result
+        }
+
+        val sql = sql(name) {
+            "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and ${versionCol} = :$oldVersionParam"
+        }
+
+        val counts = session.batchUpdate(sql, updates.map { it.first }, updateOptions(name))
+        check(counts.size() == values.size(), "${name} updated ${counts.size()} rows, but expected ${values.size()}")
+        for ((count, value) in counts.zip(values)) {
+            if (count == 0) {
+                throw OptimisticLockException("The same version (${version(value.first)}) of ${table.name} with id ${id(value.first)} has been updated by another transaction")
+            }
+        }
+
+        for ((old, new) in values.stream().map { it.first }.zip(updates.stream().map { it.second })) {
+            fireEvent(listOf(UpdateEvent(table, id(old), new, old)))
+        }
+
+        return updates.map { it.second }
     }
 }

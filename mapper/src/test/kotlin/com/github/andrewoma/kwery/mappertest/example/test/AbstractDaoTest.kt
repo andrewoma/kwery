@@ -192,4 +192,51 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         } catch(e: OptimisticLockException) {
         }
     }
+
+    test fun `Unsafe update of same version should be accepted`() {
+        val inserted = insert()
+
+        Thread.sleep(2)
+        assertEquals(1, dao.unsafeUpdate(mutateContents(inserted))) // This mutation will be silently lost
+
+        Thread.sleep(2)
+        val updated = mutateContents(inserted)
+        assertEquals(1, dao.unsafeUpdate(updated))
+        val found = dao.findById(id(updated))
+        assertTrue(contentsEqual(updated, found!!))
+    }
+
+    test fun `Batch updates should update all values`() {
+        if (dao.table.versionColumn == null || dao.table.idColumns.size() > 1) return
+
+        val inserted = insert(2)
+        val mutated = inserted.map { mutateContents(it) }
+
+        val updated = dao.batchUpdate(inserted.zip(mutated))
+        assertEquals(2, updated.size())
+
+        val found = dao.findByIds(updated.map { id(it) })
+
+        for (value in updated) {
+            assertTrue(contentsEqual(value, found[id(value)]!!))
+        }
+    }
+
+    test fun `Batch updates should reject updates of same version`() {
+        if (dao.table.versionColumn == null) return
+
+        val inserted = insert(2)
+        val mutated = inserted.map { mutateContents(it) }
+
+        Thread.sleep(2)
+        val updated = dao.batchUpdate(inserted.zip(mutated))
+        assertEquals(2, updated.size())
+
+        Thread.sleep(2)
+        try {
+            dao.batchUpdate(inserted.zip(mutated)) // Attempt to original collection again
+            fail("Expected OptimisticLockException")
+        } catch(e: OptimisticLockException) {
+        }
+    }
 }

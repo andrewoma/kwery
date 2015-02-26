@@ -110,15 +110,15 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertEquals(inserted.toSet(), cache.values().toSet())
     }
 
-    Ignore test fun `Batch update should be visible after commit`() {
+    test fun `Batch update should be visible after commit`() {
         val tommy = Name("Tommy", "Lee")
         session.transaction {
             val actors = listOf(
                     Actor(Name("Bruce", "Lee")),
                     Actor(Name("John", "Wayne"))
             )
-            dao.batchInsert(actors)
-            dao.batchUpdate(actors.map { it.copy(name = tommy) })
+            val inserted = dao.batchInsert(actors)
+            dao.batchUpdate(inserted.zip(inserted.map { it.copy(name = tommy) }))
             assertTrue(cache.isEmpty())
         }
         assertEquals(2, cache.size())

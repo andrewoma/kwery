@@ -40,6 +40,10 @@ public data class Column<T, R>(val property: (T) -> R,
                                val isNullable: Boolean
 ) {
     public fun of(value: R): Pair<Column<T, R>, R> = Pair(this, value)
+
+    override fun toString(): String {
+        return "Column($name id=$id version=$version nullable=$isNullable)" // Prevent NPE in debugger on "property"
+    }
 }
 
 public trait Value<T> {

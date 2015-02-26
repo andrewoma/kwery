@@ -166,7 +166,7 @@ Example:
 
 Misc:
 * Create a test module, factoring out common code like AbstractSessionTest
-* Better IDE support for highlighting inline SQL
+* Better IDE support for highlighting inline SQL. Vote for [KT-6610](https://youtrack.jetbrains.com/issue/KT-6610)
 
 #### License
 This project is licensed under a MIT license.
