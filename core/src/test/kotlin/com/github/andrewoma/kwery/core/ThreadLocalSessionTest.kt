@@ -29,15 +29,17 @@ import org.junit.Before as before
 import kotlin.test.assertEquals
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import javax.sql.PooledConnection
+import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 
-data class SessionInfo(val thread: String, val connection: Long)
+data class SessionInfo(val thread: String, val poolConnection: Long, val connection: Long)
 
 class SessionInfoDao(val session: Session) {
     fun insertCurrent() {
-        val sql = "insert into sessions(thread, connection) values (:thread, :connection)"
+        val sql = "insert into sessions_test(thread, pool_connection, connection) values (:thread, :pool_connection, :connection)"
         val params = mapOf("thread" to Thread.currentThread().getName(),
-                "connection" to System.identityHashCode(session.connection))
-        println("Inserting $params")
+                "pool_connection" to System.identityHashCode(session.connection),
+                "connection" to System.identityHashCode((session.connection as PooledConnection).getConnection()))
         session.update(sql, params)
     }
 }
@@ -53,15 +55,17 @@ class ThreadLocalSessionTest {
         if (!initialised) {
             initialised = true
             val sql = """
-                create table sessions (
+                drop table if exists sessions_test;
+                create table sessions_test (
                     thread varchar(1000),
+                    pool_connection numeric(20),
                     connection numeric(20)
                 )
             """
-            withSession { it.update(sql) }
+            withSession { for (statement in sql.split(";")) it.update(statement) }
         }
 
-        withSession { it.update("delete from sessions") }
+        withSession { it.update("delete from sessions_test") }
     }
 
     fun <R> withSession(f: (Session) -> R): R {
@@ -77,8 +81,8 @@ class ThreadLocalSessionTest {
     }
 
     fun getInsertedSessions() = withSession {
-        val sessions = it.select("select * from sessions") { row ->
-            SessionInfo(row.string("thread"), row.long("connection"))
+        val sessions = it.select("select * from sessions_test") { row ->
+            SessionInfo(row.string("thread"), row.long("pool_connection"), row.long("connection"))
         }
         println(sessions.joinToString("\n"))
         sessions
@@ -127,9 +131,12 @@ class ThreadLocalSessionTest {
         assertEquals(requests, sessions.size())
 
         // Should use a different connection per request (will usually be pooled)
-        assertEquals(requests, sessions.groupBy { it.connection }.size())
+        assertEquals(requests, sessions.groupBy { it.poolConnection }.size())
 
         // Should have executed in multiple threads
         assertEquals(threads, sessions.groupBy { it.thread }.size())
+
+        // Should have used 1 underlying connection per thread
+        assertEquals(threads, sessions.groupBy { it.connection }.size())
     }
 }
