@@ -37,13 +37,18 @@ import com.github.andrewoma.kommon.util.StopWatch
  * *  Warn: Anything statements that return SQLWarnings (TODO)
  * * Error: Anything that throws an exception
  *
+ *  Logging can also be forced on a per thread basis via `forceLogging`.
+ *  This allows a particular request to logged without turning on all logging for a server.
+ *  e.g. Add "sqlLogging=true" to an http request that sets forceLogging=true in a servlet filter
  */
 // TODO - Add support for SQL Warnings
-class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
+public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
                          val infoQueryThresholdInMs: Long = 1000L) : StatementInterceptor {
     class object {
-        data class Context(val stopWatch: StopWatch, val exception: Exception? = null)
+        public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
+
+    data class Context(val stopWatch: StopWatch, val exception: Exception? = null)
 
     var ExecutingStatement.context: Context
         get() = this.contexts[javaClass.getName()] as Context
@@ -59,6 +64,7 @@ class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<Log
     override fun closed(statement: ExecutingStatement) {
         val context = statement.context
         when {
+            forceLogging.get() ?: false -> log.info(createMessage(statement))
             log.isErrorEnabled() && context.exception != null -> log.error(createMessage(statement))
             log.isInfoEnabled() && context.stopWatch.elapsed(MILLISECONDS) >= infoQueryThresholdInMs -> log.info(createMessage(statement))
             log.isDebugEnabled() -> log.debug(createMessage(statement))
@@ -83,12 +89,15 @@ class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<Log
 
         val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.stopWatch}${rowCount}"
         val message = if (context.exception == null) {
-            "\nSucessfully executed $timing\n"
+            "\nSucessfully executed $timing"
         } else {
-            "\nFailed to execute $timing\nReason: ${context.exception.getMessage()}\n"
+            "\nFailed to execute $timing\nReason: ${context.exception.getMessage()}"
         }
 
         sb.append(message)
+        sb.append(". TXN: ")
+        sb.append(statement.session.currentTransaction?.id ?: "None")
+        sb.append("\n")
         return sb.toString()
     }
 

@@ -22,6 +22,8 @@
 
 package com.github.andrewoma.kwery.core
 
+import java.util.concurrent.atomic.AtomicLong
+
 trait SessionCallback {
     fun invoke(session: Session)
 }
@@ -31,6 +33,7 @@ public trait Transaction {
     public fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
     public fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
     public fun postRollbackHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+    public val id: Long
 }
 
 public trait ManualTransaction : Transaction {
@@ -39,11 +42,17 @@ public trait ManualTransaction : Transaction {
 }
 
 class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
+    class object {
+        val transactionId = AtomicLong()
+    }
+
     {
         check(session.transaction == null, "A transaction is already started for this session")
         session.connection.setAutoCommit(false)
         session.transaction = this
     }
+
+    override val id: Long = transactionId.incrementAndGet()
 
     override fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
         return handler(name, postCommitHandlers, ifAbsent)
