@@ -52,7 +52,7 @@ public trait Value<T> {
 
 class TableConfiguration(val defaults: Map<Class<*>, *>, val converters: Map<Class<*>, Converter<*>>, val namingConvention: (String) -> String)
 
-public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration) {
+public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration, val sequence: String? = null) {
     public val allColumns: Set<Column<T, *>> = LinkedHashSet()
     public val defaultColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filter { it.selectByDefault }) }
     public val idColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filter { it.id }) }

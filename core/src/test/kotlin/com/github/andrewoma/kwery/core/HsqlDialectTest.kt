@@ -42,6 +42,8 @@ class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
             create table test (
               id            varchar(255),
               value         varchar(255)
-            )
+            );
+
+            create sequence test_seq
         """
 }

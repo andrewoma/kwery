@@ -153,7 +153,8 @@ Core:
 * Support direct execution (currently everything is via a PreparedStatement)
 
 DAO:
-* Add support for fetching a block of ids
+* Bulk update by example?
+* Bulk delete by example?
 
 Fetcher:
 * General review - code seems overly complicated for what it does

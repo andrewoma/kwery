@@ -28,7 +28,7 @@ import com.github.andrewoma.kwery.core.*
 import com.github.andrewoma.kwery.mappertest.example.Actor as A
 import com.github.andrewoma.kwery.mappertest.example.Name as N
 
-object actorTable : Table<A, Int>("actor", tableConfig), VersionedWithTimestamp {
+object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedWithTimestamp {
     // @formatter:off
     val ActorId    by col(A::id,                     id = true)
     val FirstName  by col(N::firstName, { it.name }, notNull = true)

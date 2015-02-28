@@ -99,6 +99,26 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEqualValues(byLiteral, value)
     }
 
+    test fun `Allocate ids should contain a unique sequence of ids`() {
+        if (!dialect.supportsAllocateIds) return
+
+        val count = 100
+        val iterations = 5
+
+        val all = hashSetOf<Long>()
+        iterations.times {
+            val ids = session.select(dialect.allocateIds(count, "test_seq", "id")) { row ->
+                row.long("id")
+            }
+
+            assertEquals(count, ids.size())
+            all.addAll(ids)
+        }
+
+        // Check ids are unique across invocations
+        assertEquals(count * iterations, all.size())
+    }
+
     private fun findById(id: String): Value {
         return session.select("select * from dialect_test where id = '$id'") { row ->
             Value(row.time("time_col"),

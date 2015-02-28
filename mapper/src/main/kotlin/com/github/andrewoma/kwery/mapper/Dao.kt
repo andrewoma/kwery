@@ -48,4 +48,6 @@ public trait Dao<T : Any, ID : Any> {
     public fun unsafeBatchUpdate(values: List<T>): List<Int>
 
     public fun batchUpdate(values: List<Pair<T, T>>): List<T>
+
+    public fun allocateIds(count: Int): List<ID>
 }

@@ -42,4 +42,9 @@ public open class PostgresDialect : Dialect {
     override fun arrayBasedIn(name: String) = "= any(:$name)"
 
     override val supportsArrayBasedIn = true
+
+    override val supportsAllocateIds = true
+
+    override fun allocateIds(count: Int, sequence: String, columnName: String) =
+            "select nextval('$sequence') as $columnName from generate_series(1, $count)"
 }

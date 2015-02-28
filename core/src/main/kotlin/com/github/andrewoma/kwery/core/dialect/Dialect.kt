@@ -35,8 +35,13 @@ public trait Dialect {
             }.joinToString(",", prefix, postfix)
 
     val supportsArrayBasedIn: Boolean
+    val supportsAllocateIds: Boolean
 
     fun arrayBasedIn(name: String): String {
+        throw UnsupportedOperationException()
+    }
+
+    fun allocateIds(count: Int, sequence: String, columnName: String): String {
         throw UnsupportedOperationException()
     }
 }

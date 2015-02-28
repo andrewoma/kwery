@@ -239,4 +239,13 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         } catch(e: OptimisticLockException) {
         }
     }
+
+    test fun `Allocate ids should contain a unique sequence of ids`() {
+        if (!dialect.supportsAllocateIds || dao.table.sequence == null) return
+
+        val count = 100
+        val ids = dao.allocateIds(count)
+
+        assertEquals(count, ids.size())
+    }
 }

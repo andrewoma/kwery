@@ -342,4 +342,15 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
         return updates.map { it.second }
     }
+
+    override fun allocateIds(count: Int): List<ID> {
+        check(session.dialect.supportsAllocateIds, "Dialect does not support allocate ids")
+        check(table.sequence != null, "Table sequence is not defined")
+        check(table.idColumns.size() == 1, "Compound ids are not supported")
+
+        val sql = session.dialect.allocateIds(count, table.sequence!!, table.idColumns.first().name)
+        return session.select(sql, mapOf(), selectOptions("allocateIds")) { row ->
+            id(table.rowMapper(table.idColumns, nf)(row))
+        }
+    }
 }

@@ -46,6 +46,9 @@ class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDial
             CREATE TABLE test (
               id            VARCHAR(255),
               value         VARCHAR(255)
-            )
+            );
+
+            drop sequence if exists test_seq;
+            create sequence test_seq;
         """
 }
