@@ -12,5 +12,6 @@
 include 'core'
 include 'fetcher'
 include 'mapper'
+include 'tomcat-pool'
 
 rootProject.name = 'kwery'

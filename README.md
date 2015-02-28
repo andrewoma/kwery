@@ -167,6 +167,8 @@ Example:
 Misc:
 * Create a test module, factoring out common code like AbstractSessionTest
 * Better IDE support for highlighting inline SQL. Vote for [KT-6610](https://youtrack.jetbrains.com/issue/KT-6610)
+* Create a guava backed statement cache for Tomcat's connection pool (standard one just caches the first _n_
+  statements and then ignores anything else).
 
 #### License
 This project is licensed under a MIT license.

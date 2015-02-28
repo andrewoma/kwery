@@ -75,11 +75,18 @@ project(':fetcher') {
     }
 }
 
+project(':tomcat-pool') {
+    dependencies {
+        compile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
+        testCompile 'com.h2database:h2:1.4.182'
+    }
+}
+
 project(':mapper') {
     dependencies {
         compile project(':core')
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
-        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.15'
+        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
         testCompile 'org.apache.logging.log4j:log4j-core:2.1'
         testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.1'
         testCompile 'org.hsqldb:hsqldb:2.3.2'
@@ -91,11 +98,12 @@ project(':core') {
     dependencies {
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
         testCompile 'com.h2database:h2:1.4.182'
-        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.15'
+        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
         testCompile 'org.apache.logging.log4j:log4j-core:2.1'
         testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.1'
         testCompile 'org.hsqldb:hsqldb:2.3.2'
         testCompile 'org.postgresql:postgresql:9.3-1102-jdbc4'
+        testCompile project(':tomcat-pool')
     }
 }
 

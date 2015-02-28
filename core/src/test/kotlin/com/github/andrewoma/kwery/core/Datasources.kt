@@ -38,5 +38,6 @@ val postgresDataSource: DataSource by Delegates.lazy {
     dataSource.setDefaultAutoCommit(true)
     dataSource.setDriverClassName("org.postgresql.Driver")
     dataSource.setUrl("jdbc:postgresql://localhost:5432/kwery")
+    dataSource.setJdbcInterceptors("com.github.andrewoma.kwery.tomcat.pool.StatementCache")
     dataSource
 }

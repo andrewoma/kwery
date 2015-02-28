@@ -42,7 +42,7 @@ import com.github.andrewoma.kommon.util.StopWatch
  *  e.g. Add "sqlLogging=true" to an http request that sets forceLogging=true in a servlet filter
  */
 // TODO - Add support for SQL Warnings
-public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
+open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
                          val infoQueryThresholdInMs: Long = 1000L) : StatementInterceptor {
     class object {
         public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
@@ -97,9 +97,12 @@ public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaCl
         sb.append(message)
         sb.append(". TXN: ")
         sb.append(statement.session.currentTransaction?.id ?: "None")
+        sb.append(additionalInfo(statement))
         sb.append("\n")
         return sb.toString()
     }
+
+    protected open fun additionalInfo(statement: ExecutingStatement): String = ""
 
     override fun exception(statement: ExecutingStatement, e: Exception) {
         statement.context = statement.context.copy(exception = e)

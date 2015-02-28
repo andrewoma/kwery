@@ -23,7 +23,6 @@
 package com.github.andrewoma.kwery.core
 
 import org.junit.Test as test
-import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import org.junit.Before as before
 import kotlin.test.assertEquals
@@ -31,6 +30,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.sql.PooledConnection
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
+import org.postgresql.PGStatement
+import java.lang.reflect.Proxy
+import kotlin.test.assertTrue
+import com.github.andrewoma.kwery.tomcat.pool.StatementCache
 
 data class SessionInfo(val thread: String, val poolConnection: Long, val connection: Long)
 
@@ -44,10 +47,35 @@ class SessionInfoDao(val session: Session) {
     }
 }
 
+object postgresLoggingInterceptor : LoggingInterceptor() {
+    var serverPrepared = 0
+    var total = 0
+
+    fun clear() {
+        serverPrepared = 0
+        total = 0
+    }
+
+    override fun additionalInfo(statement: ExecutingStatement): String {
+        println()
+        val pgStatement = (Proxy.getInvocationHandler(statement.statement) as StatementCache.CachedStatement)
+                .getStatement() as PGStatement
+
+        total++
+
+        if (pgStatement.isUseServerPrepare()) {
+            serverPrepared++
+        }
+
+        return ". Connection: " + System.identityHashCode((statement.session.connection as PooledConnection).getConnection()) +
+                ". ServerPrepared=" + pgStatement.isUseServerPrepare()
+    }
+}
+
 class ThreadLocalSessionTest {
     class object {
         var initialised = false
-        val threadLocalSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), LoggingInterceptor())
+        val threadLocalSession = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
         val dao = SessionInfoDao(threadLocalSession) // Test shared dao singleton
     }
 
@@ -69,9 +97,9 @@ class ThreadLocalSessionTest {
     }
 
     fun <R> withSession(f: (Session) -> R): R {
-        val connection = hsqlDataSource.getConnection()
+        val connection = postgresDataSource.getConnection()
         try {
-            val defaultSession = DefaultSession(connection, HsqlDialect(), LoggingInterceptor())
+            val defaultSession = DefaultSession(connection, PostgresDialect(), postgresLoggingInterceptor)
             return defaultSession.transaction {
                 f(defaultSession)
             }
@@ -111,6 +139,7 @@ class ThreadLocalSessionTest {
     test fun `Inserts on different threads should use different connections`() {
         val threads = 5
         val requests = 100
+        postgresLoggingInterceptor.clear()
 
         val executor = Executors.newFixedThreadPool(threads)
 
@@ -138,5 +167,9 @@ class ThreadLocalSessionTest {
 
         // Should have used 1 underlying connection per thread
         assertEquals(threads, sessions.groupBy { it.connection }.size())
+
+        // Should have a majority server side prepared (by default the Postgres driver waits
+        // unit a statement is used 5 times before it prepares on the server)
+        assertTrue(postgresLoggingInterceptor.serverPrepared.toDouble() / postgresLoggingInterceptor.total.toDouble() > .8)
     }
 }
