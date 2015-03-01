@@ -29,7 +29,6 @@ import com.github.andrewoma.kwery.mapper.listener.*
 import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
-import org.junit.Ignore
 import com.github.andrewoma.kwery.core.Session
 
 class DaoListenerPostCommitTest : AbstractSessionTest() {

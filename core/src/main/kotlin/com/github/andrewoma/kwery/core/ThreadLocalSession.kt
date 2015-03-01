@@ -25,7 +25,6 @@ package com.github.andrewoma.kwery.core
 import java.sql.Connection
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
-import kotlin.properties.Delegates
 import javax.sql.DataSource
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
 
@@ -94,10 +93,10 @@ public class ThreadLocalSession(val dataSource: DataSource,
     }
 
     override val currentTransaction: Transaction?
-            get() = session.currentTransaction
+        get() = session.currentTransaction
 
     override val connection: Connection
-            get() = session.connection
+        get() = session.connection
 
     private val session: DefaultSession
         get() {

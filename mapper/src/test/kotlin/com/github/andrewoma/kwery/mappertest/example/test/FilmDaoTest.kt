@@ -136,7 +136,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         fetched = dao.findByIds(ids).values().fetch(Node(Film::language.node()))
         assertEquals(films.size(), fetched.size())
 
-        for (film in fetched){
+        for (film in fetched) {
             assertEquals(0, film.actors.size())
             assertEquals(sd.languageEnglish.name, film.language.name)
         }

@@ -95,13 +95,13 @@ public class TestStatementCache extends DefaultTestCase {
     public void testPreparedStatementCache() throws Exception {
         config(true, false, 100);
         Connection con = datasource.getConnection();
-        PreparedStatement ps1 = con.prepareStatement("SELECT 1");
-        PreparedStatement ps2 = con.prepareStatement("SELECT 1");
+        PreparedStatement ps1 = con.prepareStatement("select 1");
+        PreparedStatement ps2 = con.prepareStatement("select 1");
         Assert.assertEquals(0, interceptor.getCacheSize().get());
         ps1.close();
         Assert.assertTrue(ps1.isClosed());
         Assert.assertEquals(1, interceptor.getCacheSize().get());
-        PreparedStatement ps3 = con.prepareStatement("SELECT 1");
+        PreparedStatement ps3 = con.prepareStatement("select 1");
         Assert.assertEquals(0, interceptor.getCacheSize().get());
         ps2.close();
         Assert.assertTrue(ps2.isClosed());
@@ -115,13 +115,13 @@ public class TestStatementCache extends DefaultTestCase {
         init();
         config(false, false, 100);
         Connection con = datasource.getConnection();
-        PreparedStatement ps1 = con.prepareStatement("SELECT 1");
-        PreparedStatement ps2 = con.prepareStatement("SELECT 1");
+        PreparedStatement ps1 = con.prepareStatement("select 1");
+        PreparedStatement ps2 = con.prepareStatement("select 1");
         Assert.assertEquals(0, interceptor.getCacheSize().get());
         ps1.close();
         Assert.assertTrue(ps1.isClosed());
         Assert.assertEquals(0, interceptor.getCacheSize().get());
-        PreparedStatement ps3 = con.prepareStatement("SELECT 1");
+        PreparedStatement ps3 = con.prepareStatement("select 1");
         Assert.assertEquals(0, interceptor.getCacheSize().get());
         ps2.close();
         Assert.assertTrue(ps2.isClosed());
@@ -141,14 +141,14 @@ public class TestStatementCache extends DefaultTestCase {
         StatementCounterInterceptor counter = findInterceptor(con, StatementCounterInterceptor.class);
         PreparedStatement ps1, ps2;
 
-        ps1 = con.prepareStatement("SELECT 1");
+        ps1 = con.prepareStatement("select 1");
         Assert.assertEquals(1, counter.getActiveCount());
         ps1.close();
         Assert.assertEquals("Statement goes into cache, not closed", 1, counter.getActiveCount());
 
-        ps1 = con.prepareStatement("SELECT 1");
+        ps1 = con.prepareStatement("select 1");
         Assert.assertEquals("Reusing statement from cache", 1, counter.getActiveCount());
-        ps2 = con.prepareStatement("SELECT 1");
+        ps2 = con.prepareStatement("select 1");
         Assert.assertEquals("Reusing statement from cache", 2, counter.getActiveCount());
 
         ps2.close();
@@ -173,7 +173,7 @@ public class TestStatementCache extends DefaultTestCase {
                         + StatementCounterInterceptor.class.getName());
         Connection con = datasource.getConnection();
         StatementCounterInterceptor counter = findInterceptor(con, StatementCounterInterceptor.class);
-        PreparedStatement ps1 = con.prepareStatement("SELECT 1");
+        PreparedStatement ps1 = con.prepareStatement("select 1");
         Assert.assertEquals(1, counter.getActiveCount());
         ps1.close();
         Assert.assertEquals("Statement is not pooled, closes immediately", 0, counter.getActiveCount());

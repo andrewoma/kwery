@@ -49,5 +49,5 @@ public open class HsqlDialect : Dialect {
     override val supportsAllocateIds = true
 
     override fun allocateIds(count: Int, sequence: String, columnName: String) =
-        "select next value for $sequence as $columnName from unnest(sequence_array(1, $count, 1))"
+            "select next value for $sequence as $columnName from unnest(sequence_array(1, $count, 1))"
 }

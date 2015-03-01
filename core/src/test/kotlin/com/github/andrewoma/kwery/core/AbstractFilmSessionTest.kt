@@ -32,11 +32,11 @@ open class AbstractFilmSessionTest : AbstractSessionTest() {
     override fun afterSessionSetup() = initialise(javaClass<AbstractFilmSessionTest>().getName()) {
         //language=SQL
         val sql = """
-            CREATE TABLE actor (
-                actor_id    INTEGER IDENTITY,
-                first_name  CHARACTER VARYING(45) NOT NULL,
-                last_name   CHARACTER VARYING(45) NULL,
-                last_update TIMESTAMP             NOT NULL
+            create table actor (
+                actor_id    integer identity,
+                first_name  character varying(45) not null,
+                last_name   character varying(45) null,
+                last_update timestamp             not null
             )
         """
 

@@ -72,8 +72,8 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
         //language=SQL
         val sql = """
-            INSERT INTO dialect_test (id, time_col, date_col, timestamp_col, binary_col, varchar_col, blob_col, clob_col, array_col)
-            VALUES (:id, :time_col, :date_col, :timestamp_col, :binary_col, :varchar_col, :blob_col, :clob_col, :array_col)
+            insert into dialect_test (id, time_col, date_col, timestamp_col, binary_col, varchar_col, blob_col, clob_col, array_col)
+            values (:id, :time_col, :date_col, :timestamp_col, :binary_col, :varchar_col, :blob_col, :clob_col, :array_col)
         """
 
         val params = mapOf(

@@ -27,25 +27,25 @@ import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDialect()) {
     //language=SQL
     override val sql = """
-            DROP TABLE IF EXISTS dialect_test;
+            drop table if exists dialect_test;
 
-            CREATE TABLE dialect_test (
-              id            VARCHAR(255),
-              time_col      TIME,
-              date_col      DATE,
-              timestamp_col TIMESTAMP,
+            create table dialect_test (
+              id            varchar(255),
+              time_col      time,
+              date_col      date,
+              timestamp_col timestamp,
               binary_col    bytea,
-              varchar_col   VARCHAR(1000),
+              varchar_col   varchar(1000),
               blob_col      bytea,
-              clob_col      TEXT,
-              array_col     INT ARRAY
+              clob_col      text,
+              array_col     int array
             );
 
-            DROP TABLE IF EXISTS test;
+            drop table if exists test;
 
-            CREATE TABLE test (
-              id            VARCHAR(255),
-              value         VARCHAR(255)
+            create table test (
+              id            varchar(255),
+              value         varchar(255)
             );
 
             drop sequence if exists test_seq;

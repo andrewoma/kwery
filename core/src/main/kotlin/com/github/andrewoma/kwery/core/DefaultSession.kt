@@ -28,7 +28,6 @@ import java.sql.Statement
 import java.sql.PreparedStatement
 import java.sql.SQLException
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
-import com.github.andrewoma.kwery.core.interceptor.StatementInterceptorChain
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import java.util.ArrayList
 import com.github.andrewoma.kommon.lang.trimMargin

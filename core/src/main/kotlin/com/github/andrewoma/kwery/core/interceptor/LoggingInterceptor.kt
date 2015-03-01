@@ -43,7 +43,7 @@ import com.github.andrewoma.kommon.util.StopWatch
  */
 // TODO - Add support for SQL Warnings
 open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
-                         val infoQueryThresholdInMs: Long = 1000L) : StatementInterceptor {
+                                     val infoQueryThresholdInMs: Long = 1000L) : StatementInterceptor {
     class object {
         public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
