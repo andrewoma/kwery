@@ -38,7 +38,7 @@ import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
  * on a single connection, so it seems a little pointless to make this safe.
  *
  * Typically, use a ThreadLocalSession in server environments. Alternatively, use a connection pool
- * and create a new session per thread.
+ * and create a new session per transaction.
  */
 public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,

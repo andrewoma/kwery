@@ -266,9 +266,11 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     override fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>>): Map<ID, T> {
         if (ids.isEmpty()) return mapOf()
+        // TODO ... optimise case of single id by delegating to findById
 
         val name = "findByIds"
 
+        // TODO ... support compound ids
         if (table.idColumns.size() != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
 
         val (sql, idsParam) = if (session.dialect.supportsArrayBasedIn) {

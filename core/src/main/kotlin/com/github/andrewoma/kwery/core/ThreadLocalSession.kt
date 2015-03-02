@@ -147,4 +147,17 @@ public class ThreadLocalSession(val dataSource: DataSource,
     override fun manualTransaction(): ManualTransaction {
         return session.manualTransaction()
     }
+
+    public fun <R> use(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName, f: () -> R): R {
+        ThreadLocalSession.initialise(startTransaction, name)
+        var commit = true
+        try {
+            return f()
+        } catch(e: Exception) {
+            commit = false
+            throw e
+        } finally {
+            ThreadLocalSession.finalise(commit, name)
+        }
+    }
 }
