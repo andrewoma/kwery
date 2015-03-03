@@ -22,39 +22,36 @@
 
 package com.github.andrewoma.kwery.example.film
 
-import io.dropwizard.Configuration
 import io.dropwizard.Application
 import io.dropwizard.setup.Environment
 import io.dropwizard.setup.Bootstrap
-import io.dropwizard.db.DataSourceFactory
-import com.fasterxml.jackson.annotation.JsonProperty
-import javax.validation.constraints.NotNull
-import javax.validation.Valid
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import javax.sql.DataSource
-import com.github.andrewoma.kwery.core.DefaultSession
 import com.google.common.io.Resources
-
-data class FilmConfiguration : Configuration() {
-    // TODO ... devise a more elegant solution. Tried Jackson's Kotlin module but
-    // DropWizard requires a default constructor
-    Valid NotNull JsonProperty("database")
-    private var _database: DataSourceFactory? = null
-    val database: DataSourceFactory
-        get() = _database!!
-}
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
+import com.codahale.metrics.health.HealthCheck
+import com.github.andrewoma.kwery.example.film.resources.FilmResource
 
 class FilmApplication : Application<FilmConfiguration>() {
     override fun getName() = "film-app"
 
     override fun run(configuration: FilmConfiguration, environment: Environment) {
         val dataSource = configuration.database.build(environment.metrics(), "db")
-        val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
+        val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor(infoQueryThresholdInMs = -1))
         createDb(session)
 
-        environment.jersey().register(FilmResource())
+        environment.healthChecks().register("db", object : HealthCheck() {
+            override fun check() = session.use {
+                session.select("select 1 from information_schema.system_users") { }
+                HealthCheck.Result.healthy()
+            }
+        })
+
+        val jersey = environment.jersey()
+        jersey.register(TransactionListener())
+        jersey.register(FilmResource(session))
     }
 
     fun createDb(session: ThreadLocalSession) {
@@ -66,11 +63,6 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     override fun initialize(bootstrap: Bootstrap<FilmConfiguration>) {
-//        bootstrap.getObjectMapper().registerModule(KotlinModule())
+        bootstrap.getObjectMapper().registerModule(KotlinModule())
     }
-}
-
-fun main(args: Array<String>) {
-    val defaults = array("server", "example/src/main/resources/dev.yml")
-    FilmApplication().run(*if (args.isEmpty()) defaults else args)
 }

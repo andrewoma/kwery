@@ -3,7 +3,7 @@ database:
   url: jdbc:hsqldb:mem:kweryexample
   user:
   maxWaitForConnection: 1s
-  validationQuery: "select 1 from INFORMATION_SCHEMA.SYSTEM_USERS"
-  minSize: 8
+  validationQuery: "select 1 from information_schema.system_users"
+  minSize: 1
   maxSize: 32
   logValidationErrors: true

@@ -22,19 +22,7 @@
 
 package com.github.andrewoma.kwery.example.film
 
-import com.codahale.metrics.annotation.Timed as timed
-
-import javax.ws.rs.GET as get
-import javax.ws.rs.Path
-import javax.ws.rs.Produces
-import javax.ws.rs.QueryParam as param
-import javax.ws.rs.core.MediaType
-
-Path("/films")
-Produces(MediaType.APPLICATION_JSON)
-public class FilmResource {
-
-    get timed fun allFilms(param("name") name: String?): String {
-        return "Hello ${name ?: "Unknown"}"
-    }
+fun main(args: Array<String>) {
+    val defaults = array("server", "example/src/main/resources/dev.yml")
+    FilmApplication().run(*if (args.isEmpty()) defaults else args)
 }
