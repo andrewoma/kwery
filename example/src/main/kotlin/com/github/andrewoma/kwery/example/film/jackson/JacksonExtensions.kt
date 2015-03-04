@@ -20,21 +20,26 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.example.film.resources
+package com.github.andrewoma.kwery.example.film.jackson
 
-import com.codahale.metrics.annotation.Timed
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import java.io.File
+import java.io.InputStream
+import java.net.URL
 
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
-import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.model.Film
-import com.github.andrewoma.kwery.mapper.Column
+inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Stream<T>) -> Unit) {
+    val parser = this.getFactory().createParser(url)
+    check(parser.nextToken() == JsonToken.START_ARRAY, "Expected an array")
+    check(parser.nextToken() == JsonToken.START_OBJECT, "Expected an object")
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-import com.github.andrewoma.kwery.core.Session
-
-
-Path("/films")
-Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val session: Session) {
+    try {
+        val iterator = this.readValues<T>(parser, javaClass<T>())
+        f(object : Stream<T> {
+            override fun iterator() = iterator
+        })
+    } finally {
+        parser.close()
+    }
 }

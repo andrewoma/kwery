@@ -26,15 +26,30 @@ import com.codahale.metrics.annotation.Timed
 
 import com.github.andrewoma.kwery.example.film.jersey.Transaction
 import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.model.Film
+import com.github.andrewoma.kwery.example.film.model.Actor
 import com.github.andrewoma.kwery.mapper.Column
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-import com.github.andrewoma.kwery.core.Session
 
-
-Path("/films")
+Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val session: Session) {
+public class ActorResource(val actorDao: ActorDao) {
+
+    Transaction Timed GET
+    fun find(QueryParam("firstName") firstName: String?,
+             QueryParam("lastName") lastName: String?): List<Actor> {
+
+        val filter = mapOf<Column<Actor, *>, Any?>(
+                actorTable.FirstName to firstName,
+                actorTable.LastName to lastName
+        ).filter { it.value != null }
+
+        return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet())
+    }
+
+    Transaction Timed GET Path("/{id}")
+    fun findById(PathParam("id") id: Int): Actor {
+        return actorDao.findById(id) ?: throw NotFoundException("$id not found")
+    }
 }

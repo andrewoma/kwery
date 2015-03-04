@@ -111,6 +111,8 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>>): List<T> {
+        if (exampleColumns.isEmpty()) return findAll(columns)
+
         val name = "findByExample"
         val exampleMap = table.objectMap(session, example, exampleColumns, nf)
         val sql = sql(Triple(name, exampleColumns, columns)) {

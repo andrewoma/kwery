@@ -33,6 +33,12 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
 import com.codahale.metrics.health.HealthCheck
 import com.github.andrewoma.kwery.example.film.resources.FilmResource
+import com.github.andrewoma.kwery.example.film.jackson.withObjectStream
+import com.github.andrewoma.kommon.collection.chunked
+import com.github.andrewoma.kwery.example.film.dao.ActorDao
+import com.github.andrewoma.kwery.mapper.Dao
+import com.github.andrewoma.kwery.example.film.resources.ActorResource
+import com.fasterxml.jackson.databind.SerializationFeature
 
 class FilmApplication : Application<FilmConfiguration>() {
     override fun getName() = "film-app"
@@ -40,7 +46,6 @@ class FilmApplication : Application<FilmConfiguration>() {
     override fun run(configuration: FilmConfiguration, environment: Environment) {
         val dataSource = configuration.database.build(environment.metrics(), "db")
         val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor(infoQueryThresholdInMs = -1))
-        createDb(session)
 
         environment.healthChecks().register("db", object : HealthCheck() {
             override fun check() = session.use {
@@ -49,9 +54,23 @@ class FilmApplication : Application<FilmConfiguration>() {
             }
         })
 
+        val actorDao = ActorDao(session)
+
+        createDb(session)
+        load(environment, session, actorDao, "actors.json")
+
         val jersey = environment.jersey()
         jersey.register(TransactionListener())
         jersey.register(FilmResource(session))
+        jersey.register(ActorResource(actorDao))
+    }
+
+    inline fun <reified T> load(environment: Environment, session: ThreadLocalSession, dao: Dao<T, *>, resource: String) {
+        environment.getObjectMapper().withObjectStream<T>(Resources.getResource(resource)) {
+            for (values in it.chunked(50)) {
+                session.use { dao.batchInsert(values) }
+            }
+        }
     }
 
     fun createDb(session: ThreadLocalSession) {
@@ -63,6 +82,8 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     override fun initialize(bootstrap: Bootstrap<FilmConfiguration>) {
-        bootstrap.getObjectMapper().registerModule(KotlinModule())
+        val mapper = bootstrap.getObjectMapper()
+        mapper.registerModule(KotlinModule())
+        mapper.enable(SerializationFeature.INDENT_OUTPUT)
     }
 }

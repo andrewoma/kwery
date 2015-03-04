@@ -20,21 +20,27 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.example.film.resources
+package com.github.andrewoma.kwery.example.film.dao
 
-import com.codahale.metrics.annotation.Timed
+import com.github.andrewoma.kwery.mapper.*
+import com.github.andrewoma.kwery.core.*
 
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
-import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.model.Film
-import com.github.andrewoma.kwery.mapper.Column
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
-import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.example.film.model.Name as N
+import com.github.andrewoma.kwery.example.film.model.Actor as A
 
 
-Path("/films")
-Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val session: Session) {
+object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedWithInt {
+    // @formatter:off
+    val Id         by col(A::id,                 id = true)
+    val FirstName  by col(N::first, { it.name }, notNull = true)
+    val LastName   by col(N::last,  { it.name }, notNull = true)
+    val Version    by col(A::version,            version = true)
+    // @formatter:on
+
+    override fun idColumns(id: Int) = setOf(Id of id)
+
+    override fun create(value: Value<A>) = A(value.of(Id), N(value.of(FirstName), value.of(LastName)),
+            value.of(Version))
 }
+
+class ActorDao(session: Session) : AbstractDao<A, Int>(session, actorTable, { it.id }, "int", defaultId = 0)

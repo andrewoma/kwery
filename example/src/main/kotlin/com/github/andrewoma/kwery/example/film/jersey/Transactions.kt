@@ -36,7 +36,7 @@ import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Retention
 
 Retention(RetentionPolicy.RUNTIME)
-public annotation class transaction
+public annotation class Transaction
 
 Provider
 public class TransactionListener : ApplicationEventListener {
@@ -61,7 +61,7 @@ public class TransactionListener : ApplicationEventListener {
 
     private fun register(method: ResourceMethod) {
         val definitionMethod = method.getInvocable().getDefinitionMethod()
-        val annotation = definitionMethod.getAnnotation(javaClass<transaction>())
+        val annotation = definitionMethod.getAnnotation(javaClass<Transaction>())
         if (annotation != null) {
             transactions.add(definitionMethod)
         }
@@ -75,7 +75,7 @@ public class TransactionListener : ApplicationEventListener {
         override fun onEvent(event: RequestEvent) {
             val type = event.getType()
             if (type == RequestEvent.Type.REQUEST_MATCHED || type == RequestEvent.Type.FINISHED) {
-                val method = event.getUriInfo().getMatchedResourceMethod().getInvocable().getDefinitionMethod()
+                val method = event.getUriInfo()?.getMatchedResourceMethod()?.getInvocable()?.getDefinitionMethod()
                 if (method in transactions) {
                     if (type == RequestEvent.Type.REQUEST_MATCHED) {
                         println("Starting transaction...")
