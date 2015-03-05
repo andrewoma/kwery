@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "English",
+    "version": 1
+  },
+  {
+    "id": 2,
+    "name": "Italian",
+    "version": 1
+  },
+  {
+    "id": 3,
+    "name": "Japanese",
+    "version": 1
+  },
+  {
+    "id": 4,
+    "name": "Mandarin",
+    "version": 1
+  },
+  {
+    "id": 5,
+    "name": "French",
+    "version": 1
+  },
+  {
+    "id": 6,
+    "name": "German",
+    "version": 1
+  }
+]

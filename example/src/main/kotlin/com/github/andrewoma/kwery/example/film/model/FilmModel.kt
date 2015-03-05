@@ -25,23 +25,35 @@ package com.github.andrewoma.kwery.example.film.model
 import java.time.LocalDateTime
 import java.time.Duration
 
-private val defaultLocalDateTime = LocalDateTime.now()
+trait Version {
+    val version: Int
+}
+
+// TODO ... move AttributeSet logic to be external to the model itself into the Jackson filter definition
+enum class AttributeSet { Id All }
+
+trait HasAttributeSet {
+    fun attributeSet(): AttributeSet
+}
+
+trait AttributeSetByVersion : HasAttributeSet, Version {
+    override fun attributeSet() = if (this.version == 0) AttributeSet.Id else AttributeSet.All
+}
 
 data class Name(val first: String, val last: String)
 
-data class Actor(val id: Int = -1, val name: Name, override val version: Int = 1) : Version
+data class Actor(val id: Int = -1, val name: Name, override val version: Int = 1) : AttributeSetByVersion
 
-fun Actor(id: Int = -1) = Actor(id, Name("", ""))
+fun Actor(id: Int = 0) = Actor(id, Name("", ""), 0)
 
 enum class FilmRating {
     G PG PG_13 R NC_17
 }
 
-trait Version { val version: Int }
-
 data class Film (
         val id: Int,
         val title: String,
+        val description: String,
         val releaseYear: Int,
         val language: Language,
         val originalLanguage: Language?,
@@ -49,12 +61,12 @@ data class Film (
         val rating: FilmRating?,
         val specialFeatures: List<String> = listOf(),
         val actors: Set<Actor> = setOf(),
-        override val version: Int = 0
+        override val version: Int = 1
 
-) : Version
+) : AttributeSetByVersion
 
-fun Film(id: Int = -1): Film = Film(id, "", 0, Language(-1), null, Duration.ZERO,
-        null)
+fun Film(id: Int = 0): Film = Film(id, "", "", 0, Language(-1), null, Duration.ZERO,
+        null, version = 0)
 
 data class FilmActor(
         val id: FilmActor.Id,
@@ -64,6 +76,6 @@ data class FilmActor(
     data class Id(val filmId: Int, val actorId: Int)
 }
 
-data class Language (val id: Int, val name: String, val lastUpdate: LocalDateTime)
+data class Language (val id: Int, val name: String, override val version: Int = 1) : AttributeSetByVersion
 
-fun Language(id: Int = -1): Language = Language(id, "", defaultLocalDateTime)
+fun Language(id: Int = 0): Language = Language(id, "", 0)

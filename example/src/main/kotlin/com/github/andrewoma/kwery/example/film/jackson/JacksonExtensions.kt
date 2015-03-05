@@ -24,10 +24,16 @@ package com.github.andrewoma.kwery.example.film.jackson
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.core.JsonToken
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import java.io.File
-import java.io.InputStream
 import java.net.URL
+import com.fasterxml.jackson.databind.ser.PropertyFilter
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.ser.PropertyWriter
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor
+import com.fasterxml.jackson.annotation.JsonFilter
+import com.github.andrewoma.kwery.example.film.model.AttributeSet
+import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
 
 inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Stream<T>) -> Unit) {
     val parser = this.getFactory().createParser(url)
@@ -42,4 +48,33 @@ inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Stream<T>) ->
     } finally {
         parser.close()
     }
+}
+
+// TODO ... sort out how to handle deserialisation of unspecified values into non-null fields
+
+class AttributeSetFilter : PropertyFilter {
+    override fun serializeAsField(pojo: Any, generator: JsonGenerator, provider: SerializerProvider, writer: PropertyWriter) {
+        val partial = pojo as HasAttributeSet
+        if (partial.attributeSet() == AttributeSet.All || writer.getName().equals("id")) {
+            writer.serializeAsField(pojo, generator, provider);
+        } else {
+            writer.serializeAsOmittedField(pojo, generator, provider);
+        }
+    }
+
+    override fun serializeAsElement(p0: Any?, p1: JsonGenerator?, p2: SerializerProvider?, p3: PropertyWriter?) {
+        throw UnsupportedOperationException()
+    }
+
+    override fun depositSchemaProperty(p0: PropertyWriter?, p1: ObjectNode?, p2: SerializerProvider?) {
+        throw UnsupportedOperationException()
+    }
+
+    override fun depositSchemaProperty(p0: PropertyWriter?, p1: JsonObjectFormatVisitor?, p2: SerializerProvider?) {
+        throw UnsupportedOperationException()
+    }
+}
+
+JsonFilter("Attribute set filter")
+class AttributeSetFilterMixIn {
 }

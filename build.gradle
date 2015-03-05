@@ -120,6 +120,7 @@ project(':example') {
         compile 'io.dropwizard:dropwizard-db:0.8.0-rc5'
         compile 'org.hsqldb:hsqldb:2.3.2'
         compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.5.1'
+        compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.5.1'
         compile 'org.postgresql:postgresql:9.3-1102-jdbc4'
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
     }

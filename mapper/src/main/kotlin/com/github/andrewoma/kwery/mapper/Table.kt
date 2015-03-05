@@ -78,11 +78,16 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         synchronized(this) {
             if (initialised) return
 
-            val instance = create(object : Value<T> {
-                override fun <R> of(column: Column<T, R>): R {
-                    return column.defaultValue
-                }
-            })
+            val instance: T
+            try {
+                instance = create(object : Value<T> {
+                                override fun <R> of(column: Column<T, R>): R {
+                                    return column.defaultValue
+                                }
+                            })
+            } catch(e: NullPointerException) {
+                throw RuntimeException("A table field is declared as nullable but the mapped field is non-null?", e)
+            }
             lazyType = instance.javaClass
             initialised = true
         }

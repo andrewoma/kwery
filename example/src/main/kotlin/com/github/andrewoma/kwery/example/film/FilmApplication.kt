@@ -39,6 +39,14 @@ import com.github.andrewoma.kwery.example.film.dao.ActorDao
 import com.github.andrewoma.kwery.mapper.Dao
 import com.github.andrewoma.kwery.example.film.resources.ActorResource
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module
+import com.github.andrewoma.kwery.example.film.dao.LanguageDao
+import com.github.andrewoma.kwery.example.film.dao.FilmDao
+import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
+import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilterMixIn
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
+import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilter
+import com.github.andrewoma.kwery.example.film.resources.LanguageResource
 
 class FilmApplication : Application<FilmConfiguration>() {
     override fun getName() = "film-app"
@@ -55,14 +63,20 @@ class FilmApplication : Application<FilmConfiguration>() {
         })
 
         val actorDao = ActorDao(session)
+        val languageDao = LanguageDao(session)
+        val filmDao = FilmDao(session)
 
+        // Create an populate an in-memory database
         createDb(session)
         load(environment, session, actorDao, "actors.json")
+        load(environment, session, languageDao, "languages.json")
+        load(environment, session, filmDao, "films.json")
 
         val jersey = environment.jersey()
         jersey.register(TransactionListener())
-        jersey.register(FilmResource(session))
+        jersey.register(FilmResource(filmDao))
         jersey.register(ActorResource(actorDao))
+        jersey.register(LanguageResource(languageDao))
     }
 
     inline fun <reified T> load(environment: Environment, session: ThreadLocalSession, dao: Dao<T, *>, resource: String) {
@@ -74,16 +88,20 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     fun createDb(session: ThreadLocalSession) {
-        session.use(startTransaction = false) {
-            for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";")) {
-                session.update(sql)
-            }
+        for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";")) {
+            session.use { session.update(sql) }
         }
     }
 
     override fun initialize(bootstrap: Bootstrap<FilmConfiguration>) {
         val mapper = bootstrap.getObjectMapper()
         mapper.registerModule(KotlinModule())
+        mapper.registerModule(JSR310Module())
+
+        mapper.addMixIn(javaClass<HasAttributeSet>(), javaClass<AttributeSetFilterMixIn>())
+        val provider = SimpleFilterProvider().addFilter("Attribute set filter", AttributeSetFilter())
+        mapper.setConfig(mapper.getSerializationConfig().withFilters(provider))
+
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
     }
 }

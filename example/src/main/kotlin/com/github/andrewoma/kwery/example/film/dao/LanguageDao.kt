@@ -20,36 +20,22 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.example.film.resources
+package com.github.andrewoma.kwery.example.film.dao
 
-import com.codahale.metrics.annotation.Timed
+import com.github.andrewoma.kwery.mapper.*
+import com.github.andrewoma.kwery.core.*
 
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
-import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.model.Film
-import com.github.andrewoma.kwery.mapper.Column
+import com.github.andrewoma.kwery.example.film.model.Language as L
 
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
+object languageTable : Table<L, Int>("language", tableConfig), VersionedWithInt {
+    // @formatter:off
+    val Id      by col(L::id,      id = true)
+    val Name    by col(L::name,    notNull = true)
+    val Version by col(L::version, version = true)
+    // @formatter:on
 
-
-Path("/films")
-Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val filmDao: FilmDao) {
-    Transaction Timed GET
-    fun find(QueryParam("title") title: String?,
-             QueryParam("releaseYear") releaseYear: Int?): List<Film> {
-
-        val filter = mapOf<Column<Film, *>, Any?>(
-                filmTable.Title to title,
-                filmTable.ReleaseYear to releaseYear
-        ).filter { it.value != null }
-
-        return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet())
-    }
-
-    Transaction Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int): Film {
-        return filmDao.findById(id) ?: throw NotFoundException("$id not found")
-    }
+    override fun idColumns(id: Int) = setOf(Id of id)
+    override fun create(value: Value<L>) = L(value.of(Id), value.of(Name), value.of(Version))
 }
+
+class LanguageDao(session: Session) : AbstractDao<L, Int>(session, languageTable, { it.id }, "int", defaultId = 0)

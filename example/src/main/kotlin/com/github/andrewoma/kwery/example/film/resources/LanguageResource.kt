@@ -26,30 +26,28 @@ import com.codahale.metrics.annotation.Timed
 
 import com.github.andrewoma.kwery.example.film.jersey.Transaction
 import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.model.Film
+import com.github.andrewoma.kwery.example.film.model.Language
 import com.github.andrewoma.kwery.mapper.Column
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
-Path("/films")
+Path("/languages")
 Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val filmDao: FilmDao) {
+public class LanguageResource(val languageDao: LanguageDao) {
     Transaction Timed GET
-    fun find(QueryParam("title") title: String?,
-             QueryParam("releaseYear") releaseYear: Int?): List<Film> {
+    fun find(QueryParam("name") name: String?): List<Language> {
 
-        val filter = mapOf<Column<Film, *>, Any?>(
-                filmTable.Title to title,
-                filmTable.ReleaseYear to releaseYear
+        val filter = mapOf<Column<Language, *>, Any?>(
+                languageTable.Name to name
         ).filter { it.value != null }
 
-        return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet())
+        return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keySet())
     }
 
     Transaction Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int): Film {
-        return filmDao.findById(id) ?: throw NotFoundException("$id not found")
+    fun findById(PathParam("id") id: Int): Language {
+        return languageDao.findById(id) ?: throw NotFoundException("$id not found")
     }
 }
