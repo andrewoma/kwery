@@ -22,7 +22,12 @@
 
 package com.github.andrewoma.kwery.example.film
 
+import java.io.File
+
 fun main(args: Array<String>) {
-    val defaults = array("server", "example/src/main/resources/dev.yml")
-    FilmApplication().run(*if (args.isEmpty()) defaults else args)
+    // Default to dev config if unspecified and it's available
+    val config = "example/src/main/resources/dev.yml"
+    val defaults = array("server", config)
+
+    FilmApplication().run(*if (args.isEmpty() && File(config).exists()) defaults else args)
 }
