@@ -3,10 +3,11 @@ buildscript {
         kotlinVersion = '0.10.770'
     }
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.0'
     }
 }
 
@@ -107,6 +108,9 @@ project(':core') {
 }
 
 project(':example') {
+    apply plugin: 'com.github.johnrengelman.shadow'
+    apply plugin: 'application'
+
     dependencies {
         compile project(':core')
         compile project(':mapper')
@@ -118,6 +122,20 @@ project(':example') {
         compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.5.1'
         compile 'org.postgresql:postgresql:9.3-1102-jdbc4'
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
+    }
+
+    shadowJar {
+        mergeServiceFiles()
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+    }
+
+    mainClassName = 'com.github.andrewoma.kwery.example.film.FilmPackage'
+
+    jar {
+        manifest {
+            attributes 'Main-Class': mainClassName
+        }
     }
 }
 
