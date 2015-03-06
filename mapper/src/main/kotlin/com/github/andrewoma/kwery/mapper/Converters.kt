@@ -135,13 +135,7 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
         }
 )
 
-public class EnumByNameConverter<T>(type: Class<T>) : SimpleConverter<T>(
-        {(row, c) -> enumValueOf(type, row.string(c)) },
+public class EnumByNameConverter<T:Enum<T>>(type: Class<T>) : SimpleConverter<T>(
+        {(row, c) -> java.lang.Enum.valueOf(type, row.string(c)) },
         { (it as Enum<*>).name() }
 )
-
-// TODO ... remove reflection. Can't currently make the type system express this :-(
-private val enumValueOfMethod = javaClass<Enum<*>>().getDeclaredMethods().firstOrNull { it.getName() == "valueOf" }!!
-
-[suppress("UNCHECKED_CAST")]
-private fun <T> enumValueOf(type: Class<T>, name: String): T = enumValueOfMethod.invoke(null, type, name) as T

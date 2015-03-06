@@ -131,9 +131,12 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         return DelegatedColumn(column)
     }
 
-    suppress("UNCHECKED_CAST")
+    // Can't cast T to Enum<T> due to recursive type, so cast to any enum to satisfy compiler
+    private enum class DummyEnum
+
+    suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_UNIT_OR_ANY", "CAST_NEVER_SUCCEEDS")
     public fun <T> converter(nullable: Boolean, type: Class<T>): Converter<T> {
-        val converter = config.converters[type] ?: if (type.isEnum()) EnumByNameConverter(type) else null
+        val converter = config.converters[type] ?: if (type.isEnum()) EnumByNameConverter(type as Class<DummyEnum>) as T else null
         checkNotNull(converter, "Converter undefined for type: ${type.getName()}")
         return (if (nullable) optional(converter!! as Converter<T>) else converter) as Converter<T>
     }
