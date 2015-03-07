@@ -23,8 +23,8 @@ subprojects {
     apply plugin: 'jacoco'
 
     repositories {
-        mavenLocal()
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
