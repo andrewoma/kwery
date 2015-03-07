@@ -47,6 +47,8 @@ import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilterMixIn
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilter
 import com.github.andrewoma.kwery.example.film.resources.LanguageResource
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.example.film.dao.FilmActorDao
 
 class FilmApplication : Application<FilmConfiguration>() {
     override fun getName() = "film-app"
@@ -65,12 +67,14 @@ class FilmApplication : Application<FilmConfiguration>() {
         val actorDao = ActorDao(session)
         val languageDao = LanguageDao(session)
         val filmDao = FilmDao(session)
+        val filmActorDao = FilmActorDao(session)
 
         // Create an populate an in-memory database
         createDb(session)
         load(environment, session, actorDao, "actors.json")
         load(environment, session, languageDao, "languages.json")
         load(environment, session, filmDao, "films.json")
+        load(environment, session, filmActorDao, "film_actors.json")
 
         val jersey = environment.jersey()
         jersey.register(TransactionListener())

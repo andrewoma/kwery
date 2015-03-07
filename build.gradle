@@ -114,6 +114,7 @@ project(':example') {
     dependencies {
         compile project(':core')
         compile project(':mapper')
+        compile project(':fetcher')
         compile project(':tomcat-pool')
         compile 'org.hsqldb:hsqldb:2.3.2'
         compile 'io.dropwizard:dropwizard-core:0.8.0-rc5'

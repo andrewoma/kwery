@@ -69,8 +69,7 @@ fun Film(id: Int = 0): Film = Film(id, "", "", 0, Language(-1), null, Duration.Z
         null, version = 0)
 
 data class FilmActor(
-        val id: FilmActor.Id,
-        val lastUpdate: LocalDateTime
+        val id: FilmActor.Id
 
 ) {
     data class Id(val filmId: Int, val actorId: Int)

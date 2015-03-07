@@ -90,6 +90,10 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         return this.map { "${f(it) } = :${f(it)}" }.joinToString(separator)
     }
 
+    protected fun Collection<ID>.copyToSqlArray(): java.sql.Array {
+        return session.connection.createArrayOf(idSqlType, this.copyToArray<Any>())
+    }
+
     protected fun selectOptions(name: String): SelectOptions =
             session.defaultSelectOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
 
@@ -281,7 +285,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
                         session.dialect.arrayBasedIn("ids")
             }
 
-            sql to session.connection.createArrayOf(idSqlType, ids.copyToArray<Any>())
+            sql to ids.copyToSqlArray()
         } else {
             val sql = sql(name to columns) {
                 "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
