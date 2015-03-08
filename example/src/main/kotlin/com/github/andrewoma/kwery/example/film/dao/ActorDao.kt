@@ -27,6 +27,8 @@ import com.github.andrewoma.kwery.core.*
 
 import com.github.andrewoma.kwery.example.film.model.Name as N
 import com.github.andrewoma.kwery.example.film.model.Actor as A
+import com.github.andrewoma.kwery.example.film.model.Actor
+import com.github.andrewoma.kwery.example.film.model.FilmActor
 
 
 object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedWithInt {
@@ -43,4 +45,10 @@ object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedW
             value.of(Version))
 }
 
-class ActorDao(session: Session) : AbstractDao<A, Int>(session, actorTable, { it.id }, "int", defaultId = 0)
+class ActorDao(session: Session) : AbstractDao<A, Int>(session, actorTable, { it.id }, "int", defaultId = 0) {
+
+    fun findByFilmIds(filmActors: Collection<FilmActor>): Map<Int, Collection<Actor>> {
+        val films = findByIds(filmActors.map { it.id.actorId }.toSet())
+        return filmActors.groupBy { it.id.filmId }.mapValues { it.getValue().map { films.get(it.id.actorId)!! } }
+    }
+}

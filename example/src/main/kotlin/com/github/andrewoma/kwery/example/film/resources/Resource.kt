@@ -22,36 +22,24 @@
 
 package com.github.andrewoma.kwery.example.film.resources
 
-import com.codahale.metrics.annotation.Timed
-
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
-import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.model.Actor
 import com.github.andrewoma.kwery.mapper.Column
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.fetcher.Node
 
-Path("/actors")
-Produces(MediaType.APPLICATION_JSON)
-public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+trait Resource {
+    val fetcher: GraphFetcher
 
-    Transaction Timed GET
-    fun find(QueryParam("firstName") firstName: String?,
-             QueryParam("lastName") lastName: String?,
-             QueryParam("fetch") root: String?): List<Actor> {
-
-        val filter = parameters(
-                actorTable.FirstName + firstName,
-                actorTable.LastName + lastName
-        )
-
-        return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)
+    fun <T> parameters(vararg parameters: Pair<Column<T, *>, Any?>): Map<Column<T, *>, Any?> {
+        return parameters.toList().toMap().filter { it.getValue() != null }
     }
 
-    Transaction Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Actor {
-        return actorDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
+    fun <T> List<T>.fetch(root: String?): List<T> {
+        if (root == null) return this
+        return fetcher.fetch(this, Node.parse(root))
+    }
+
+    fun <T> T.fetch(root: String?): T {
+        if (root == null) return this
+        return fetcher.fetch(this, Node.parse(root))
     }
 }

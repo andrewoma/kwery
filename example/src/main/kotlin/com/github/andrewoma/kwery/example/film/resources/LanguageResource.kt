@@ -31,17 +31,16 @@ import com.github.andrewoma.kwery.mapper.Column
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
 
 
 Path("/languages")
 Produces(MediaType.APPLICATION_JSON)
-public class LanguageResource(val languageDao: LanguageDao) {
+public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
     Transaction Timed GET
     fun find(QueryParam("name") name: String?): List<Language> {
 
-        val filter = mapOf<Column<Language, *>, Any?>(
-                languageTable.Name to name
-        ).filter { it.value != null }
+        val filter = parameters(languageTable.Name + name)
 
         return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keySet())
     }

@@ -22,33 +22,39 @@
 
 package com.github.andrewoma.kwery.example.film
 
-import io.dropwizard.Application
-import io.dropwizard.setup.Environment
-import io.dropwizard.setup.Bootstrap
-import com.github.andrewoma.kwery.core.ThreadLocalSession
-import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.google.common.io.Resources
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
 import com.codahale.metrics.health.HealthCheck
-import com.github.andrewoma.kwery.example.film.resources.FilmResource
-import com.github.andrewoma.kwery.example.film.jackson.withObjectStream
-import com.github.andrewoma.kommon.collection.chunked
-import com.github.andrewoma.kwery.example.film.dao.ActorDao
-import com.github.andrewoma.kwery.mapper.Dao
-import com.github.andrewoma.kwery.example.film.resources.ActorResource
+
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module
-import com.github.andrewoma.kwery.example.film.dao.LanguageDao
-import com.github.andrewoma.kwery.example.film.dao.FilmDao
-import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
-import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilterMixIn
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilter
-import com.github.andrewoma.kwery.example.film.resources.LanguageResource
-import com.github.andrewoma.kwery.fetcher.GraphFetcher
-import com.github.andrewoma.kwery.example.film.dao.FilmActorDao
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+
+import com.github.andrewoma.kommon.collection.chunked
+
+import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import com.github.andrewoma.kwery.core.ThreadLocalSession
+
+import com.github.andrewoma.kwery.example.film.dao.*
+import com.github.andrewoma.kwery.example.film.jackson.*
+import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
+import com.github.andrewoma.kwery.example.film.model.*
+import com.github.andrewoma.kwery.example.film.resources.*
+import com.github.andrewoma.kwery.fetcher.*
+
+import com.github.andrewoma.kwery.mapper.Dao
+
+import com.google.common.io.Resources
+import io.dropwizard.Application
+import io.dropwizard.setup.Bootstrap
+import io.dropwizard.setup.Environment
+
+class Daos(
+        val actor: ActorDao,
+        val language: LanguageDao,
+        val film: FilmDao,
+        val filmActor: FilmActorDao
+)
 
 class FilmApplication : Application<FilmConfiguration>() {
     override fun getName() = "film-app"
@@ -64,23 +70,31 @@ class FilmApplication : Application<FilmConfiguration>() {
             }
         })
 
-        val actorDao = ActorDao(session)
-        val languageDao = LanguageDao(session)
-        val filmDao = FilmDao(session)
-        val filmActorDao = FilmActorDao(session)
+        val daos = Daos(
+                ActorDao(session),
+                LanguageDao(session),
+                FilmDao(session),
+                FilmActorDao(session)
+        )
 
-        // Create an populate an in-memory database
-        createDb(session)
-        load(environment, session, actorDao, "actors.json")
-        load(environment, session, languageDao, "languages.json")
-        load(environment, session, filmDao, "films.json")
-        load(environment, session, filmActorDao, "film_actors.json")
+        createAndLoadDb(environment, session, daos)
+
+        val fetcher = createFetcher(daos)
 
         val jersey = environment.jersey()
         jersey.register(TransactionListener())
-        jersey.register(FilmResource(filmDao))
-        jersey.register(ActorResource(actorDao))
-        jersey.register(LanguageResource(languageDao))
+        jersey.register(FilmResource(daos.film, fetcher))
+        jersey.register(ActorResource(daos.actor, fetcher))
+        jersey.register(LanguageResource(daos.language, fetcher))
+    }
+
+    // Create an populate an in-memory database
+    private fun createAndLoadDb(environment: Environment, session: ThreadLocalSession, daos: Daos) {
+        createDb(session)
+        load(environment, session, daos.actor, "actors.json")
+        load(environment, session, daos.language, "languages.json")
+        load(environment, session, daos.film, "films.json")
+        load(environment, session, daos.filmActor, "film_actors.json")
     }
 
     inline fun <reified T> load(environment: Environment, session: ThreadLocalSession, dao: Dao<T, *>, resource: String) {
@@ -107,5 +121,20 @@ class FilmApplication : Application<FilmConfiguration>() {
         mapper.setConfig(mapper.getSerializationConfig().withFilters(provider))
 
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
+    }
+
+    fun createFetcher(daos: Daos): GraphFetcher {
+        val language = Type(Language::id, { daos.language.findByIds(it) })
+        val actor = Type(Actor::id, { daos.actor.findByIds(it) })
+
+        val film = Type(Film::id, { daos.film.findByIds(it) }, listOf(
+                Property(Film::language, language, { it.language.id }, {(f, l) -> f.copy(language = l) }),
+                Property(Film::originalLanguage, language, { it.originalLanguage?.id }, {(f, l) -> f.copy(originalLanguage = l) }),
+                CollectionProperty(Film::actors, actor, { it.id },
+                        {(f, a) -> f.copy(actors = a.toSet()) },
+                        { daos.actor.findByFilmIds(daos.filmActor.findByFilmIds(it)) })
+        ))
+
+        return GraphFetcher(setOf(language, actor, film))
     }
 }

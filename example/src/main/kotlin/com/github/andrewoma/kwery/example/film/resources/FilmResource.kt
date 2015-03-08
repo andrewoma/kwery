@@ -31,25 +31,27 @@ import com.github.andrewoma.kwery.mapper.Column
 
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
 
 
 Path("/films")
 Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val filmDao: FilmDao) {
+public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
     Transaction Timed GET
     fun find(QueryParam("title") title: String?,
-             QueryParam("releaseYear") releaseYear: Int?): List<Film> {
+             QueryParam("releaseYear") releaseYear: Int?,
+             QueryParam("fetch") root: String?): List<Film> {
 
-        val filter = mapOf<Column<Film, *>, Any?>(
-                filmTable.Title to title,
-                filmTable.ReleaseYear to releaseYear
-        ).filter { it.value != null }
+        val filter = parameters(
+                filmTable.Title + title,
+                filmTable.ReleaseYear + releaseYear
+        )
 
-        return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet())
+        return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet()).fetch(root)
     }
 
     Transaction Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int): Film {
-        return filmDao.findById(id) ?: throw NotFoundException("$id not found")
+    fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Film {
+        return filmDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }
 }
