@@ -48,13 +48,17 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
         public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
 
-    data class Context(val stopWatch: StopWatch, val exception: Exception? = null)
+    data class Context(val stopWatch: StopWatch, val executedTiming: String = "", val exception: Exception? = null)
 
     var ExecutingStatement.context: Context
         get() = this.contexts[javaClass.getName()] as Context
         set(value) {
             this.contexts[javaClass.getName()] = value
         }
+
+    override fun executed(statement: ExecutingStatement) {
+        statement.context = statement.context.copy(executedTiming = statement.context.stopWatch.toString())
+    }
 
     override fun construct(statement: ExecutingStatement): ExecutingStatement {
         statement.context = Context(StopWatch().start())
@@ -73,6 +77,7 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
 
     private fun createMessage(statement: ExecutingStatement): String {
         val context = statement.context
+        val closedTiming = context.stopWatch.toString()
         val sb = StringBuilder()
 
         for (parameters in statement.parametersList) {
@@ -87,7 +92,7 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
             else -> ". Rows affected: ${count.reduce {(sum, i) -> sum + i }} (${count.joinToString(", ")})"
         }
 
-        val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.stopWatch}${rowCount}"
+        val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.executedTiming} ($closedTiming)${rowCount}"
         val message = if (context.exception == null) {
             "\nSucessfully executed $timing"
         } else {
