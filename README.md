@@ -159,10 +159,10 @@ DAO:
 Fetcher:
 * General review - code seems overly complicated for what it does
 * Review methods for specifying graphs
+* Make node specs `*` (all) and `**` (all descendants) nest within a root node
 
 Example:
-* Interactive REST endpoint via DropWizard
-* ThreadLocalSessions
+* Documentation
 * Caching and automatic cache invalidation
 
 Misc:
