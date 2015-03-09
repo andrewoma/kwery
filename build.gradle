@@ -117,8 +117,8 @@ project(':example') {
         compile project(':fetcher')
         compile project(':tomcat-pool')
         compile 'org.hsqldb:hsqldb:2.3.2'
-        compile 'io.dropwizard:dropwizard-core:0.8.0-rc5'
-        compile 'io.dropwizard:dropwizard-db:0.8.0-rc5'
+        compile 'io.dropwizard:dropwizard-core:0.8.0'
+        compile 'io.dropwizard:dropwizard-db:0.8.0'
         compile 'org.hsqldb:hsqldb:2.3.2'
         compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.5.1'
         compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.5.1'
@@ -140,21 +140,3 @@ project(':example') {
         }
     }
 }
-
-/*
-task kommon() {
-    def kommonDir = new File(buildDir, "kommon")
-    kommonDir.deleteDir()
-    kommonDir.mkdirs()
-    exec {
-        executable "git"
-        workingDir buildDir
-        args "clone", "https://github.com/andrewoma/kommon.git"
-    }
-
-    exec {
-        executable "./gradlew"
-        workingDir kommonDir
-        args "clean", "install"
-    }
-}*/
