@@ -29,7 +29,15 @@ import com.github.andrewoma.kwery.core.ExecutingStatement
 import java.util.Collections
 import java.util.ArrayList
 import java.util.concurrent.TimeUnit
+import java.lang.Math.max
+import java.util.Formatter
 
+/**
+ * LoggingSummaryInterceptor produces a summary report of all statements that have occurred on a
+ * given thread between `start()` and `stop()` calls.
+ *
+ * WARNING: The code has been prematurely optimised and is accordingly ugly.
+ */
 public class LoggingSummaryInterceptor : StatementInterceptor {
 
     class Request(val stopWatch: StopWatch, val executions: MutableList<Execution>)
@@ -37,6 +45,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
     class object {
         val requests: ThreadLocal<Request> = ThreadLocal()
         val nanoToMs = 1000000
+        val headings = array("", "Calls", "Exec", "Close", "Rows", "")
 
         public fun start() {
             check(requests.get() == null, "LoggingSummaryInterceptor already started")
@@ -58,7 +67,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
             log.info(createReport(request.stopWatch.elapsed(TimeUnit.NANOSECONDS), totals, summaries))
         }
 
-        fun calculateWidths(totals: ExecutionSummary, summaries: List<ExecutionSummary>): List<Int> {
+        fun calculateWidths(headings: Array<String>, totals: ExecutionSummary, summaries: List<ExecutionSummary>): List<Int> {
             var name = 0
             var executions = 0
             var closed = 0
@@ -67,15 +76,22 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
             var percentage = 0
 
             for (summary in summaries) {
-                name = Math.max(name, summary.name.length())
-                executions = Math.max(executions, width(summary.executionCount))
-                closed = Math.max(closed, width(summary.closedTime / nanoToMs))
-                executed = Math.max(executed, width(summary.executionTime / nanoToMs))
-                rowCount = Math.max(rowCount, width(summary.rowCounts))
-                percentage = Math.max(percentage, width((summary.executionTime.toDouble() / totals.executionTime.toDouble() * 100).toLong()))
+                name = max(name, summary.name.length())
+                executions = max(executions, width(summary.executionCount))
+                closed = max(closed, width(summary.closedTime / nanoToMs))
+                executed = max(executed, width(summary.executionTime / nanoToMs))
+                rowCount = max(rowCount, width(summary.rowCounts))
+                percentage = max(percentage, width((summary.executionTime.toDouble() / totals.executionTime.toDouble() * 100).toLong()))
             }
 
-            return listOf(name, executions, executed + 4, closed + 4, rowCount, percentage + 2)
+            return listOf(
+                    max(headings[0].length(), name),
+                    max(headings[1].length(), executions),
+                    max(headings[2].length(), executed + 4),
+                    max(headings[3].length(), closed + 4),
+                    max(headings[4].length(), rowCount),
+                    max(headings[5].length(), percentage + 2)
+            )
         }
 
         fun width(count: Long): Int {
@@ -84,7 +100,13 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
         }
 
         fun createReport(requestTime: Long, totals: ExecutionSummary, summaries: List<ExecutionSummary>): String {
-            val sb = StringBuilder()
+            val widths = calculateWidths(headings, totals, summaries)
+            val format = "\n    %${widths[0]}s  %,${widths[1]}d  %,${widths[2]}.${3}f  %,${widths[3]}.${3}f  %,${widths[4]}d  %${widths[5]}.${1}f%%"
+            val headingsFormat = "    %${widths[0]}s  %${widths[1]}s  %${widths[2]}s  %${widths[3]}s  %${widths[4]}s  %${widths[5]}s"
+            val totalWidth = widths.reduce {(accum, i) -> accum + i }
+
+            val sb = StringBuilder(150 + ((15 + totalWidth) * (summaries.size() + 1)))
+
             sb.append("\nExecuted %,d statements in %,.3f ms (closed in %,.3f ms) affecting %,d rows using %.1f%% of request total (%,.3f ms):\n".format(
                     totals.executionCount,
                     totals.executionTime.toDouble() / nanoToMs,
@@ -93,25 +115,18 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
                     totals.closedTime.toDouble() / requestTime.toDouble() * 100,
                     requestTime.toDouble() / nanoToMs
             ))
-            createReport(sb, totals, summaries)
+
+            val formatter = Formatter(sb)
+            sb.append(headingsFormat.format(*headings))
+            for (summary in summaries) {
+                formatSummary(formatter, format, totals, summary)
+            }
+
             return sb.toString()
         }
 
-        fun createReport(sb: StringBuilder, totals: ExecutionSummary, summaries: List<ExecutionSummary>) {
-            val headings = listOf("", "Calls", "Exec", "Close", "Rows", "")
-            val widths = calculateWidths(totals, summaries).zip(headings).map { Math.max(it.first, it.second.length()) }
-
-            val format = "    %${widths[0]}s  %,${widths[1]}d  %,${widths[2]}.${3}f  %,${widths[3]}.${3}f  %,${widths[4]}d  %${widths[5]}.${1}f%%"
-            val headingsFormat = "    %${widths[0]}s  %${widths[1]}s  %${widths[2]}s  %${widths[3]}s  %${widths[4]}s  %${widths[5]}s"
-
-            sb.append(headingsFormat.format(*headings.copyToArray()))
-            for (summary in summaries) {
-                sb.append("\n").append(printSummary(format, totals, summary))
-            }
-        }
-
-        fun printSummary(format: String, totals: ExecutionSummary, summary: ExecutionSummary): String {
-            return format.format(summary.name,
+        fun formatSummary(formatter: Formatter, format: String, totals: ExecutionSummary, summary: ExecutionSummary) {
+            formatter.format(format, summary.name,
                     summary.executionCount,
                     summary.executionTime.toDouble() / nanoToMs,
                     summary.closedTime.toDouble() / nanoToMs,
