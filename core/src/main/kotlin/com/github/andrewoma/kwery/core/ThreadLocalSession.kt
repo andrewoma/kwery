@@ -27,6 +27,7 @@ import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import javax.sql.DataSource
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
+import org.slf4j.LoggerFactory
 
 /**
  * ThreadLocalSession creates sessions on a per thread basis. It allows services
@@ -57,6 +58,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
                 return hashMapOf()
             }
         }
+        private val log = LoggerFactory.getLogger(javaClass<ThreadLocalSession>())
 
         public fun initialise(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
@@ -66,7 +68,13 @@ public class ThreadLocalSession(val dataSource: DataSource,
 
         public fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
-            val config = configs.get(name) ?: error("A session has not been initialised for this thread")
+            val config = configs.get(name)
+
+            if (config == null) {
+                log.warn("A session has not been initialised for this thread")
+                return
+            }
+
             try {
                 closeSession(commitTransaction, config)
             } finally {

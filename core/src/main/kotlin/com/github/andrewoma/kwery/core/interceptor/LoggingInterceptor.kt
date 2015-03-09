@@ -51,9 +51,9 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
     data class Context(val stopWatch: StopWatch, val executedTiming: String = "", val exception: Exception? = null)
 
     var ExecutingStatement.context: Context
-        get() = this.contexts[javaClass.getName()] as Context
+        get() = this.contexts[javaClass<LoggingInterceptor>().getName()] as Context
         set(value) {
-            this.contexts[javaClass.getName()] = value
+            this.contexts[javaClass<LoggingInterceptor>().getName()] = value
         }
 
     override fun executed(statement: ExecutingStatement) {

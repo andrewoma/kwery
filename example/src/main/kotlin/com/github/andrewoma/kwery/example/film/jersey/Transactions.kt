@@ -34,13 +34,15 @@ import java.lang.reflect.Method
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 import java.lang.annotation.RetentionPolicy
 import java.lang.annotation.Retention
+import org.slf4j.LoggerFactory
 
 Retention(RetentionPolicy.RUNTIME)
 public annotation class Transaction
 
 Provider
 public class TransactionListener : ApplicationEventListener {
-    var transactions = hashSetOf<Method>()
+    private val log = LoggerFactory.getLogger(javaClass<TransactionListener>())
+    private var transactions = hashSetOf<Method>()
 
     override fun onEvent(event: ApplicationEvent) {
         if (event.getType() == ApplicationEvent.Type.INITIALIZATION_APP_FINISHED) {
@@ -73,18 +75,20 @@ public class TransactionListener : ApplicationEventListener {
 
     private inner class Listener : RequestEventListener {
         override fun onEvent(event: RequestEvent) {
-            val type = event.getType()
-            if (type == RequestEvent.Type.REQUEST_MATCHED || type == RequestEvent.Type.FINISHED) {
-                val method = event.getUriInfo()?.getMatchedResourceMethod()?.getInvocable()?.getDefinitionMethod()
-                if (method in transactions) {
-                    if (type == RequestEvent.Type.REQUEST_MATCHED) {
-                        println("Starting transaction...")
-                        ThreadLocalSession.initialise(true)
-                    } else {
-                        println("Completing transaction: ${event.isSuccess()}")
-                        ThreadLocalSession.finalise(event.isSuccess())
+            try {
+                val type = event.getType()
+                if (type == RequestEvent.Type.REQUEST_MATCHED || type == RequestEvent.Type.FINISHED) {
+                    val method = event.getUriInfo()?.getMatchedResourceMethod()?.getInvocable()?.getDefinitionMethod()
+                    if (method in transactions) {
+                        if (type == RequestEvent.Type.REQUEST_MATCHED) {
+                            ThreadLocalSession.initialise(true)
+                        } else {
+                            ThreadLocalSession.finalise(event.isSuccess())
+                        }
                     }
                 }
+            } catch(e: Exception) {
+                log.error("Error processing transaction listener", e)
             }
         }
     }

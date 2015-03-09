@@ -32,12 +32,12 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.andrewoma.kommon.collection.chunked
 
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import com.github.andrewoma.kwery.core.interceptor.*
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 
 import com.github.andrewoma.kwery.example.film.dao.*
 import com.github.andrewoma.kwery.example.film.jackson.*
-import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
+import com.github.andrewoma.kwery.example.film.jersey.*
 import com.github.andrewoma.kwery.example.film.model.*
 import com.github.andrewoma.kwery.example.film.resources.*
 import com.github.andrewoma.kwery.fetcher.*
@@ -61,7 +61,11 @@ class FilmApplication : Application<FilmConfiguration>() {
 
     override fun run(configuration: FilmConfiguration, environment: Environment) {
         val dataSource = configuration.database.build(environment.metrics(), "db")
-        val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor(infoQueryThresholdInMs = -1))
+        val interceptors = StatementInterceptorChain(listOf(
+                LoggingInterceptor(infoQueryThresholdInMs = 1000),
+                LoggingSummaryInterceptor()))
+
+        val session = ThreadLocalSession(dataSource, HsqlDialect(), interceptors)
 
         environment.healthChecks().register("db", object : HealthCheck() {
             override fun check() = session.use {
@@ -82,6 +86,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         val fetcher = createFetcher(daos)
 
         val jersey = environment.jersey()
+        jersey.register(LoggingListener())
         jersey.register(TransactionListener())
         jersey.register(FilmResource(daos.film, fetcher))
         jersey.register(ActorResource(daos.actor, fetcher))
