@@ -7,3 +7,18 @@ database:
   minSize: 1
   maxSize: 32
   logValidationErrors: true
+
+server:
+  applicationConnectors:
+    - type: http
+      port: 9090
+  adminConnectors:
+    - type: http
+      port: 9091
+
+logging:
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+#  loggers:
+#    com.example.app: DEBUG

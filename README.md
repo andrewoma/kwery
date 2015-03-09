@@ -149,7 +149,6 @@ General cleanup and improve test coverage.
 Core:
 * Better support for Blobs and Clobs
 * Oracle dialect
-* Transaction logging (including statement execution summary)
 * Support direct execution (currently everything is via a PreparedStatement)
 
 DAO:
@@ -164,6 +163,7 @@ Fetcher:
 Example:
 * Documentation
 * Caching and automatic cache invalidation
+* Add create, update and delete
 
 Misc:
 * Create a test module, factoring out common code like AbstractSessionTest

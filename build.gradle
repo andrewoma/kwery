@@ -134,6 +134,10 @@ project(':example') {
 
     mainClassName = 'com.github.andrewoma.kwery.example.film.FilmPackage'
 
+    run {
+        args project.hasProperty("appArgs") ? Eval.me(appArgs) : ['server', 'src/main/resources/dev.yml']
+    }
+
     jar {
         manifest {
             attributes('Main-Class': mainClassName, "Implementation-Version": version)
