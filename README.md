@@ -120,6 +120,11 @@ DAOs and graph fetching aim to cover 95% of a typical application data retrieval
 remaining performance critical sections, use specialised methods on the DAOs using
 partial selects and joins as required.
 
+#### Example
+
+There's a working [example](example) showing how to expose a Kwery backed domain model
+using RESTful web services via DropWizard
+
 #### Status
 
 Kwery is unstable. It's currently being developed for a side project, so features are added as required.

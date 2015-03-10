@@ -4,13 +4,14 @@ The example is a [DropWizard](http://dropwizard.io/) project that demonstrates u
 to expose a simple model via RESTful web services.
 
 Features:
-* Model persistence using Kwery's mapper module (e.g. [ActorDao](film/dao/ActorDao.kt))
-* Transactions using a [Jersey interceptor](film/jersey/Transactions.kt) and Kwery's ThreadLocalSession
+* Model persistence using Kwery's mapper module (e.g. [ActorDao](src/main/kotlin/com/github/andrewoma/kwery/example/film/dao/ActorDao.kt))
+* Transactions using a [Jersey interceptor](src/main/kotlin/com/github/andrewoma/kwery/example/film/jersey/Transactions.kt) and Kwery's ThreadLocalSession
 * Filtering using Kwery's `Dao.findByExample`
 * Graph fetching of related entities on a per request basis
 * Logging of either full statements or summaries on a per request basis
+* [Partial serialisation](src/main/kotlin/com/github/andrewoma/kwery/example/film/jackson/JacksonExtensions.kt) of objects to JSON (i.e. only serialise the id if the object hasn't been fetched)
 
-Here's a sample Resource:
+Here's a snippet from [ActorResource](src/main/kotlin/com/github/andrewoma/kwery/example/film/resources/ActorResource.kt) showing a typical resource:
 ```kotlin
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
@@ -38,17 +39,14 @@ public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFe
 
 ##### Building & Running
 
-Assuming you've built Kwery as per the [README](../README.md), you can run the example via gradle:
+Assuming you've built Kwery as per [Building](../README.md#building), you can run the example via gradle:
 ```bash
 ./gradlew :example:run
 ```
 You can then browse at example home page at http://localhost:9090 and try out some queries.
 
-##### Logging
-
-
 ##### Graph Fetching
+...
 
-
-##### Caching
-
+##### Logging
+...
