@@ -144,6 +144,12 @@ class FilmApplication : Application<FilmConfiguration>() {
                         { daos.actor.findByFilmIds(daos.filmActor.findByFilmIds(it)) })
         ))
 
+        // The model defines a cycle, so set the actor properties after film is defined
+        // While models support cycles, fetching cycles isn't recommended
+        actor.properties = listOf(CollectionProperty(Actor::films, film, { it.id },
+                {(a, f) -> a.copy(films = f.toSet()) },
+                { daos.film.findByActorIds(daos.filmActor.findByActorIds(it)) }))
+
         return GraphFetcher(setOf(language, actor, film))
     }
 }

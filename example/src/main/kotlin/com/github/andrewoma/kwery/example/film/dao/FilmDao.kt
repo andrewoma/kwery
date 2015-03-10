@@ -27,6 +27,9 @@ import com.github.andrewoma.kwery.core.*
 
 import com.github.andrewoma.kwery.example.film.model.Film as F
 import java.time.temporal.ChronoUnit
+import com.github.andrewoma.kwery.example.film.model.FilmActor
+import com.github.andrewoma.kwery.example.film.model.Actor
+import com.github.andrewoma.kwery.example.film.model.Film
 
 object filmTable : Table<F, Int>("film", tableConfig), VersionedWithInt {
     // @formatter:off
@@ -49,4 +52,10 @@ object filmTable : Table<F, Int>("film", tableConfig), VersionedWithInt {
             value of Length, value of Rating, value of SpecialFeatures, version = value of Version)
 }
 
-class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.id }, "int", defaultId = 0)
+class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.id }, "int", defaultId = 0) {
+
+    fun findByActorIds(filmActors: Collection<FilmActor>): Map<Int, Collection<Film>> {
+        val films = findByIds(filmActors.map { it.id.filmId }.toSet())
+        return filmActors.groupBy { it.id.filmId }.mapValues { it.getValue().map { films.get(it.id.filmId)!! } }
+    }
+}

@@ -36,7 +36,7 @@ open class Type<T, ID> (
         val javaClass: Class<T>,
         val id: (T) -> ID,
         val fetch: (Collection<ID>) -> Map<ID, T>,
-        val properties: List<BaseProperty<*, *, *>> = listOf()
+        var properties: List<BaseProperty<*, *, *>> = listOf() // Mutable to support cycles
 ) {
     open fun supports(obj: Any?) = obj?.javaClass?.isAssignableFrom(javaClass)!!
 

@@ -41,7 +41,7 @@
         }
 
         h3 {
-            color: #666666;
+            color: #777777;
         }
     </style>
 </head>
@@ -54,6 +54,7 @@
 <ul>
     <li>Find all films: <a href="/api/films">/api/films</a></li>
     <li>Find 'G' rated films: <a href="/api/films?rating=G">/api/films?<span class="highlight">rating=G</span></a></li>
+    <li>Actors with a last name of Davis: <a href="/api/actors?lastName=Davis">/api/actors?<span class="highlight">lastName=Davis</span></a></li>
 </ul>
 <h3>Logging</h3>
 
@@ -73,8 +74,8 @@
 <ul>
     <li>Find 'G' rated films including the actors: <a href="/api/films?rating=G&fetch=actors">/api/films?rating=G&<span
             class="highlight">fetch=actors</span></a></li>
-    <li>Find 'G' rated films including the actors and languages: <a href="/api/films?rating=G&fetch=actors,language">/api/films?rating=G&<span
-            class="highlight">fetch=actors,language</span></a></li>
+    <li>Multiple levels (Actors with Films with Languages): <a href="/api/actors?fetch=films(language,originalLanguage)">/api/actors?<span
+            class="highlight">fetch=films(language,originalLanguage)</span></a></li>
 </ul>
 <p>See <a href="https://github.com/andrewoma/kwery/tree/master/example">https://github.com/andrewoma/kwery/tree/master/example</a>
     for more information</p>

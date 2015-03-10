@@ -159,6 +159,7 @@ Fetcher:
 * General review - code seems overly complicated for what it does
 * Review methods for specifying graphs
 * Make node specs `*` (all) and `**` (all descendants) nest within a root node
+* Clarify position on fetching cycles. Forbidden?
 
 Example:
 * Documentation

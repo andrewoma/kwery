@@ -22,33 +22,18 @@
 
 package com.github.andrewoma.kwery.example.film.model
 
-import java.time.LocalDateTime
 import java.time.Duration
-
-trait Version {
-    val version: Int
-}
-
-// TODO ... move AttributeSet logic to be external to the model itself into the Jackson filter definition
-enum class AttributeSet { Id All }
-
-trait HasAttributeSet {
-    fun attributeSet(): AttributeSet
-}
-
-trait AttributeSetByVersion : HasAttributeSet, Version {
-    override fun attributeSet() = if (this.version == 0) AttributeSet.Id else AttributeSet.All
-}
 
 data class Name(val first: String, val last: String)
 
-data class Actor(val id: Int = -1, val name: Name, override val version: Int = 1) : AttributeSetByVersion
+data class Actor(
+        val id: Int,
+        val name: Name,
+        override val version: Int = 1,
+        val films: Set<Film> = setOf()
+) : AttributeSetByVersion
 
 fun Actor(id: Int = 0) = Actor(id, Name("", ""), 0)
-
-enum class FilmRating {
-    G PG PG_13 R NC_17
-}
 
 data class Film (
         val id: Int,
@@ -65,16 +50,35 @@ data class Film (
 
 ) : AttributeSetByVersion
 
-fun Film(id: Int = 0): Film = Film(id, "", "", 0, Language(-1), null, Duration.ZERO,
-        null, version = 0)
+fun Film(id: Int = 0): Film = Film(id, "", "", 0, Language(-1), null, Duration.ZERO, null, version = 0)
 
-data class FilmActor(
-        val id: FilmActor.Id
+enum class FilmRating {
+    G PG PG_13 R NC_17
+}
 
-) {
+data class FilmActor(val id: FilmActor.Id) {
     data class Id(val filmId: Int, val actorId: Int)
 }
 
-data class Language (val id: Int, val name: String, override val version: Int = 1) : AttributeSetByVersion
+data class Language (
+        val id: Int,
+        val name: String,
+        override val version: Int = 1
+) : AttributeSetByVersion
 
 fun Language(id: Int = 0): Language = Language(id, "", 0)
+
+trait Version {
+    val version: Int
+}
+
+// TODO ... move AttributeSet logic to be external to the model itself into the Jackson filter definition
+enum class AttributeSet { Id All }
+
+trait HasAttributeSet {
+    fun attributeSet(): AttributeSet
+}
+
+trait AttributeSetByVersion : HasAttributeSet, Version {
+    override fun attributeSet() = if (this.version == 0) AttributeSet.Id else AttributeSet.All
+}
