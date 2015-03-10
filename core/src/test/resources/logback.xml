@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2015 Andrew O'Malley
   ~
@@ -21,18 +20,16 @@
   ~ THE SOFTWARE.
   -->
 
-<Configuration status="WARN">
-    <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-        </Console>
-    </Appenders>
-    <Loggers>
-        <Root level="info">
-            <AppenderRef ref="Console"/>
-        </Root>
-        <Logger name="com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor" level="trace" additivity="false">
-            <AppenderRef ref="Console"/>
-        </Logger>
-    </Loggers>
-</Configuration>
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="console" />
+    </root>
+
+    <logger name="com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor" level="debug"/>
+</configuration>

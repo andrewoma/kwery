@@ -89,7 +89,7 @@ project(':mapper') {
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
         testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
         testCompile 'org.apache.logging.log4j:log4j-core:2.1'
-        testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.1'
+        testCompile 'ch.qos.logback:logback-classic:1.1.2'
         testCompile 'org.hsqldb:hsqldb:2.3.2'
         testCompile project(':fetcher')
     }
@@ -100,7 +100,7 @@ project(':core') {
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
         testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
         testCompile 'org.apache.logging.log4j:log4j-core:2.1'
-        testCompile 'org.apache.logging.log4j:log4j-slf4j-impl:2.1'
+        testCompile 'ch.qos.logback:logback-classic:1.1.2'
         testCompile 'org.hsqldb:hsqldb:2.3.2'
         testCompile 'org.postgresql:postgresql:9.3-1102-jdbc4'
         testCompile project(':tomcat-pool')
@@ -125,6 +125,7 @@ project(':example') {
         compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.5.1'
         compile 'org.postgresql:postgresql:9.3-1102-jdbc4'
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'
+        testCompile 'io.dropwizard:dropwizard-testing:0.8.0'
     }
 
     shadowJar {
