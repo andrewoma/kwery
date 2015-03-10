@@ -32,6 +32,7 @@ import com.github.andrewoma.kwery.mapper.Column
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.example.film.model.FilmRating
 
 
 Path("/films")
@@ -40,11 +41,13 @@ public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetch
     Transaction Timed GET
     fun find(QueryParam("title") title: String?,
              QueryParam("releaseYear") releaseYear: Int?,
+             QueryParam("rating") rating: FilmRating?,
              QueryParam("fetch") root: String?): List<Film> {
 
         val filter = parameters(
                 filmTable.Title + title,
-                filmTable.ReleaseYear + releaseYear
+                filmTable.ReleaseYear + releaseYear,
+                filmTable.Rating + rating
         )
 
         return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet()).fetch(root)

@@ -48,6 +48,7 @@ import com.google.common.io.Resources
 import io.dropwizard.Application
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
+import io.dropwizard.assets.AssetsBundle
 
 class Daos(
         val actor: ActorDao,
@@ -86,6 +87,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         val fetcher = createFetcher(daos)
 
         val jersey = environment.jersey()
+        environment.jersey().setUrlPattern("/api/*");
         jersey.register(LoggingListener())
         jersey.register(TransactionListener())
         jersey.register(FilmResource(daos.film, fetcher))
@@ -117,6 +119,8 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     override fun initialize(bootstrap: Bootstrap<FilmConfiguration>) {
+        bootstrap.addBundle(AssetsBundle("/static", "/", "index.html", "static"))
+
         val mapper = bootstrap.getObjectMapper()
         mapper.registerModule(KotlinModule())
         mapper.registerModule(JSR310Module())
