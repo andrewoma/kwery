@@ -37,6 +37,9 @@ public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFe
 }
 ```
 
+For all of the wiring and configuration of daos, caches and the fetcher,
+see [FilmApplication.kt](src/main/kotlin/com/github/andrewoma/kwery/example/film/FilmApplication.kt).
+
 ##### Building & Running
 
 Assuming you've built Kwery as per [Building](../README.md#building), you can run the example via gradle:
@@ -100,3 +103,19 @@ where id in(unnest(array[1]));
 ```
 
 You can also set `log=none` to disable logging completely, or `log=all` for both statements and summaries.
+
+##### Caching
+
+The example caches Languages for a minute (after writing to the cache) using Guava's `LoadingCache`.
+
+You can verify the caching behaviour from the logs. If you make multiple calls to any
+method that graph fetches languages within a minute, you should only see a single call to
+`LanguageDao.findByIds` in the logs.
+
+Graph fetching works particularly well with caching as both fetch by ids. It is therefore
+trivial to check the cache first before hitting the database.
+
+Guava's caches also allow batch loading of misses, so it is often unnecessary to pre-warm caches.
+
+The example uses [Dao Listeners](../mapper/src/main/kotlin/com/github/andrewoma/kwery/mapper/listener/DaoListener.kt)
+to automatically invalidate the caches on update or delete. So you don't have to rely on expiry to consistency.

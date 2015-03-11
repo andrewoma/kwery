@@ -167,8 +167,6 @@ Fetcher:
 * Clarify position on fetching cycles. Forbidden?
 
 Example:
-* Documentation
-* Caching and automatic cache invalidation
 * Add create, update and delete
 
 Misc:

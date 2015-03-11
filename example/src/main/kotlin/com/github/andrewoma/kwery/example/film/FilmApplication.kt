@@ -49,15 +49,15 @@ import io.dropwizard.Application
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.dropwizard.assets.AssetsBundle
-
-class Daos(
-        val actor: ActorDao,
-        val language: LanguageDao,
-        val film: FilmDao,
-        val filmActor: FilmActorDao
-)
+import com.github.andrewoma.kwery.mapper.listener.*
+import com.github.andrewoma.kwery.core.Session
+import com.google.common.cache.*
+import java.util.concurrent.TimeUnit
+import org.slf4j.LoggerFactory
 
 class FilmApplication : Application<FilmConfiguration>() {
+    val log = LoggerFactory.getLogger(javaClass)
+
     override fun getName() = "film-app"
 
     override fun run(configuration: FilmConfiguration, environment: Environment) {
@@ -84,7 +84,9 @@ class FilmApplication : Application<FilmConfiguration>() {
 
         createAndLoadDb(environment, session, daos)
 
-        val fetcher = createFetcher(daos)
+        val caches = createCaches(daos)
+
+        val fetcher = createFetcher(daos, caches)
 
         val jersey = environment.jersey()
         environment.jersey().setUrlPattern("/api/*");
@@ -132,8 +134,45 @@ class FilmApplication : Application<FilmConfiguration>() {
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
     }
 
-    fun createFetcher(daos: Daos): GraphFetcher {
-        val language = Type(Language::id, { daos.language.findByIds(it) })
+    fun createCaches(daos: Daos): Caches {
+        // Create a Guava-backed cache that loads from the dao on demand
+        // For clusters this could be a distributed cache. Alternatively, the invalidation events below
+        // could be broadcast to the cluster
+        val caches = Caches(CacheBuilder.newBuilder()
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(object : CacheLoader<Int, Language>() {
+                    override fun load(key: Int) = daos.language.findById(key)
+                    override fun loadAll(keys: Iterable<Int>) = daos.language.findByIds(keys.toList())
+                }))
+
+
+        // Add a listener to invalidate on update
+        daos.language.addListener(PostCommitListener {
+            object : DeferredEventHandler() {
+                override fun invoke(session: Session) {
+                    for (event in events) handleEvent(event)
+                }
+
+                fun handleEvent(event: Event) {
+                    when (event) {
+                        is UpdateEvent, is DeleteEvent -> {
+                            log.info("Invalidating language cache for id ${event.id}")
+                            caches.language.invalidate(event.id)
+                        }
+                    }
+                }
+            }
+        })
+
+        return caches
+    }
+
+    fun createFetcher(daos: Daos, caches: Caches): GraphFetcher {
+        val language = Type(Language::id, {
+            log.info("Requesting objects from Language cache with ids: $it")
+            caches.language.getAll(it)
+        })
+
         val actor = Type(Actor::id, { daos.actor.findByIds(it) })
 
         val film = Type(Film::id, { daos.film.findByIds(it) }, listOf(
@@ -153,3 +192,12 @@ class FilmApplication : Application<FilmConfiguration>() {
         return GraphFetcher(setOf(language, actor, film))
     }
 }
+
+class Daos(
+        val actor: ActorDao,
+        val language: LanguageDao,
+        val film: FilmDao,
+        val filmActor: FilmActorDao
+)
+
+class Caches(val language: LoadingCache<Int, Language>)
