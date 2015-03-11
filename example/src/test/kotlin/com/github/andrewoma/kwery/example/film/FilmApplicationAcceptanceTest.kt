@@ -28,20 +28,22 @@ import io.dropwizard.testing.ResourceHelpers
 import io.dropwizard.testing.junit.DropwizardAppRule
 import javax.ws.rs.client.ClientBuilder
 import kotlin.test.assertEquals
-import org.glassfish.jersey.client.ClientResponse
 import com.github.andrewoma.kommon.lang.trimMargin
 
 class FilmApplicationAcceptanceTest {
     class object {
-        ClassRule
-        public val RULE: DropwizardAppRule<FilmConfiguration> =
+        ClassRule public val rule: DropwizardAppRule<FilmConfiguration> =
                 DropwizardAppRule(javaClass<FilmApplication>(), ResourceHelpers.resourceFilePath("dev.yml"))
     }
 
-    fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${RULE.getLocalPort()}${url}")
+    fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.getLocalPort()}${url}")
 
     test fun `Actors should find Scarlett`() {
-        val response = target("/api/actors").queryParam("firstName", "Scarlett").queryParam("lastName", "Damon").request().get(javaClass<String>())
+
+        val response = target("/api/actors")
+                .queryParam("firstName", "Scarlett")
+                .queryParam("lastName", "Damon")
+                .request().get(javaClass<String>())
 
         val expected = """
             [ {
@@ -58,7 +60,10 @@ class FilmApplicationAcceptanceTest {
     }
 
     test fun `Languages should find English`() {
-        val response = target("/api/languages").queryParam("name", "English").request().get(javaClass<String>())
+
+        val response = target("/api/languages")
+                .queryParam("name", "English")
+                .request().get(javaClass<String>())
 
         val expected = """
             [ {
@@ -71,7 +76,10 @@ class FilmApplicationAcceptanceTest {
     }
 
     test fun `Films should find Ace Goldfinger`() {
-        val response = target("/api/films").queryParam("title", "Ace Goldfinger").request().get(javaClass<String>())
+
+        val response = target("/api/films")
+                .queryParam("title", "Ace Goldfinger")
+                .request().get(javaClass<String>())
 
         val expected = """
             [ {

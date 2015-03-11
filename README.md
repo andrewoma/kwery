@@ -122,8 +122,8 @@ partial selects and joins as required.
 
 #### Example
 
-There's a working [example](example) showing how to expose a Kwery backed domain model
-using RESTful web services via DropWizard
+The [example module](example) demonstrates using Kwery
+to expose a simple model via RESTful web services via [DropWizard](http://dropwizard.io/).
 
 #### Status
 

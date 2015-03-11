@@ -43,10 +43,60 @@ Assuming you've built Kwery as per [Building](../README.md#building), you can ru
 ```bash
 ./gradlew :example:run
 ```
-You can then browse at example home page at http://localhost:9090 and try out some queries.
+You can then browse the example home page at [http://localhost:9090](http://localhost:9090) and try out some queries.
 
 ##### Graph Fetching
-...
+
+The resource `GET` apis accept a `fetch` parameter that allows the user to control how much
+data to fetch on each request. e.g.
+* Fetch all actors: `http://localhost:9090/api/actors`
+* Actors with films (with languages): `http://localhost:9090/api/actors?fetch=films(language,originalLanguage)`
+
+This pattern means has two main advantages:
+
+1. It removes the need for a proliferation of method names and DTOs returning different payloads
+2. Clients are much more likely to request the data they actually need rather than abuse existing methods
+
+With Kwery the pattern is trivial to implement - just pass the graph specification through to the fetcher
+as shown in the resource example above.
 
 ##### Logging
-...
+
+Logging is a core concern in Kwery and is designed to be used in production (usually dormant by default).
+
+The resource apis accept a `log` parameter that allows logging to be controlled on a per request basis.
+
+Setting `log=summary` produces a summary of all statements made during the request. e.g.
+
+`http://localhost:9090/api/actors?fetch=films(language,originalLanguage)&log=summary`
+```
+Executed 4 statements in 7.661 ms (closed in 12.597 ms) affecting 6,660 rows using 45.0% of request total (27.986 ms):
+                                 Calls   Exec  Close   Rows
+              FilmDao.findByIds      1  3.216  5.682    997  45.1%
+    FilmActorDao.findByActorIds      1  3.213  5.295  5,462  42.0%
+               ActorDao.findAll      1  0.603  0.944    200   7.5%
+          LanguageDao.findByIds      1  0.629  0.675      1   5.4%
+```
+
+Setting `log=statements` produces a summary of all statements made during the request. e.g.
+
+`http://localhost:9090/api/actors?fetch=films(language,originalLanguage)&log=statements`
+```
+select id, first_name, last_name, version
+from actor;
+Sucessfully executed ActorDao.findAll in 0.362 ms (0.550 ms). Rows affected: 200. TXN: 145
+
+select film_id, actor_id from film_actor where actor_id in(unnest(array[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 ... ]));
+Sucessfully executed FilmActorDao.findByActorIds in 2.643 ms (4.776 ms). Rows affected: 5462. TXN: 145
+
+select id, title, description, release_year, language_id, original_language_id, length, rating, special_features, version
+from film
+where id in(unnest(array[1,23,25,106,140,166,277,361,438,499,506,509,605,635,749,832,939,970,980,3,31,47,105 ... ]));
+Sucessfully executed FilmDao.findByIds in 2.270 ms (6.612 ms). Rows affected: 997. TXN: 145
+
+select id, name, version
+from language
+where id in(unnest(array[1]));
+```
+
+You can also set `log=none` to disable logging completely, or `log=all` for both statements and summaries.
