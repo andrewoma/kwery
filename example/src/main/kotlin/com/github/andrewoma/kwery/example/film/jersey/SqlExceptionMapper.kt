@@ -29,19 +29,22 @@ import java.sql.SQLException
 import io.dropwizard.jersey.errors.ErrorMessage
 import java.sql.SQLIntegrityConstraintViolationException
 import io.dropwizard.jersey.errors.LoggingExceptionMapper
+import com.github.andrewoma.kwery.mapper.OptimisticLockException
 
 Provider
 public class SqlExceptionMapper : LoggingExceptionMapper<SQLException>() {
 
     override fun toResponse(exception: SQLException): Response {
-        val response = super.toResponse(exception)
+        val response = super.toResponse(exception) // Logs exception
 
-        return when (exception) {
-            is SQLIntegrityConstraintViolationException ->
-                Response.status(Response.Status.CONFLICT)
-                        .type(MediaType.APPLICATION_JSON_TYPE)
-                        .entity(ErrorMessage(Response.Status.CONFLICT.getStatusCode(), exception.getMessage())).build()
-            else -> response
+        val code = when (exception) {
+            is SQLIntegrityConstraintViolationException -> Response.Status.CONFLICT.getStatusCode()
+            is OptimisticLockException -> 428 // http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#428
+            else -> null
         }
+
+        return if (code == null) response else Response.status(code)
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .entity(ErrorMessage(code, exception.getMessage())).build()
     }
 }

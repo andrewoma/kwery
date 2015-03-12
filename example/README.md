@@ -118,4 +118,62 @@ trivial to check the cache first before hitting the database.
 Guava's caches also allow batch loading of misses, so it is often unnecessary to pre-warm caches.
 
 The example uses [Dao Listeners](../mapper/src/main/kotlin/com/github/andrewoma/kwery/mapper/listener/DaoListener.kt)
-to automatically invalidate the caches on update or delete. So you don't have to rely on expiry to consistency.
+to automatically invalidate the caches on update or delete so you don't have to rely on expiry for consistency.
+
+##### CRUD Operations
+
+[LanguageResource](src/main/kotlin/com/github/andrewoma/kwery/example/film/resources/LanguageResource.kt) supports standard CRUD operations.
+[SqlExceptionMapper](/Users/andrew/dev/projects/kwery/example/src/main/kotlin/com/github/andrewoma/kwery/example/film/jersey/SqlExceptionMapper.kt)
+converts SQLExceptions to their RESTful counterparts.
+
+To create (returns the generated id):
+```
+$ curl -H "Content-Type: application/json" -X POST -d '{"id" : 0, "name" : "Chinese", "version" : 1 }' http://localhost:9090/api/languages
+10
+```
+Attempts to create a language with a name that already exists returns a 409 (Conflict):
+```
+$ curl -H "Content-Type: application/json" -X POST -d '{"id" : 0, "name" : "Chinese", "version" : 1 }' http://localhost:9090/api/languages
+{
+  "code" : 409,
+  "message" : "integrity constraint violation: unique constraint or index violation; LANGUAGE_NAME_IDX table: LANGUAGE",
+  "details" : null
+}
+```
+Update via PUT, ensuring you pass the version of the object you are updating (new version is returned):
+```
+$ curl -H "Content-Type: application/json" -X PUT -d '{"id" : 10, "name" : "Cantonese", "version" : 1 }' http://localhost:9090/api/languages/10
+2
+```
+Attempts to update the same version twice will return a 428 (Precondition Required):
+```
+$ curl -H "Content-Type: application/json" -X PUT -d '{"id" : 10, "name" : "Cantonese", "version" : 1 }' http://localhost:9090/api/languages/10
+{
+  "code" : 428,
+  "message" : "The same version (1) of language with id 10 has been updated by another transaction",
+  "details" : null
+}
+```
+Finally, a object can be deleted:
+```
+curl -H "Content-Type: application/json" -X DELETE http://localhost:9090/api/languages/10
+```
+Attempts to delete an object that is use via a foreign key with return 409 (Conflict):
+```
+$ curl -H "Content-Type: application/json" -X DELETE http://localhost:9090/api/languages/1
+{
+  "code" : 409,
+  "message" : "integrity constraint violation: foreign key no action; FK_FILM_LANGUAGE table: FILM",
+  "details" : null
+}
+```
+Attempts to delete an object that doesn't exist with return a 404.
+
+##### Cache invalidation
+
+With the update method above we can also verify cache invalidation:
+
+1. Run a query that fetches a language. e.g. `http://localhost:9090/api/films/1?fetch=language`
+2. Update the language name: `$ curl -H "Content-Type: application/json" -X PUT -d '{"id" : 1, "name" : "Was English", "version" : 1 }' http://localhost:9090/api/languages/1`
+3. Refresh the query - you should see `"Was English"` immediately without waiting for cache expiry.
+An invalidation message will also be written to the server logs for inspection.

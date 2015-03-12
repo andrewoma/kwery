@@ -55,4 +55,14 @@ public class LanguageResource(val languageDao: LanguageDao, override val fetcher
     fun create(language: Language): Int {
         return languageDao.insert(language.copy(version = 1), IdStrategy.Generated).id
     }
+
+    Transaction Timed PUT Path("/{id}")
+    fun update(PathParam("id") id: Int, language: Language): Int {
+        return languageDao.update(Language(id).copy(version = language.version), language).version
+    }
+
+    Transaction Timed DELETE Path("/{id}")
+    fun delete(PathParam("id") id: Int) {
+        if (languageDao.delete(id) == 0) throw NotFoundException("$id not found")
+    }
 }

@@ -22,4 +22,6 @@
 
 package com.github.andrewoma.kwery.mapper
 
-public class OptimisticLockException(message: String) : RuntimeException(message)
+import java.sql.SQLNonTransientException
+
+public class OptimisticLockException(message: String) : SQLNonTransientException(message)

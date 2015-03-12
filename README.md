@@ -156,6 +156,7 @@ Core:
 * Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
 * Allow StatementInterceptors to transform exceptions
+* Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
 
 DAO:
 * Bulk update by example?
@@ -166,9 +167,6 @@ Fetcher:
 * Review methods for specifying graphs
 * Make node specs `*` (all) and `**` (all descendants) nest within a root node
 * Clarify position on fetching cycles. Forbidden?
-
-Example:
-* Add Update and delete
 
 Misc:
 * Create a test module, factoring out common code like AbstractSessionTest
