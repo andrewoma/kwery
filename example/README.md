@@ -123,7 +123,7 @@ to automatically invalidate the caches on update or delete so you don't have to 
 ##### CRUD Operations
 
 [LanguageResource](src/main/kotlin/com/github/andrewoma/kwery/example/film/resources/LanguageResource.kt) supports standard CRUD operations.
-[SqlExceptionMapper](/Users/andrew/dev/projects/kwery/example/src/main/kotlin/com/github/andrewoma/kwery/example/film/jersey/SqlExceptionMapper.kt)
+[SqlExceptionMapper](src/main/kotlin/com/github/andrewoma/kwery/example/film/jersey/SqlExceptionMapper.kt)
 converts SQLExceptions to their RESTful counterparts.
 
 To create (returns the generated id):
