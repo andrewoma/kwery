@@ -32,6 +32,7 @@ import com.github.andrewoma.kwery.mapper.Column
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.mapper.IdStrategy
 
 
 Path("/languages")
@@ -48,5 +49,10 @@ public class LanguageResource(val languageDao: LanguageDao, override val fetcher
     Transaction Timed GET Path("/{id}")
     fun findById(PathParam("id") id: Int): Language {
         return languageDao.findById(id) ?: throw NotFoundException("$id not found")
+    }
+
+    Transaction Timed POST
+    fun create(language: Language): Int {
+        return languageDao.insert(language.copy(version = 1), IdStrategy.Generated).id
     }
 }

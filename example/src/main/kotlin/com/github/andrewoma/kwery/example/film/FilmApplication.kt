@@ -90,6 +90,7 @@ class FilmApplication : Application<FilmConfiguration>() {
 
         val jersey = environment.jersey()
         environment.jersey().setUrlPattern("/api/*");
+        jersey.register(SqlExceptionMapper())
         jersey.register(LoggingListener())
         jersey.register(TransactionListener())
         jersey.register(FilmResource(daos.film, fetcher))

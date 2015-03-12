@@ -155,6 +155,7 @@ Core:
 * Better support for Blobs and Clobs
 * Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
+* Allow StatementInterceptors to transform exceptions
 
 DAO:
 * Bulk update by example?
@@ -167,7 +168,7 @@ Fetcher:
 * Clarify position on fetching cycles. Forbidden?
 
 Example:
-* Add create, update and delete
+* Add Update and delete
 
 Misc:
 * Create a test module, factoring out common code like AbstractSessionTest

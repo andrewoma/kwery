@@ -8,7 +8,8 @@ create table actor (
 create table language (
   id      integer identity,
   name    varchar(255) not null,
-  version integer      not null
+  version integer      not null,
+  constraint language_name_idx unique (name)
 );
 
 create table film (
