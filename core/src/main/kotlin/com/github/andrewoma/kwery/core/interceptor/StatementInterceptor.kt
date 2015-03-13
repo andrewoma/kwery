@@ -38,8 +38,7 @@ public trait StatementInterceptor {
     public fun closed(statement: ExecutingStatement): Unit {
     }
 
-    public fun exception(statement: ExecutingStatement, e: Exception): Unit {
-    }
+    public fun exception(statement: ExecutingStatement, e: Exception): Exception = e
 }
 
 object noOpStatementInterceptor : StatementInterceptor

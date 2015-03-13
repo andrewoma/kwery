@@ -43,7 +43,6 @@ public class StatementInterceptorChain(val interceptors: List<StatementIntercept
         interceptors.forEach { it.closed(statement) }
     }
 
-    override fun exception(statement: ExecutingStatement, e: Exception) {
-        interceptors.forEach { it.exception(statement, e) }
-    }
+    override fun exception(statement: ExecutingStatement, e: Exception) =
+        interceptors.fold(e) { (result, interceptor) -> interceptor.exception(statement, result) }
 }

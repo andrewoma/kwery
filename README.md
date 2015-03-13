@@ -155,7 +155,6 @@ Core:
 * Better support for Blobs and Clobs
 * Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
-* Allow StatementInterceptors to transform exceptions
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
 
 DAO:

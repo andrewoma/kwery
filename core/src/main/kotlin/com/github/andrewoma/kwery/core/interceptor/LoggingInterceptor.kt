@@ -109,7 +109,8 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
 
     protected open fun additionalInfo(statement: ExecutingStatement): String = ""
 
-    override fun exception(statement: ExecutingStatement, e: Exception) {
+    override fun exception(statement: ExecutingStatement, e: Exception): Exception {
         statement.context = statement.context.copy(exception = e)
+        return e
     }
 }
