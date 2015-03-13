@@ -127,7 +127,7 @@ class GraphFetcherTest {
     test fun testFindMatchingPropertiesAll() {
         val fetcher = GraphFetcher(setOf(film.type))
         val properties = fetcher.findMatchingProperties(film.type, Node.all)
-        assertEquals(film.type.properties.size, properties.size)
+        assertEquals(film.type.properties.size(), properties.size())
         for ((property, node) in properties) {
             assertEquals(Node.all, node)
         }
@@ -146,21 +146,21 @@ class GraphFetcherTest {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         val result = fetcher.fetch(setOf(film2), "originalLanguage".graph)
 
-        assertEquals(1, result.size)
-        val film = result.first!!
+        assertEquals(1, result.size())
+        val film = result.first()
         assertNull(film.originalLanguage)
-        assertEquals(0, language.calls.size)
+        assertEquals(0, language.calls.size())
     }
 
     test fun testFetchPropertyCombinesSameType() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         val result = fetcher.fetch(setOf(film1), "language, originalLanguage".graph)
 
-        assertEquals(1, result.size)
-        val film = result.first!!
+        assertEquals(1, result.size())
+        val film = result.first()
         assertEquals(languageEnglish, film.language)
         assertEquals(languageJapanese, film.originalLanguage)
-        assertEquals(1, language.calls.size)
+        assertEquals(1, language.calls.size())
     }
 
     test fun testFetchPropertyCombinesMultipleObjects() {
@@ -169,7 +169,7 @@ class GraphFetcherTest {
         val graph = "language, originalLanguage".graph
         val result = fetcher.fetch(setOf(film1, film2), graph)
 
-        assertEquals(2, result.size)
+        assertEquals(2, result.size())
         val film1 = result[0]
         val film2 = result[1]
         assertEquals(languageEnglish, film1.language)
@@ -191,7 +191,7 @@ class GraphFetcherTest {
         println(sw)
         println("${sw.elapsed(TimeUnit.MILLISECONDS) * 1.0 / 10000} ms/op")
 
-        assertEquals(2, result.size)
+        assertEquals(2, result.size())
         val film1 = result[0]
         val film2 = result[1]
 
@@ -215,7 +215,7 @@ class GraphFetcherTest {
         continent.assertCalls(1)
     }
 
-    fun TrackedType<*, *>.assertCalls(expected: Int) = assertEquals(expected, this.calls.size)
+    fun TrackedType<*, *>.assertCalls(expected: Int) = assertEquals(expected, this.calls.size())
 
     test fun testCollectionProperties() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type))
