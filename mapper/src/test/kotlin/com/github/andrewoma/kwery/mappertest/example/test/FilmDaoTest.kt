@@ -119,7 +119,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         }
 
         // Check to see actors and language are populated
-        var fetched = dao.findByIds(ids).values().fetch(Node.all)
+        var fetched = dao.findByIds(ids).values().fetch(Node(Node.all))
         assertEquals(films.size(), fetched.size())
 
         for (film in fetched) {

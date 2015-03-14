@@ -33,6 +33,11 @@ class Value<T>(val get: () -> T, val set: (T) -> Unit) {
 public class GraphFetcher(val types: Set<Type<*, *>>) {
     private val typeCache: MutableMap<Class<*>, Type<*, *>> = ConcurrentHashMap()
     private val noType: Type<*, *> = Type({ it }, { mapOf() })
+    protected val debug: Boolean = false
+
+    inline protected fun debug(f: () -> Unit) {
+        if (debug) f()
+    }
 
     public fun <T> fetch(value: T, root: Node): T {
         return fetch(listOf(value), root).single()
@@ -52,20 +57,26 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         return result
     }
 
-    class ChildKey(val type: Type<Any?, Any?>, val node: Node) {
+    data class ChildKey(val type: Type<Any?, Any?>, val node: Node) {
         override fun equals(other: Any?) = other is ChildKey && this.type == other.type && this.node.children == other.node.children
         override fun hashCode() = this.type.hashCode() * 31 + this.node.children.hashCode()
     }
 
-    class Children(val valuesByTypeAndNode: MutableMap<ChildKey, MutableMap<Any?, Value<Any?>>> = hashMapOf(),
+    data class Children(val valuesByTypeAndNode: MutableMap<ChildKey, MutableList<Value<Any?>>> = hashMapOf(),
                    val idsByType: MutableMap<Type<Any?, Any?>, MutableSet<Any?>> = hashMapOf()
+
     )
 
     suppress("UNCHECKED_CAST")
     private fun <T> fetch(indent: String, values: Iterable<Value<T>>, root: Node, fetched: MutableMap<Type<Any?, Any?>, MutableMap<Any?, Any?>>) {
-        //        println("${indent}fetch(root=$root, values=$values)")
+        debug {
+            println("\n$indent ====================================================================================================")
+            println("$indent Fetch: node=$root")
+            println(values.stream().map { "$indent     $it" }.joinToString("\n"))
+        }
 
         val type = findMatchingType(values.first().get())
+        debug { println("$indent Matched to $type")}
         val properties = findMatchingProperties(type, root)
 
         fun fetchChildren(children: Children) {
@@ -75,7 +86,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
 
             val newIndent = indent + "    "
             for ((key, childValues) in children.valuesByTypeAndNode) {
-                fetch(newIndent, childValues.values(), key.node, fetched)
+                fetch(newIndent, childValues, key.node, fetched)
             }
         }
 
@@ -91,11 +102,22 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
                         }
                     }
                 }
+
+                debug {
+                    println("$indent Required properties:")
+                    for ((requiredType, ids) in required) {
+                        println("$indent     ${requiredType.javaClass.getSimpleName()}: $ids")
+                    }
+                }
+
                 return required
             }
 
             fun fetchRequired(required: Map<Type<Any?, Any?>, Set<Any?>>) {
                 for ((requiredType, ids) in required) {
+                    debug {
+                        println("$indent Fetching ${requiredType.javaClass.getSimpleName()} with ids: $ids")
+                    }
                     fetched.getOrPut(requiredType) { hashMapOf() }.putAll(requiredType.fetch(ids))
                 }
             }
@@ -112,12 +134,13 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
                         if (existing == null) continue // May happen if the object was deleted.
 
                         // Apply the fetched object to it's containing object
+                        debug { println("$indent Applying value: $existing") }
                         value.set(property.apply(value.get(), existing) as T)
 
                         // Collect children
                         if (!node.children.isEmpty() || node == Node.allDescendants) {
                             val child = Value({ property.property.get(value.get()) }, { value.set(property.apply(value.get(), it) as T) })
-                            children.valuesByTypeAndNode.getOrPut(ChildKey(property.type, node)) { hashMapOf() }.put(id, child)
+                            children.valuesByTypeAndNode.getOrPut(ChildKey(property.type, node)) { arrayListOf() }.add(child)
 
                             if (!(fetched[property.type]?.containsKey(id) ?: false)) {
                                 children.idsByType.getOrPut(property.type) { hashSetOf() }.add(id)
@@ -144,7 +167,6 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
             val deferredList: MutableList<Deferred> = arrayListOf()
 
             for ((property, node) in properties) {
-
                 // Collect all the ids
                 val required: MutableSet<Any?> = hashSetOf()
                 for (value in values) {
@@ -153,8 +175,10 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
                         required.add(id)
                     }
                 }
+                debug { println("$indent Required collection ${property.property.name} for ids: $required") }
 
                 val fetchedById = property.fetch(required)
+
                 val fetchedByType = fetched.getOrPut(property.type) { hashMapOf() }
                 for (collection in fetchedById.values()) {
                     for (obj in collection) {
@@ -169,13 +193,17 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
 
                     if (node.children.isEmpty() && node != Node.allDescendants) {
                         // Apply the fetched object to it's containing object
+                        debug { println("$indent     Applying value: $existing") }
                         value.set(property.apply(value.get(), existing as Collection<T>) as T)
                     } else {
+                        // Defer application until the child properties are fetched
+                        debug { println("$indent     Deferring application to $id of value: $existing") }
+
                         val childValues = existing.indices.map { i -> Value({ existing[i] }, { existing[i] = it }) }
                         deferredList.add(Deferred(property, value, childValues))
 
                         for (child in childValues) {
-                            children.valuesByTypeAndNode.getOrPut(ChildKey(property.type, node)) { hashMapOf() }.put(id, child)
+                            children.valuesByTypeAndNode.getOrPut(ChildKey(property.type, node)) { arrayListOf() }.add(child)
                             if (!(fetched[property.type]?.containsKey(id) ?: false)) {
                                 children.idsByType.getOrPut(property.type) { hashSetOf() }.add(id)
                             }
@@ -189,6 +217,8 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
             // Apply the sets now that children have been fetched
             for (deferred in deferredList) {
                 val existing = deferred.children.map { it.get() }
+
+                debug { println("$indent Applying deferred value: $existing") }
                 deferred.value.set(deferred.property.apply(deferred.value.get(), existing as Collection<T>) as T)
             }
         }
@@ -196,21 +226,22 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         fetchProperties(properties.filter { it.first is Property<*, *, *> } as List<Pair<Property<Any?, Any?, Any?>, Node>>)
         fetchCollectionProperties(properties.filter { it.first is CollectionProperty<*, *, *> } as List<Pair<CollectionProperty<Any?, Any?, Any?>, Node>>)
 
+        debug { println("$indent ====================================================================================================") }
     }
 
     fun findMatchingProperties(type: Type<*, *>, node: Node): Set<Pair<BaseProperty<*, *, *>, Node>> {
         val matches = hashSetOf<Pair<BaseProperty<*, *, *>, Node>>()
 
         for (property in type.properties) {
-            if (node == Node.all || node == Node.allDescendants) {
-                matches.add(property to node)
-            } else {
-                val match = node[property.property.name]
-                if (match != null) {
-                    matches.add(property to match)
-                }
+            val match = node[property.property.name]
+            if (match != null) {
+                matches.add(property to match)
             }
         }
+
+        val invalid = node.children.map { it.name }.toSet().subtract(type.properties.map { it.property.name })
+                .subtract(setOf(Node.all.name, Node.allDescendants.name))
+        require(invalid.isEmpty()) { "Undefined properties of type ${type.javaClass.getSimpleName()}: $invalid"}
 
         return matches
     }

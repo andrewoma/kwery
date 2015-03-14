@@ -26,12 +26,23 @@ import java.util.Stack
 import java.util.LinkedHashSet
 import java.util.StringTokenizer
 import kotlin.reflect.KMemberProperty
+import kotlin.properties.Delegates
 
-public data class Node(val name: String = "", val children: Set<Node> = setOf()) {
+private class AllDescendants : Node("**", setOf()) {
+    override fun get(name: String) = this
+    override fun toString() = name
+}
+
+public open data class Node protected (val name: String, val children: Set<Node>) {
     class object {
-        val empty = Node()
-        val all = Node("*")
-        val allDescendants = Node("**")
+        public val all: Node = Node("*", setOf())
+        public val allDescendants: Node = AllDescendants()
+
+        public fun create(name: String = "", children: Set<Node> = setOf()): Node {
+            val node = Node(name, children)
+            node.initialise()
+            return node
+        }
 
         fun parse(graph: String): Node {
             val nodes = Stack<Node>()
@@ -61,16 +72,22 @@ public data class Node(val name: String = "", val children: Set<Node> = setOf())
         }
     }
 
-    private fun initialise() {
+    fun initialise() {
         childrenByName = buildChildrenByName()
-        for (child in children) child.initialise()
+        for (child in children) {
+            if ((child == all || child == allDescendants) && allNode != allDescendants) {
+                allNode = child
+            }
+            child.initialise()
+        }
     }
 
-    private var childrenByName = buildChildrenByName()
+    private var childrenByName: Map<String, Node> = mapOf()
+    private var allNode: Node? = null
 
     private fun buildChildrenByName() = children.map { it.name to it }.toMap()
 
-    fun get(name: String) = childrenByName[name]
+    open fun get(name: String) = if (allNode != null) allNode else childrenByName[name]
 
     override fun toString(): String {
         val isRoot = name == ""
@@ -81,6 +98,7 @@ public data class Node(val name: String = "", val children: Set<Node> = setOf())
     }
 }
 
-public fun Node(vararg children: Node): Node = Node("", children.toSet())
+public fun Node(vararg children: Node): Node = Node.create("", children.toSet())
+public fun Node(name: String = "", vararg children: Node): Node = Node.create(name, children.toSet())
 
-public fun KMemberProperty<*, *>.node(vararg children: Node): Node = Node(this.name, children.toSet())
+public fun KMemberProperty<*, *>.node(vararg children: Node): Node = Node.create(this.name, children.toSet())

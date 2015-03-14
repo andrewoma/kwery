@@ -28,9 +28,7 @@ import kotlin.reflect.KMemberProperty
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertNotNull
-import java.util.concurrent.TimeUnit
-import org.junit.Ignore
-import com.github.andrewoma.kommon.util.StopWatch
+import kotlin.test.assertTrue
 
 class GraphFetcherTest {
 
@@ -92,7 +90,6 @@ class GraphFetcherTest {
     val filmOriginalLanguage = Property(Film::originalLanguage, language.type, { it.originalLanguage?.id }, {(f, l) -> f.copy(originalLanguage = l) })
 
     val filmActors = CollectionProperty(Film::actors, actor.type, { it.id }, {(f, a) -> f.copy(actors = a.toSet()) }, { ids ->
-        println("Fetching actors for films: $ids")
         actorsByFilm.filter { ids.contains(it.key) }
     })
 
@@ -114,6 +111,7 @@ class GraphFetcherTest {
 
     test fun testFindMatchingType() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
+
         assertEquals(film.type, fetcher.findMatchingType(films.values().first()))
         assertEquals(actor.type, fetcher.findMatchingType(actors.values().first()))
         assertEquals(language.type, fetcher.findMatchingType(languages.values().first()))
@@ -126,10 +124,21 @@ class GraphFetcherTest {
 
     test fun testFindMatchingPropertiesAll() {
         val fetcher = GraphFetcher(setOf(film.type))
-        val properties = fetcher.findMatchingProperties(film.type, Node.all)
+        val properties = fetcher.findMatchingProperties(film.type, Node(Node.all))
+
         assertEquals(film.type.properties.size(), properties.size())
         for ((property, node) in properties) {
             assertEquals(Node.all, node)
+        }
+    }
+
+    test fun testFindMatchingPropertiesAllDescendants() {
+        val fetcher = GraphFetcher(setOf(film.type))
+        val properties = fetcher.findMatchingProperties(film.type, Node(Node.allDescendants))
+
+        assertEquals(film.type.properties.size(), properties.size())
+        for ((property, node) in properties) {
+            assertEquals(Node.allDescendants, node)
         }
     }
 
@@ -178,18 +187,62 @@ class GraphFetcherTest {
         language.assertCalls(1)
     }
 
-    [Ignore] test fun testMultipleLevels() {
-        val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type))
-        val graph = "language(country(continent))".graph
+    test fun testMultipleLevels() {
+        testMultipleLevels("language(country(continent))".graph)
+    }
 
-        var result: List<Film> = listOf()
-        val sw = StopWatch().start()
-        for (i in 1..10000) {
-            result = fetcher.fetch(setOf(film1, film2), graph)
+    test fun testMultipleLevelsAllDescendant() {
+        testMultipleLevels("**".graph)
+    }
+
+    test fun testSingleLevel() {
+        val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type, continent.type))
+
+        // Should fetch language, original language and actors only
+        val result = fetcher.fetch(setOf(film1, film2), "*".graph)
+
+        assertEquals(2, result.size())
+        val film1 = result[0]
+        val film2 = result[1]
+
+        assertNotNull(film1.language.name)
+        assertTrue(film1.actors.isNotEmpty())
+
+        assertNotNull(film2.language.name)
+        assertTrue(film2.actors.isNotEmpty())
+
+        println(result.joinToString("\n"))
+        println(language.calls)
+
+        language.assertCalls(1)
+        actor.assertCalls(0)
+        country.assertCalls(0)
+        continent.assertCalls(0)
+    }
+
+    test fun testMultiLevelCollection() {
+        val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type, continent.type))
+
+        // Should fetch language, original language and actors only
+        val result = fetcher.fetch(setOf(film1, film2), "actors(language)".graph)
+
+        assertEquals(2, result.size())
+        for (film in result) {
+            assertTrue(film.actors.isNotEmpty())
+            for (actor in film.actors) {
+                assertTrue(actor.language.name.trim().isNotEmpty())
+            }
         }
-        sw.stop()
-        println(sw)
-        println("${sw.elapsed(TimeUnit.MILLISECONDS) * 1.0 / 10000} ms/op")
+
+        language.assertCalls(1)
+        actor.assertCalls(1)
+        country.assertCalls(0)
+        continent.assertCalls(0)
+    }
+
+    private fun testMultipleLevels(graph: Node) {
+        val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type, continent.type))
+        val result = fetcher.fetch(setOf(film1, film2), graph)
 
         assertEquals(2, result.size())
         val film1 = result[0]
@@ -203,12 +256,12 @@ class GraphFetcherTest {
         assertNotNull(film2.language.country?.name)
         assertNotNull(film2.language.country?.continent?.name)
 
-        //        println(result)
-        //        println(film.calls)
-        //        println(actor.calls)
-        //        println(language.calls)
-        //        println(country.calls)
-        //        println(continent.calls)
+        println(result)
+        println(film.calls)
+        println(actor.calls)
+        println(language.calls)
+        println(country.calls)
+        println(continent.calls)
 
         language.assertCalls(1)
         country.assertCalls(1)

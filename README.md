@@ -110,7 +110,7 @@ fun <T> Collection<T>.fetch(node: Node) = graphFetcher.fetch(this, node)
 
 // We can now efficiently fetch various graphs for any list of films
 // The following fetches the films with actors and languages in 3 queries
-val filmsWithAll = filmDao.findFilmsReleasedAfter(2010).fetch(Node.all)
+val filmsWithAll = filmDao.findFilmsReleasedAfter(2010).fetch(Node(Node.all))
 
 // The graph specification can also be built using properties
 val filmsWithActors = filmDao.findFilmsReleasedAfter(2010).fetch(Node(Film::actors.node()))
@@ -164,7 +164,6 @@ DAO:
 Fetcher:
 * General review - code seems overly complicated for what it does
 * Review methods for specifying graphs
-* Make node specs `*` (all) and `**` (all descendants) nest within a root node
 * Clarify position on fetching cycles. Forbidden?
 
 Misc:

@@ -63,7 +63,7 @@ fun readme() {
     val fetcher = GraphFetcher(setOf(language, actor, film))
 
     // Extension function to fetch the graph for any List using fetcher defined above
-    fun <T> List<T>.fetch(vararg nodes: Node) = fetcher.fetch(this, Node(children = nodes.toSet()))
+    fun <T> List<T>.fetch(vararg nodes: Node) = fetcher.fetch(this, Node.create("", nodes.toSet()))
 
     // We can now efficiently fetch various graphs for any list of films
     // The following fetches the films with actors and languages in 3 queries

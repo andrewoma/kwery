@@ -64,4 +64,6 @@ class CollectionProperty<C, T, ID>(
         id: (C) -> ID,
         val apply: (C, Collection<T>) -> C,
         val fetch: (Collection<ID>) -> Map<ID, Collection<T>>
-) : BaseProperty<C, T, ID>(id, type, property)
+) : BaseProperty<C, T, ID>(id, type, property) {
+    override fun toString() = property.name
+}
