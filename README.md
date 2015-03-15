@@ -152,25 +152,32 @@ To open in IntelliJ, just open the ``build.gradle`` file and IntelliJ will gener
 General cleanup and improve test coverage.
 
 Core:
-* Better support for Blobs and Clobs
+* Documentation
+* Better support for Blobs and Clobs (Streams)
 * Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
+* Add an easy way of using a pooled DataSource with a Session. e.g. `SessionFactory(dataSource).use { session -> ... }`
+* Automatic closing of statement parameters (arrays, streams, blobs, clobs)
 
 DAO:
+* Documentation
 * Bulk update by example?
 * Bulk delete by example?
 
 Fetcher:
+* Documentation
 * General review - code seems overly complicated for what it does
-* Review methods for specifying graphs
-* Clarify position on fetching cycles. Forbidden?
+
+Modules:
+* Dropwizard metrics integration
+* Jersey transaction/session integration (factor out from example)
+* Create a test module, factoring out common code like AbstractSessionTest
 
 Misc:
-* Create a test module, factoring out common code like AbstractSessionTest
 * Better IDE support for highlighting inline SQL. Vote for [KT-6610](https://youtrack.jetbrains.com/issue/KT-6610)
-* Create a guava backed statement cache for Tomcat's connection pool (standard one just caches the first _n_
-  statements and then ignores anything else).
+* Create a guava backed statement cache for Tomcat's connection pool?
+* Release to Maven Central
 
 #### License
 This project is licensed under a MIT license.
