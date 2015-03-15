@@ -106,14 +106,14 @@ val film = Type(Film::id, { filmDao.findByIds(it) }, listOf(
 val fetcher = GraphFetcher(setOf(language, actor, film))
 
 // Extension function to fetch the graph for any List using fetcher defined above
-fun <T> Collection<T>.fetch(node: Node) = graphFetcher.fetch(this, node)
+fun <T> Collection<T>.fetch(node: Node) = graphFetcher.fetch(this, Node(node))
 
 // We can now efficiently fetch various graphs for any list of films
 // The following fetches the films with actors and languages in 3 queries
-val filmsWithAll = filmDao.findFilmsReleasedAfter(2010).fetch(Node(Node.all))
+val filmsWithAll = filmDao.findFilmsReleasedAfter(2010).fetch(Node.all)
 
 // The graph specification can also be built using properties
-val filmsWithActors = filmDao.findFilmsReleasedAfter(2010).fetch(Node(Film::actors.node()))
+val filmsWithActors = filmDao.findFilmsReleasedAfter(2010).fetch(Film::actors.node())
 ```
 
 DAOs and graph fetching aim to cover 95% of a typical application data retrievals. For the
