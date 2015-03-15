@@ -76,9 +76,20 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             values (:id, :time_col, :date_col, :timestamp_col, :binary_col, :varchar_col, :blob_col, :clob_col, :array_col)
         """
 
-        session.update(sql, createParams(value) + mapOf("id" to "params"))
+        val params = mapOf(
+                "time_col" to value.time,
+                "date_col" to value.date,
+                "timestamp_col" to value.timestamp,
+                "binary_col" to value.binary.toByteArray(Charsets.UTF_8),
+                "varchar_col" to value.varchar,
+                "blob_col" to toBlob(value.blob),
+                "clob_col" to toClob(value.clob),
+                "array_col" to session.connection.createArrayOf("int", value.ints.copyToArray())
+        )
 
-        val literalSql = session.bindParameters(sql, createParams(value) + mapOf("id" to "literal"))
+        session.update(sql, params + mapOf("id" to "params"))
+
+        val literalSql = session.bindParameters(sql, params + mapOf("id" to "literal"))
         session.update(literalSql, mapOf())
 
         val byParams = findById("params")
@@ -87,17 +98,6 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEqualValues(byParams, value)
         assertEqualValues(byLiteral, value)
     }
-
-    private fun createParams(value: Value) = mapOf(
-            "time_col" to value.time,
-            "date_col" to value.date,
-            "timestamp_col" to value.timestamp,
-            "binary_col" to value.binary.toByteArray(Charsets.UTF_8),
-            "varchar_col" to value.varchar,
-            "blob_col" to toBlob(value.blob),
-            "clob_col" to toClob(value.clob),
-            "array_col" to session.connection.createArrayOf("int", value.ints.copyToArray())
-    )
 
     test fun `Allocate ids should contain a unique sequence of ids`() {
         if (!dialect.supportsAllocateIds) return

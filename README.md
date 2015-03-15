@@ -157,6 +157,7 @@ Core:
 * Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
+* Automatic closing of statement parameters (arrays, streams, blobs, clobs)
 
 DAO:
 * Documentation

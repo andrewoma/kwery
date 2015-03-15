@@ -32,8 +32,6 @@ import com.github.andrewoma.kwery.core.dialect.Dialect
 import java.util.ArrayList
 import com.github.andrewoma.kommon.lang.trimMargin
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
-import java.io.Closeable
-import java.sql.SQLFeatureNotSupportedException
 
 /**
  * DefaultSession is NOT thread safe. It seems the underlying JDBC drivers are patchy with thread safety
@@ -192,15 +190,8 @@ public class DefaultSession(override val connection: Connection,
             interceptor.exception(statement, e)
             throw e
         } finally {
-            try {
-                interceptor.closed(statement)
-            } finally {
-                try {
-                    if (options.closeParameters) closeParameters(parameters)
-                } finally {
-                    statement.statement?.close()
-                }
-            }
+            statement.statement?.close()
+            interceptor.closed(statement)
         }
     }
 
@@ -224,39 +215,6 @@ public class DefaultSession(override val connection: Connection,
         }
         for (i in values.size()..size - 1) {
             ps.setObject(i + 1, null)
-        }
-    }
-
-    private fun closeParameters(parametersList: List<Map<String, Any?>>) {
-        var exception: Exception? = null
-
-        for (parameters in parametersList) {
-            for (value in parameters.values()) {
-                try {
-                    closeParameter(value)
-                } catch(e: Exception) {
-                    if (exception == null) {
-                        exception = e
-                    }
-                }
-            }
-        }
-
-        // Attempt to close all parameters, but only throw the first exception encountered
-        if (exception != null) throw exception!!
-    }
-
-    fun closeParameter(value: Any?) {
-        try {
-            when (value) {
-                is Closeable -> value.close()
-                is java.sql.Array -> value.free()
-                is java.sql.Clob -> value.free()
-                is java.sql.NClob -> value.free()
-                is java.sql.Blob -> value.free()
-            }
-        } catch(e: SQLFeatureNotSupportedException) {
-            // Ignore ... e.g. Postgres JDBC doesn't support free
         }
     }
 }

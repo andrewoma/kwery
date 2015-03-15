@@ -25,7 +25,6 @@ package com.github.andrewoma.kwery.core
 abstract class StatementOptions(
         val name: String? = null,
         val applyNameToQuery: Boolean = false,
-        val closeParameters: Boolean = true,
         val usePreparedStatement: Boolean = true
 ) {
     abstract val cacheKey: Any?
@@ -34,33 +33,29 @@ abstract class StatementOptions(
 open class SelectOptions(
         name: String? = null,
         applyNameToQuery: Boolean = false,
-        closeParameters: Boolean = true,
         usePreparedStatement: Boolean = true
-) : StatementOptions(name, applyNameToQuery, closeParameters, usePreparedStatement) {
+) : StatementOptions(name, applyNameToQuery, usePreparedStatement) {
 
     override val cacheKey = listOf(name, applyNameToQuery)
 
     fun copy(name: String? = this.name,
              applyNameToQuery: Boolean = this.applyNameToQuery,
-             usePreparedStatement: Boolean = this.usePreparedStatement,
-             closeParameters: Boolean = this.closeParameters
-    ): SelectOptions = SelectOptions(name, applyNameToQuery, closeParameters, usePreparedStatement)
+             usePreparedStatement: Boolean = this.usePreparedStatement
+    ): SelectOptions = SelectOptions(name, applyNameToQuery, usePreparedStatement)
 }
 
 open class UpdateOptions(
         name: String? = null,
         applyNameToQuery: Boolean = false,
         usePreparedStatement: Boolean = true,
-        closeParameters: Boolean = true,
         val useGeneratedKeys: Boolean = false
-) : StatementOptions(name, applyNameToQuery, closeParameters, usePreparedStatement) {
+) : StatementOptions(name, applyNameToQuery, usePreparedStatement) {
 
     override val cacheKey = name
 
     fun copy(name: String? = this.name,
              applyNameToQuery: Boolean = this.applyNameToQuery,
              usePreparedStatement: Boolean = this.usePreparedStatement,
-             useGeneratedKeys: Boolean = this.useGeneratedKeys,
-             closeParameters: Boolean = this.closeParameters
-    ): UpdateOptions = UpdateOptions(name, applyNameToQuery, usePreparedStatement, closeParameters, useGeneratedKeys)
+             useGeneratedKeys: Boolean = this.useGeneratedKeys
+    ): UpdateOptions = UpdateOptions(name, applyNameToQuery, usePreparedStatement, useGeneratedKeys)
 }
