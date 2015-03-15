@@ -34,49 +34,14 @@ import org.postgresql.PGStatement
 import java.lang.reflect.Proxy
 import kotlin.test.assertTrue
 import com.github.andrewoma.kwery.tomcat.pool.StatementCache
-
-data class SessionInfo(val thread: String, val poolConnection: Long, val connection: Long)
-
-class SessionInfoDao(val session: Session) {
-    fun insertCurrent() {
-        val sql = "insert into sessions_test(thread, pool_connection, connection) values (:thread, :pool_connection, :connection)"
-        val params = mapOf("thread" to Thread.currentThread().getName(),
-                "pool_connection" to System.identityHashCode(session.connection),
-                "connection" to System.identityHashCode((session.connection as PooledConnection).getConnection()))
-        session.update(sql, params)
-    }
-}
-
-object postgresLoggingInterceptor : LoggingInterceptor() {
-    var serverPrepared = 0
-    var total = 0
-
-    fun clear() {
-        serverPrepared = 0
-        total = 0
-    }
-
-    override fun additionalInfo(statement: ExecutingStatement): String {
-        println()
-        val pgStatement = (Proxy.getInvocationHandler(statement.statement) as StatementCache.CachedStatement)
-                .getStatement() as PGStatement
-
-        total++
-
-        if (pgStatement.isUseServerPrepare()) {
-            serverPrepared++
-        }
-
-        return ". Connection: " + System.identityHashCode((statement.session.connection as PooledConnection).getConnection()) +
-                ". ServerPrepared=" + pgStatement.isUseServerPrepare()
-    }
-}
+import kotlin.test.assertNotNull
+import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 
 class ThreadLocalSessionTest {
     class object {
         var initialised = false
-        val threadLocalSession = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
-        val dao = SessionInfoDao(threadLocalSession) // Test shared dao singleton
+        val session = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
+        val dao = SessionInfoDao(session) // Test shared dao singleton
     }
 
     before fun setUp() {
@@ -90,26 +55,14 @@ class ThreadLocalSessionTest {
                     connection numeric(20)
                 )
             """
-            withSession { for (statement in sql.split(";")) it.update(statement) }
+            session.use { for (statement in sql.split(";")) session.update(statement) }
         }
 
-        withSession { it.update("delete from sessions_test") }
+        session.use { session.update("delete from sessions_test") }
     }
 
-    fun <R> withSession(f: (Session) -> R): R {
-        val connection = postgresDataSource.getConnection()
-        try {
-            val defaultSession = DefaultSession(connection, PostgresDialect(), postgresLoggingInterceptor)
-            return defaultSession.transaction {
-                f(defaultSession)
-            }
-        } finally {
-            connection.close()
-        }
-    }
-
-    fun getInsertedSessions() = withSession {
-        val sessions = it.select("select * from sessions_test") { row ->
+    fun getInsertedSessions() = session.use {
+        val sessions = session.select("select * from sessions_test") { row ->
             SessionInfo(row.string("thread"), row.long("pool_connection"), row.long("connection"))
         }
         println(sessions.joinToString("\n"))
@@ -171,5 +124,81 @@ class ThreadLocalSessionTest {
         // Should have a majority server side prepared (by default the Postgres driver waits
         // unit a statement is used 5 times before it prepares on the server)
         assertTrue(postgresLoggingInterceptor.serverPrepared.toDouble() / postgresLoggingInterceptor.total.toDouble() > .8)
+    }
+
+    test fun `Use should allocate a session automatically`() {
+        var count: Int? = null
+        val thread = Thread() {
+            count = session.use {
+                session.select("select count(*) c from sessions_test") { it.int("c") }
+            }.single()
+        }
+        thread.start()
+        thread.join()
+        assertNotNull(count)
+    }
+
+    test fun `Multiple datasources should be supported on same thread`() {
+        val sql = """
+            select character_value as name from information_schema.sql_implementation_info
+            where implementation_info_name = 'DBMS NAME'
+        """
+
+        val hsqlSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), name = "hsql")
+        assertEquals("HSQLDB", hsqlSession.use {
+            hsqlSession.select(sql) { it.string("name")}.single()
+        }.trim())
+
+        assertEquals("PostgreSQL", session.use {
+            session.select(sql) { it.string("name")}.single()
+        }.trim())
+    }
+
+    test fun `Use should rollback on exception`() {
+        try {
+            session.use {
+                SessionInfoDao(session).insertCurrent()
+                throw Exception()
+            }
+        } catch(e: Exception) {
+            assertEquals(0, getInsertedSessions().size())
+        }
+    }
+}
+
+data class SessionInfo(val thread: String, val poolConnection: Long, val connection: Long)
+
+class SessionInfoDao(val session: Session) {
+    fun insertCurrent() {
+        val sql = "insert into sessions_test(thread, pool_connection, connection) values (:thread, :pool_connection, :connection)"
+        val params = mapOf("thread" to Thread.currentThread().getName(),
+                "pool_connection" to System.identityHashCode(session.connection),
+                "connection" to System.identityHashCode((session.connection as PooledConnection).getConnection()))
+        session.update(sql, params)
+    }
+}
+
+object postgresLoggingInterceptor : LoggingInterceptor() {
+    var serverPrepared = 0
+    var total = 0
+
+    fun clear() {
+        serverPrepared = 0
+        total = 0
+    }
+
+    override fun additionalInfo(statement: ExecutingStatement): String {
+        println()
+        val pgStatement = (Proxy.getInvocationHandler(statement.statement) as StatementCache.CachedStatement)
+                .getStatement() as PGStatement
+
+        total++
+
+        if (pgStatement.isUseServerPrepare()) {
+            serverPrepared++
+        }
+
+        return ". Connection: " + System.identityHashCode((statement.session.connection as PooledConnection).getConnection()) +
+                ". ServerPrepared=" + pgStatement.isUseServerPrepare()
     }
 }

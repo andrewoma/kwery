@@ -156,7 +156,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
         return session.manualTransaction()
     }
 
-    public fun <R> use(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName, f: () -> R): R {
+    public fun <R> use(startTransaction: Boolean = true, f: () -> R): R {
         ThreadLocalSession.initialise(startTransaction, name)
         var commit = true
         try {
