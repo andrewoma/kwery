@@ -34,8 +34,32 @@ import kotlin.test.assertTrue
 class StatementInterceptorChainTest {
     val calls = arrayListOf<String>()
     val statement = ExecutingStatement(ThreadLocalSession(hsqlDataSource, HsqlDialect()), hashMapOf(), "sql", listOf(), SelectOptions())
+    val chain = StatementInterceptorChain(listOf(Interceptor("1"), Interceptor("2")))
 
     inner class Interceptor(val name: String) : StatementInterceptor {
+        override fun construct(statement: ExecutingStatement): ExecutingStatement {
+            calls.add("$name.executed")
+            return super.construct(statement)
+        }
+
+        override fun preparing(statement: ExecutingStatement): ExecutingStatement {
+            calls.add("$name.executed")
+            return super.preparing(statement)
+        }
+
+        override fun prepared(statement: ExecutingStatement) {
+            calls.add("$name.executed")
+        }
+
+        override fun closed(statement: ExecutingStatement) {
+            calls.add("$name.executed")
+        }
+
+        override fun exception(statement: ExecutingStatement, e: Exception): Exception {
+            calls.add("$name.executed")
+            return super.exception(statement, e)
+        }
+
         override fun executed(statement: ExecutingStatement) {
             calls.add("$name.executed")
         }
@@ -47,10 +71,32 @@ class StatementInterceptorChainTest {
         override fun exception(statement: ExecutingStatement, e: Exception) = MappedException()
     }
 
-    test fun `Each interceptor in chain should be invoked`() {
-        val chain = StatementInterceptorChain(listOf(Interceptor("1"), Interceptor("2")))
-        chain.executed(statement)
+    test fun `Each interceptor in chain should handle constructed`() {
+        assertChain { chain.construct(statement) }
+    }
 
+    test fun `Each interceptor in chain should handle preparing`() {
+        assertChain { chain.preparing(statement) }
+    }
+
+    test fun `Each interceptor in chain should handle prepared`() {
+        assertChain { chain.prepared(statement) }
+    }
+
+    test fun `Each interceptor in chain should handle executed`() {
+        assertChain { chain.executed(statement) }
+    }
+
+    test fun `Each interceptor in chain should handle exception`() {
+        assertChain { chain.exception(statement, Exception()) }
+    }
+
+    test fun `Each interceptor in chain should be closed`() {
+        assertChain { chain.closed(statement) }
+    }
+
+    fun assertChain(f: () -> Unit) {
+        f()
         assertEquals(listOf("1.executed", "2.executed"), calls)
     }
 

@@ -37,13 +37,9 @@ public trait Dialect {
     val supportsArrayBasedIn: Boolean
     val supportsAllocateIds: Boolean
 
-    fun arrayBasedIn(name: String): String {
-        throw UnsupportedOperationException()
-    }
+    fun arrayBasedIn(name: String): String
 
-    fun allocateIds(count: Int, sequence: String, columnName: String): String {
-        throw UnsupportedOperationException()
-    }
+    fun allocateIds(count: Int, sequence: String, columnName: String): String
 }
 
 val timestampFormat = object : ThreadLocal<SimpleDateFormat>() {
