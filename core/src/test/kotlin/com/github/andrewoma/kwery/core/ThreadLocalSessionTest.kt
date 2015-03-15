@@ -139,18 +139,13 @@ class ThreadLocalSessionTest {
     }
 
     test fun `Multiple datasources should be supported on same thread`() {
-        val sql = """
-            select character_value as name from information_schema.sql_implementation_info
-            where implementation_info_name = 'DBMS NAME'
-        """
-
         val hsqlSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), name = "hsql")
         assertEquals("HSQLDB", hsqlSession.use {
-            hsqlSession.select(sql) { it.string("name")}.single()
+            hsqlSession.select(dbNameSql) { it.string("name")}.single()
         }.trim())
 
         assertEquals("PostgreSQL", session.use {
-            session.select(sql) { it.string("name")}.single()
+            session.select(dbNameSql) { it.string("name")}.single()
         }.trim())
     }
 

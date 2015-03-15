@@ -79,3 +79,8 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
         }
     }
 }
+
+val dbNameSql = """
+    select character_value as name from information_schema.sql_implementation_info
+    where implementation_info_name = 'DBMS NAME'
+"""
