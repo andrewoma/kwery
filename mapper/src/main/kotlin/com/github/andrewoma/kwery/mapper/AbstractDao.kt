@@ -30,24 +30,6 @@ import java.util.HashMap
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 import com.github.andrewoma.kwery.mapper.listener.*
 
-public enum class IdStrategy {
-    /**
-     * Auto will automatically set the strategy to Generated or Explicit based on whether a
-     * non-default id value is provided in the value inserted
-     */
-    Auto
-
-    /**
-     * Forces the use of generated keys
-     */
-    Generated
-
-    /**
-     * Inserts the id from the value explicitly, not using generated keys
-     */
-    Explicit
-}
-
 public abstract class AbstractDao<T : Any, ID : Any>(
         val session: Session,
         val table: Table<T, ID>,
@@ -361,4 +343,22 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             id(table.rowMapper(table.idColumns, nf)(row))
         }
     }
+}
+
+public enum class IdStrategy {
+    /**
+     * Auto will automatically set the strategy to Generated or Explicit based on whether a
+     * non-default id value is provided in the value inserted
+     */
+    Auto
+
+    /**
+     * Forces the use of generated keys
+     */
+    Generated
+
+    /**
+     * Inserts the id from the value explicitly, not using generated keys
+     */
+    Explicit
 }

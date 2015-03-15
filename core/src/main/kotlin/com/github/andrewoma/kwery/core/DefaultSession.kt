@@ -32,6 +32,8 @@ import com.github.andrewoma.kwery.core.dialect.Dialect
 import java.util.ArrayList
 import com.github.andrewoma.kommon.lang.trimMargin
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
+import java.io.InputStream
+import java.io.Reader
 
 /**
  * DefaultSession is NOT thread safe. It seems the underlying JDBC drivers are patchy with thread safety
@@ -61,14 +63,17 @@ public class DefaultSession(override val connection: Connection,
 
             val result = arrayListOf<R>()
             val rs = ps.executeQuery()
-            var count = 0
-            interceptor.executed(statement)
-            while (rs.next()) {
-                result.add(mapper(Row(rs)))
-                count++
+            try {
+                var count = 0
+                interceptor.executed(statement)
+                while (rs.next()) {
+                    result.add(mapper(Row(rs)))
+                    count++
+                }
+                statement.copy(rowsCounts = listOf(count)) to result
+            } finally {
+                rs.close()
             }
-            rs.close()
-            statement.copy(rowsCounts = listOf(count)) to result
         }
     }
 
@@ -98,12 +103,16 @@ public class DefaultSession(override val connection: Connection,
             interceptor.executed(statement)
 
             val rs = ps.getGeneratedKeys()
-            val keys = ArrayList<K>(parametersList.size())
-            while (rs.next()) {
-                keys.add(f(Row(rs)))
+            try {
+                val keys = ArrayList<K>(parametersList.size())
+                while (rs.next()) {
+                    keys.add(f(Row(rs)))
+                }
+                require(keys.size() == parametersList.size()) { "Expected ${parametersList.size()} keys but received ${keys.size()}" }
+                statement.copy(rowsCounts = rowsAffected) to rowsAffected.zip(keys)
+            } finally {
+                rs.close()
             }
-            require(keys.size() == parametersList.size()) { "Expected ${parametersList.size()} keys but received ${keys.size()}" }
-            statement.copy(rowsCounts = rowsAffected) to rowsAffected.zip(keys)
         }
     }
 
@@ -122,9 +131,13 @@ public class DefaultSession(override val connection: Connection,
             val rowsAffected = ps.executeUpdate()
             interceptor.executed(statement)
             val rs = ps.getGeneratedKeys()
-            require(rs.next(), "No generated key received")
-            val keys = f(Row(rs))
-            statement.copy(rowsCounts = listOf(rowsAffected)) to (rowsAffected to keys)
+            try {
+                require(rs.next(), "No generated key received")
+                val keys = f(Row(rs))
+                statement.copy(rowsCounts = listOf(rowsAffected)) to (rowsAffected to keys)
+            } finally {
+                rs.close()
+            }
         }
     }
 
@@ -132,22 +145,31 @@ public class DefaultSession(override val connection: Connection,
         withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()
-            interceptor.executed(statement)
-            var count = 0
-            while (rs.next()) {
-                count++
-                f(Row(rs))
+            try {
+                interceptor.executed(statement)
+                var count = 0
+                while (rs.next()) {
+                    count++
+                    f(Row(rs))
+                }
+                statement.copy(rowsCounts = listOf(count)) to 1
+            } finally {
+                rs.close()
             }
-            rs.close()
-            statement.copy(rowsCounts = listOf(count)) to 1
         }
     }
 
-    override public fun bindParameters(sql: String, parameters: Map<String, Any?>): String {
+    override fun bindParameters(sql: String,
+                                parameters: Map<String, Any?>,
+                                closeParameters: Boolean, limit: Int,
+                                consumeStreams: Boolean): String {
+
         return replaceBindings(sql) { key ->
             val value = parameters[key]
             when (value) {
                 null -> "null"
+                is InputStream -> if (consumeStreams) dialect.bind(value) else "<InputStream>"
+                is Reader -> if (consumeStreams) dialect.bind(value) else "<Reader>"
                 is Collection<*> -> {
                     value.map { if (it == null) "null" else dialect.bind(it) }.joinToString(",")
                 }
@@ -200,10 +222,12 @@ public class DefaultSession(override val connection: Connection,
         for ((i, key) in statement.preparedParameters.withIndex()) {
             val value = parameters[key]
             require(value != null || parameters.containsKey(key)) { "Unknown query parameter: '$key'" }
-            if (value is Collection<*>) {
-                setInClause(ps, value, statement.inClauseSizes[key]!!)
-            } else {
-                ps.setObject(i + 1, value)
+            when (value) {
+                is TypedParameter -> ps.setObject(i + 1, value.value, value.sqlType)
+                is InputStream -> ps.setBinaryStream(i + 1, value)
+                is Reader -> ps.setCharacterStream(i + 1, value)
+                is Collection<*> -> setInClause(ps, value, statement.inClauseSizes[key]!!)
+                else -> ps.setObject(i + 1, value)
             }
         }
         return ps
@@ -218,6 +242,8 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 }
+
+public class TypedParameter(val value: Any?, val sqlType: Int)
 
 public data class ExecutingStatement (
         val session: Session,

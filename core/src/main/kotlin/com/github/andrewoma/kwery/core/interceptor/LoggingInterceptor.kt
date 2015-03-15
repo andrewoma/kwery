@@ -43,7 +43,9 @@ import com.github.andrewoma.kommon.util.StopWatch
  */
 // TODO - Add support for SQL Warnings
 open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
-                                     val infoQueryThresholdInMs: Long = 1000L) : StatementInterceptor {
+                                     val infoQueryThresholdInMs: Long = 1000L,
+                                     val parameterLimit: Int = -1
+) : StatementInterceptor {
     class object {
         public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
@@ -81,7 +83,7 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
         val sb = StringBuilder()
 
         for (parameters in statement.parametersList) {
-            sb.append("\n" + statement.session.bindParameters(statement.sql, parameters)).append(";")
+            sb.append("\n" + statement.session.bindParameters(statement.sql, parameters, false, parameterLimit, false)).append(";")
         }
         val batch = statement.parametersList.size().let { if (it > 1) "for batch of $it " else "" }
 

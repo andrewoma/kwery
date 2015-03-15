@@ -29,6 +29,8 @@ import java.math.BigDecimal
 import java.sql.Time
 import java.sql.Clob
 import java.sql.Blob
+import java.io.Reader
+import java.io.InputStream
 
 public class Row(val resultSet: ResultSet) {
     public fun obj(name: String): Any = requireNotNull(resultSet.getObject(name), name)
@@ -78,6 +80,12 @@ public class Row(val resultSet: ResultSet) {
 
     public fun blob(name: String): Blob = resultSet.getBlob(name)
     public fun blobOrNull(name: String): Blob? = resultSet.getBlob(name)
+
+    public fun characterStream(name: String): Reader = resultSet.getCharacterStream(name)
+    public fun characterStreamOrNull(name: String): Reader? = resultSet.getCharacterStream(name)
+
+    public fun binaryStream(name: String): InputStream = resultSet.getBinaryStream(name)
+    public fun binaryStreamOrNull(name: String): InputStream? = resultSet.getBinaryStream(name)
 
     suppress("UNCHECKED_CAST")
     public fun <T> array(name: String): List<T> {

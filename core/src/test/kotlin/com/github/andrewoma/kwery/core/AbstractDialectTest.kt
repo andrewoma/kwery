@@ -30,15 +30,26 @@ import java.sql.Date
 import java.sql.Timestamp
 import com.github.andrewoma.kommon.collection.plus
 import kotlin.test.assertEquals
+import java.io.ByteArrayInputStream
+import java.io.StringReader
+import kotlin.test.assertTrue
+import java.sql.SQLType
+import java.sql.JDBCType
+import java.sql.Types
+import org.junit.Before
+import java.sql.SQLFeatureNotSupportedException
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String
 
-    override fun afterSessionSetup() = initialise(dialect.javaClass.getName()) {
+    override fun afterSessionSetup() {
+        initialise(dialect.javaClass.getName()) {
 
-        for (statement in sql.split(";")) {
-            session.update(statement)
+            for (statement in sql.split(";")) {
+                session.update(statement)
+            }
         }
+        session.update("delete from dialect_test")
     }
 
     data class Value(val time: Time, val date: Date, val timestamp: Timestamp, val binary: String,
@@ -65,31 +76,45 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEquals(ids, actual.toSet())
     }
 
+    test fun `Bindings to blobs and clobs via streams`() {
+        try {
+            val now = System.currentTimeMillis()
+            val value = Value(Time(now), Date(now), Timestamp(now), "binary",
+                    "var'char", "blob", "clob", listOf(1, 2, 3))
+
+            val params = createParams(value) + mapOf(
+                    "id" to "streams",
+                    "blob_col" to ByteArrayInputStream(value.blob.toByteArray(Charsets.UTF_8)),
+                    "clob_col" to StringReader(value.clob)
+            )
+
+            assertEquals(1, session.update(insertSql, params))
+
+            val (blobStream, clobStream) = session.select("select blob_col, clob_col from dialect_test") { row ->
+                row.binaryStream("blob_col") to row.characterStream("clob_col")
+            }.single()
+
+            assertEquals(value.blob, String(blobStream.readBytes()))
+            assertEquals(value.clob, clobStream.readText())
+        } catch(e: SQLFeatureNotSupportedException) {
+            // TODO ... work out Postgres' blob/clob handling
+        }
+    }
+
+    //language=SQL
+    val insertSql = """
+            insert into dialect_test (id, time_col, date_col, timestamp_col, binary_col, varchar_col, blob_col, clob_col, array_col)
+            values (:id, :time_col, :date_col, :timestamp_col, :binary_col, :varchar_col, :blob_col, :clob_col, :array_col)
+        """
+
     test fun `Bindings to literals should return the same values when fetched`() {
         val now = System.currentTimeMillis()
         val value = Value(Time(now), Date(now), Timestamp(now), "binary",
                 "var'char", "blob", "clob", listOf(1, 2, 3))
 
-        //language=SQL
-        val sql = """
-            insert into dialect_test (id, time_col, date_col, timestamp_col, binary_col, varchar_col, blob_col, clob_col, array_col)
-            values (:id, :time_col, :date_col, :timestamp_col, :binary_col, :varchar_col, :blob_col, :clob_col, :array_col)
-        """
+        session.update(insertSql, createParams(value) + mapOf("id" to "params"))
 
-        val params = mapOf(
-                "time_col" to value.time,
-                "date_col" to value.date,
-                "timestamp_col" to value.timestamp,
-                "binary_col" to value.binary.toByteArray(Charsets.UTF_8),
-                "varchar_col" to value.varchar,
-                "blob_col" to toBlob(value.blob),
-                "clob_col" to toClob(value.clob),
-                "array_col" to session.connection.createArrayOf("int", value.ints.copyToArray())
-        )
-
-        session.update(sql, params + mapOf("id" to "params"))
-
-        val literalSql = session.bindParameters(sql, params + mapOf("id" to "literal"))
+        val literalSql = session.bindParameters(insertSql, createParams(value) + mapOf("id" to "literal"))
         session.update(literalSql, mapOf())
 
         val byParams = findById("params")
@@ -98,6 +123,17 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEqualValues(byParams, value)
         assertEqualValues(byLiteral, value)
     }
+
+    private fun createParams(value: Value) = mapOf(
+            "time_col" to value.time,
+            "date_col" to value.date,
+            "timestamp_col" to value.timestamp,
+            "binary_col" to value.binary.toByteArray(Charsets.UTF_8),
+            "varchar_col" to value.varchar,
+            "blob_col" to toBlob(value.blob),
+            "clob_col" to toClob(value.clob),
+            "array_col" to session.connection.createArrayOf("int", value.ints.copyToArray())
+    )
 
     test fun `Allocate ids should contain a unique sequence of ids`() {
         if (!dialect.supportsAllocateIds) return

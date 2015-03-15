@@ -36,19 +36,46 @@ trait Session {
 
     val defaultUpdateOptions: UpdateOptions
 
-    public fun <R> select(sql: String, parameters: Map<String, Any?> = mapOf(), options: SelectOptions = defaultSelectOptions, mapper: (Row) -> R): List<R>
+    public fun <R> select(sql: String,
+                          parameters: Map<String, Any?> = mapOf(),
+                          options: SelectOptions = defaultSelectOptions,
+                          mapper: (Row) -> R): List<R>
 
-    public fun update(sql: String, parameters: Map<String, Any?> = mapOf(), options: UpdateOptions = defaultUpdateOptions): Int
+    public fun update(sql: String,
+                      parameters: Map<String, Any?> = mapOf(),
+                      options: UpdateOptions = defaultUpdateOptions): Int
 
-    public fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions = defaultUpdateOptions): List<Int>
+    public fun batchUpdate(sql: String,
+                           parametersList: List<Map<String, Any?>>,
+                           options: UpdateOptions = defaultUpdateOptions): List<Int>
 
-    public fun <K> batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions = defaultUpdateOptions, f: (Row) -> K): List<Pair<Int, K>>
+    public fun <K> batchUpdate(sql: String,
+                               parametersList: List<Map<String, Any?>>,
+                               options: UpdateOptions = defaultUpdateOptions,
+                               f: (Row) -> K): List<Pair<Int, K>>
 
-    public fun <K> update(sql: String, parameters: Map<String, Any?> = mapOf(), options: UpdateOptions, f: (Row) -> K): Pair<Int, K>
+    public fun <K> update(sql: String,
+                          parameters: Map<String, Any?> = mapOf(),
+                          options: UpdateOptions, f: (Row) -> K): Pair<Int, K>
 
-    public fun stream(sql: String, parameters: Map<String, Any?> = mapOf(), options: SelectOptions = defaultSelectOptions, f: (Row) -> Unit): Unit
+    public fun stream(sql: String,
+                      parameters: Map<String, Any?> = mapOf(),
+                      options: SelectOptions = defaultSelectOptions,
+                      f: (Row) -> Unit): Unit
 
-    public fun bindParameters(sql: String, parameters: Map<String, Any?>): String
+    /**
+     * Binds parameters into a static SQL string.
+     *
+     * This can be used for logging, or (in the future) for direct execution bypassing prepared statements.
+     *
+     * Be careful not to introduce SQL injections if binding strings. The dialect will attempt to escape
+     * strings so they are safe, but it is probably not reliable for untrusted strings.
+     */
+    public fun bindParameters(sql: String,
+                              parameters: Map<String, Any?>,
+                              closeParameters: Boolean = true,
+                              limit: Int = -1,
+                              consumeStreams: Boolean = true): String
 
     public fun <R> transaction(f: (Transaction) -> R): R
 

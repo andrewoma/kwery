@@ -144,8 +144,12 @@ public class ThreadLocalSession(val dataSource: DataSource,
         return session.stream(sql, parameters, options, f)
     }
 
-    override fun bindParameters(sql: String, parameters: Map<String, Any?>): String {
-        return session.bindParameters(sql, parameters)
+    override fun bindParameters(sql: String,
+                                parameters: Map<String, Any?>,
+                                closeParameters: Boolean,
+                                limit: Int,
+                                consumeStreams: Boolean): String {
+        return session.bindParameters(sql, parameters, closeParameters, limit, consumeStreams)
     }
 
     override fun <R> transaction(f: (Transaction) -> R): R {

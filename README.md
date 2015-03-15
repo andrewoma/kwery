@@ -153,16 +153,16 @@ General cleanup and improve test coverage.
 
 Core:
 * Documentation
-* Better support for Blobs and Clobs (Streams)
 * Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
-* Automatic closing of statement parameters (arrays, streams, blobs, clobs)
+* Make statement cache configurable (so a bounded Guava cache can be used)
 
 DAO:
 * Documentation
 * Bulk update by example?
 * Bulk delete by example?
+* Make statement cache configurable (so a bounded Guava cache can be used)
 
 Fetcher:
 * Documentation
@@ -172,6 +172,10 @@ Modules:
 * Dropwizard metrics integration
 * Jersey transaction/session integration (factor out from example)
 * Create a test module, factoring out common code like AbstractSessionTest
+
+Robustness/Performance:
+* Soak test - check for leaking connections/resources over extended usage
+* Profile array based in clauses on large tables
 
 Misc:
 * Better IDE support for highlighting inline SQL. Vote for [KT-6610](https://youtrack.jetbrains.com/issue/KT-6610)
