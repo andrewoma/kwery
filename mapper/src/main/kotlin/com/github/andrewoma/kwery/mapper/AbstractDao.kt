@@ -97,9 +97,10 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>>): List<T> {
+        val name = "findByExample"
+
         if (exampleColumns.isEmpty()) return findAll(columns)
 
-        val name = "findByExample"
         val exampleMap = table.objectMap(session, example, exampleColumns, nf)
         val sql = sql(Triple(name, exampleColumns, columns)) {
             "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
@@ -118,8 +119,8 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     override fun update(oldValue: T, newValue: T, deltaOnly: Boolean): T {
         val name = "update"
-        check(id(oldValue) == id(newValue)) { "Attempt to update ${table.name} objects with different ids: ${id(oldValue)} ${id(newValue)}" }
-        check(table is Versioned<*>) { "table must be Versioned to use update. Use unsafeUpdate for unversioned tables" }
+        require(id(oldValue) == id(newValue)) { "Attempt to update ${table.name} objects with different ids: ${id(oldValue)} ${id(newValue)}" }
+        require(table is Versioned<*>) { "table must be Versioned to use update. Use unsafeUpdate for unversioned tables" }
 
         val versionColumn = table.versionColumn!!
         [suppress("UNCHECKED_CAST")]
@@ -188,6 +189,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     override fun unsafeUpdate(newValue: T): Int {
         val name = "unsafeUpdate"
+
         val sql = sql(name) {
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
         }
@@ -196,13 +198,13 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {
+        val name = "batchInsert"
         val generateKeys = isGeneratedKey(values.firstOrNull(), idStrategy)
 
         if (generateKeys && table.idColumns.size() > 1) {
             throw UnsupportedOperationException("Batch insert with generated compound keys is unsupported")
         }
 
-        val name = "batchInsert"
         val columns = if (generateKeys) table.dataColumns else table.allColumns
         val sql = sql(name) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
 
@@ -230,9 +232,9 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun insert(value: T, idStrategy: IdStrategy): T {
+        val name = "insert"
         val generateKeys = isGeneratedKey(value, idStrategy)
 
-        val name = "insert"
         val columns = if (generateKeys) table.dataColumns else table.allColumns
         val sql = sql(name to columns) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
         val parameters = table.objectMap(session, value, columns, nf)
@@ -253,13 +255,12 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>>): Map<ID, T> {
+        val name = "findByIds"
         if (ids.isEmpty()) return mapOf()
 
         if (ids.size() == 1) {
             return findById(ids.first())?.let { mapOf(id(it) to it) } ?: mapOf()
         }
-
-        val name = "findByIds"
 
         // TODO ... support compound ids
         if (table.idColumns.size() != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
@@ -298,14 +299,14 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
         val name = "batchUpdate"
-        check(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
+        require(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
         val versionColumn = table.versionColumn!!
         val versionCol = versionColumn.name
         val oldVersionParam = "old__${versionCol}"
 
         val updates = values.map {
             val (old, new) = it
-            check(id(old) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(old)} ${id(new)}" }
+            require(id(old) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(old)} ${id(new)}" }
 
             [suppress("UNCHECKED_CAST")]
             val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(old))
@@ -340,9 +341,9 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun allocateIds(count: Int): List<ID> {
-        check(session.dialect.supportsAllocateIds, "Dialect does not support allocate ids")
-        check(table.sequence != null, "Table sequence is not defined")
-        check(table.idColumns.size() == 1, "Compound ids are not supported")
+        require(session.dialect.supportsAllocateIds, "Dialect does not support allocate ids")
+        require(table.sequence != null, "Table sequence is not defined")
+        require(table.idColumns.size() == 1, "Compound ids are not supported")
 
         val sql = session.dialect.allocateIds(count, table.sequence!!, table.idColumns.first().name)
         return session.select(sql, mapOf(), selectOptions("allocateIds")) { row ->
