@@ -90,6 +90,19 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertTrue(dao.findByIds(listOf()).isEmpty())
     }
 
+    test fun `Find by ids with single id should return map`() {
+        val inserted = insert()
+        val found = dao.findByIds(listOf(id(inserted)))
+        assertContentEquals(mapOf(id(inserted) to inserted), found)
+    }
+
+    test fun `Find by ids with single unknown id should return empty map`() {
+        val id = id(insert())
+        dao.delete(id)
+        val found = dao.findByIds(listOf(id))
+        assertTrue(found.isEmpty())
+    }
+
     test fun `Find by ids should return values by id`() {
         if (dao.table.idColumns.size() > 1) return // Unsupported for now
 

@@ -254,7 +254,10 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     override fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>>): Map<ID, T> {
         if (ids.isEmpty()) return mapOf()
-        // TODO ... optimise case of single id by delegating to findById
+
+        if (ids.size() == 1) {
+            return findById(ids.first())?.let { mapOf(id(it) to it) } ?: mapOf()
+        }
 
         val name = "findByIds"
 
