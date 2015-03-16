@@ -36,8 +36,8 @@ class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDial
               timestamp_col timestamp,
               binary_col    bytea,
               varchar_col   varchar(1000),
-              blob_col      bytea,
-              clob_col      text,
+              blob_col      oid,
+              clob_col      text, -- Postgres doesn't have a CLOB type
               array_col     int array
             );
 

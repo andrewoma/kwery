@@ -32,12 +32,10 @@ import com.github.andrewoma.kommon.collection.plus
 import kotlin.test.assertEquals
 import java.io.ByteArrayInputStream
 import java.io.StringReader
-import kotlin.test.assertTrue
-import java.sql.SQLType
-import java.sql.JDBCType
-import java.sql.Types
-import org.junit.Before
 import java.sql.SQLFeatureNotSupportedException
+import com.github.andrewoma.kwery.core.dialect.PostgresDialect
+import org.postgresql.largeobject.LargeObjectManager
+import javax.sql.PooledConnection
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String
@@ -97,7 +95,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             assertEquals(value.blob, String(blobStream.readBytes()))
             assertEquals(value.clob, clobStream.readText())
         } catch(e: SQLFeatureNotSupportedException) {
-            // TODO ... work out Postgres' blob/clob handling
+            // Postgres doesn't support stream methods
         }
     }
 
@@ -168,28 +166,29 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         }.single()
     }
 
-    private fun toBlob(data: String) = try {
-        session.connection.createBlob().let { it.setBytes(1, data.toByteArray(Charsets.UTF_8)); it }
-    } catch(e: Exception) {
-        data.toByteArray(Charsets.UTF_8)
+    private fun toBlob(data: String): Any = when (session.dialect) {
+        is PostgresDialect -> {
+            val manager = ((session.connection as PooledConnection).getConnection() as org.postgresql.PGConnection).getLargeObjectAPI()
+            val oid = manager.createLO(LargeObjectManager.READ + LargeObjectManager.WRITE)
+            val obj = manager.open(oid, LargeObjectManager.WRITE)
+            obj.write(data.toByteArray(Charsets.UTF_8))
+            obj.close()
+            oid
+        }
+        else -> session.connection.createBlob().let { it.setBytes(1, data.toByteArray(Charsets.UTF_8)); it }
     }
 
-    private fun fromBlob(row: Row, column: String) = try {
-        row.blob(column).let { String(it.getBytes(1, it.length().toInt()), Charsets.UTF_8) }
-    } catch(e: Exception) {
-        String(row.bytes(column), Charsets.UTF_8)
+    private fun fromBlob(row: Row, column: String) =
+            row.blob(column).let { String(it.getBytes(1, it.length().toInt()), Charsets.UTF_8) }
+
+    private fun fromClob(row: Row, column: String): String = when (session.dialect) {
+        is PostgresDialect -> row.string(column)
+        else -> row.clob(column).let { it.getSubString(1, it.length().toInt()).trim() }
     }
 
-    private fun fromClob(row: Row, column: String) = try {
-        row.clob(column).let { it.getSubString(1, it.length().toInt()).trim() }
-    } catch(e: Exception) {
-        String(row.bytes(column), Charsets.UTF_8)
-    }
-
-    private fun toClob(data: String) = try {
-        session.connection.createClob().let { it.setString(1, data); it }
-    } catch(e: Exception) {
-        data
+    private fun toClob(data: String): Any = when (session.dialect) {
+        is PostgresDialect -> data
+        else -> session.connection.createClob().let { it.setString(1, data); it }
     }
 
     private fun assertEqualValues(actual: Value, expected: Value) {
