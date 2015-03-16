@@ -208,12 +208,14 @@ public class DefaultSession(override val connection: Connection,
             val (s, result) = f(statement, statement.statement as PreparedStatement)
             statement = s
             return result
-        } catch (e: SQLException) {
-            interceptor.exception(statement, e)
-            throw e
+        } catch (e: Exception) {
+            throw interceptor.exception(statement, e)
         } finally {
-            statement.statement?.close()
-            interceptor.closed(statement)
+            try {
+                interceptor.closed(statement)
+            } finally {
+                statement.statement?.close()
+            }
         }
     }
 
