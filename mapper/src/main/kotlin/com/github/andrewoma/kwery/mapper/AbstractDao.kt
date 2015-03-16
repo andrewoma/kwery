@@ -261,21 +261,24 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         // TODO ... support compound ids
         if (table.idColumns.size() != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
 
-        val (sql, idsParam) = if (session.dialect.supportsArrayBasedIn) {
+        val values = if (session.dialect.supportsArrayBasedIn) {
             val sql = sql(name to columns) {
                 "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} " +
                         session.dialect.arrayBasedIn("ids")
             }
-
-            sql to ids.copyToSqlArray()
+            val array = ids.copyToSqlArray()
+            try {
+                session.select(sql, mapOf("ids" to array), selectOptions(name), table.rowMapper(columns))
+            } finally {
+                array.free()
+            }
         } else {
             val sql = sql(name to columns) {
                 "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
             }
-            sql to ids.map { table.idMap(session, it, nf).values().first() }
+            session.select(sql, mapOf("ids" to ids), selectOptions(name), table.rowMapper(columns))
         }
 
-        val values = session.select(sql, mapOf("ids" to idsParam), selectOptions(name), table.rowMapper(columns))
         return values.map { id(it) to it }.toMap()
     }
 
