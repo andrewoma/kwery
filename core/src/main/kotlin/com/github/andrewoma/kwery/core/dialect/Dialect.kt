@@ -24,14 +24,15 @@ package com.github.andrewoma.kwery.core.dialect
 
 import java.text.SimpleDateFormat
 import java.sql.Blob
+import java.sql.Clob
 
 // TODO ... convert this to pass in a buffer for appending - improve performance in general
 public trait Dialect {
-    fun bind(value: Any): String
+    fun bind(value: Any, limit: Int): String
 
-    fun bindArray(value: java.sql.Array, prefix: String = "", postfix: String = "") =
+    fun bindArray(value: java.sql.Array, limit: Int, prefix: String = "", postfix: String = "") =
             (value.getArray() as Array<*>).stream().map {
-                if (it == null) "null" else bind(it)
+                if (it == null) "null" else bind(it, limit)
             }.joinToString(",", prefix, postfix)
 
     val supportsArrayBasedIn: Boolean
@@ -42,20 +43,35 @@ public trait Dialect {
     fun allocateIds(count: Int, sequence: String, columnName: String): String
 }
 
+fun String.truncate(limit: Int): String {
+    return if (limit == -1 || limit >= this.length()) this else this.take(limit)
+}
+
+fun ByteArray.truncate(limit: Int): ByteArray {
+    return if (limit == -1 || limit >= this.size()) this else {
+        val result = ByteArray(limit)
+        System.arraycopy(this, 0, result, 0, limit)
+        result
+    }
+}
+
 val timestampFormat = object : ThreadLocal<SimpleDateFormat>() {
     override fun initialValue() = SimpleDateFormat("''yyyy-MM-dd HH:mm:ss.SSS''")
 }
 
-fun standardBlob(blob: Blob): String {
-    val sb = StringBuilder("X'")
-    sb.append(javax.xml.bind.DatatypeConverter.printHexBinary(blob.getBytes(1, blob.length().toInt())))
-    sb.append("'")
-    return sb.toString()
+fun standardBlob(blob: Blob, limit: Int): String {
+    val length = if (limit == -1) blob.length().toInt() else Math.min(limit, blob.length().toInt())
+    return standardByteArray(blob.getBytes(1, length), limit)
 }
 
-fun standardByteArray(bytes: ByteArray): String {
+fun standardClob(clob: Clob, limit: Int): String {
+    val length = if (limit == -1) clob.length().toInt() else Math.min(limit, clob.length().toInt())
+    return clob.getSubString(1, length)
+}
+
+fun standardByteArray(bytes: ByteArray, limit: Int): String {
     val sb = StringBuilder("X'")
-    sb.append(javax.xml.bind.DatatypeConverter.printHexBinary(bytes))
+    sb.append(javax.xml.bind.DatatypeConverter.printHexBinary(bytes.truncate(limit)))
     sb.append("'")
     return sb.toString()
 }

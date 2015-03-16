@@ -172,6 +172,7 @@ Modules:
 * Dropwizard metrics integration
 * Jersey transaction/session integration (factor out from example)
 * Create a test module, factoring out common code like AbstractSessionTest
+* Separate out JDK 1.8 and build the rest against 1.7+
 
 Robustness/Performance:
 * Soak test - check for leaking connections/resources over extended usage

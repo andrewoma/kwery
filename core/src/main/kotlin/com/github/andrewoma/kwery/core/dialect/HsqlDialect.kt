@@ -30,15 +30,15 @@ import java.sql.Time
 
 public open class HsqlDialect : Dialect {
 
-    override fun bind(value: Any): String = when (value) {
-        is String -> escapeSingleQuotedString(value)
+    override fun bind(value: Any, limit: Int): String = when (value) {
+        is String -> escapeSingleQuotedString(value.truncate(limit))
         is Timestamp -> timestampFormat.get().format(value)
         is Date -> "'$value'"
         is Time -> "'$value'"
-        is java.sql.Array -> bindArray(value, "array[", "]")
-        is Blob -> standardBlob(value)
-        is ByteArray -> standardByteArray(value)
-        is Clob -> escapeSingleQuotedString(value.getSubString(1, value.length().toInt()))
+        is java.sql.Array -> bindArray(value, limit, "array[", "]")
+        is Blob -> standardBlob(value, limit)
+        is ByteArray -> standardByteArray(value, limit)
+        is Clob -> escapeSingleQuotedString(standardClob(value, limit))
         else -> value.toString()
     }
 

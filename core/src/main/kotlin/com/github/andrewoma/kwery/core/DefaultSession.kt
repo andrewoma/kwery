@@ -40,7 +40,7 @@ import java.io.Reader
  * on a single connection, so it seems a little pointless to make this safe.
  *
  * Typically, use a ThreadLocalSession in server environments. Alternatively, use a connection pool
- * and create a new session per transaction.
+ * and create a new session per transaction using SessionFactory.
  */
 public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
@@ -161,19 +161,20 @@ public class DefaultSession(override val connection: Connection,
 
     override fun bindParameters(sql: String,
                                 parameters: Map<String, Any?>,
-                                closeParameters: Boolean, limit: Int,
+                                closeParameters: Boolean,
+                                limit: Int,
                                 consumeStreams: Boolean): String {
 
         return replaceBindings(sql) { key ->
             val value = parameters[key]
             when (value) {
                 null -> "null"
-                is InputStream -> if (consumeStreams) dialect.bind(value) else "<InputStream>"
-                is Reader -> if (consumeStreams) dialect.bind(value) else "<Reader>"
+                is InputStream -> if (consumeStreams) dialect.bind(value, limit) else "<InputStream>"
+                is Reader -> if (consumeStreams) dialect.bind(value, limit) else "<Reader>"
                 is Collection<*> -> {
-                    value.map { if (it == null) "null" else dialect.bind(it) }.joinToString(",")
+                    value.map { if (it == null) "null" else dialect.bind(it, limit) }.joinToString(",")
                 }
-                else -> dialect.bind(value)
+                else -> dialect.bind(value, limit)
             }
         }
     }

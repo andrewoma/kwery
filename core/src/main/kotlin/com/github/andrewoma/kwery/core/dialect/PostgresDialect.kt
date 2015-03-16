@@ -29,13 +29,13 @@ import javax.xml.bind.DatatypeConverter
 
 public open class PostgresDialect : Dialect {
 
-    override fun bind(value: Any) = when (value) {
-        is String -> escapeSingleQuotedString(value)
+    override fun bind(value: Any, limit: Int) = when (value) {
+        is String -> escapeSingleQuotedString(value.truncate(limit))
         is Timestamp -> timestampFormat.get().format(value)
         is Date -> "'$value'"
         is Time -> "'$value'"
-        is java.sql.Array -> bindArray(value, "array[", "]")
-        is ByteArray -> "decode('${DatatypeConverter.printBase64Binary(value)}','base64')"
+        is java.sql.Array -> bindArray(value, limit, "array[", "]")
+        is ByteArray -> "decode('${DatatypeConverter.printBase64Binary(value.truncate(limit))}','base64')"
         else -> value.toString()
     }
 
