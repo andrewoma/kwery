@@ -58,7 +58,12 @@ trait Session {
                           parameters: Map<String, Any?> = mapOf(),
                           options: UpdateOptions, f: (Row) -> K): Pair<Int, K>
 
-    public fun stream(sql: String,
+    public fun <R> stream(sql: String,
+                      parameters: Map<String, Any?> = mapOf(),
+                      options: SelectOptions = defaultSelectOptions,
+                      f: (Stream<Row>) -> R): R
+
+    public fun forEach(sql: String,
                       parameters: Map<String, Any?> = mapOf(),
                       options: SelectOptions = defaultSelectOptions,
                       f: (Row) -> Unit): Unit

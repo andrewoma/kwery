@@ -34,6 +34,8 @@ import com.github.andrewoma.kommon.lang.trimMargin
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
 import java.io.InputStream
 import java.io.Reader
+import java.sql.ResultSet
+import kotlin.support.AbstractIterator
 
 /**
  * DefaultSession is NOT thread safe. It seems the underlying JDBC drivers are patchy with thread safety
@@ -141,7 +143,43 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun stream(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit): Unit {
+    override fun <R> stream(sql: String,
+                                    parameters: Map<String, Any?>,
+                                    options: SelectOptions,
+                                    f: (Stream<Row>) -> R): R {
+
+        return withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
+            bindParameters(parameters, statement)
+            val rs = ps.executeQuery()
+            try {
+                interceptor.executed(statement)
+                val resultSetStream = RowStream(rs)
+                val result = f(resultSetStream)
+                statement.copy(rowsCounts = listOf(resultSetStream.count)) to result
+            } finally {
+                rs.close()
+            }
+        }
+    }
+
+    private class RowStream(val rs: ResultSet) : Stream<Row> {
+        var count: Int = 0
+
+        override fun iterator(): Iterator<Row> {
+            return object : AbstractIterator<Row>() {
+                override fun computeNext() {
+                    if (rs.next()) {
+                        count++
+                        setNext(Row(rs))
+                    } else {
+                        done()
+                    }
+                }
+            }
+        }
+    }
+
+    override public fun forEach(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit): Unit {
         withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()

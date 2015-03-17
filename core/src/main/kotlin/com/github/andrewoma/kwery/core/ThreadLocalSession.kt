@@ -140,7 +140,11 @@ public class ThreadLocalSession(val dataSource: DataSource,
         return session.update(sql, parameters, options, f)
     }
 
-    override fun stream(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit) {
+    override fun forEach(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit) {
+        return session.forEach(sql, parameters, options, f)
+    }
+
+    override fun <R> stream(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Stream<Row>) -> R): R {
         return session.stream(sql, parameters, options, f)
     }
 

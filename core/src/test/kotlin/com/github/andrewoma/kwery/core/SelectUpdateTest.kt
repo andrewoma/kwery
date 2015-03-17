@@ -27,7 +27,7 @@ import java.sql.SQLException
 import kotlin.test.assertTrue
 import kotlin.test.assertEquals
 
-class SelectStreamUpdateTest : AbstractFilmSessionTest() {
+class SelectUpdateTest : AbstractFilmSessionTest() {
 
     test fun `insert with generated keys should fetch key`() {
         val max = maxId("actor_id", "actor")
@@ -78,17 +78,38 @@ class SelectStreamUpdateTest : AbstractFilmSessionTest() {
         assertEquals(2, selectActors(setOf(null, actor2.id, null, actor.id, null)).size())
     }
 
-    test fun `stream should call back for each row`() {
+    test fun `forEach should call back for each row`() {
         val actors = listOf(
                 insert(Actor("Kate", "Beckinsale")),
                 insert(Actor("Kate", "Winslet")),
                 insert(Actor("Tony", "Stark"))
         )
 
-        val fetched = hashSetOf<Int>()
         val ids = actors.map { it.id }.toSet()
-        session.stream("select actor_id from actor where actor_id in (:ids)", mapOf("ids" to ids)) { row ->
+
+        val fetched = hashSetOf<Int>()
+
+        val sql = "select actor_id from actor where actor_id in (:ids)"
+        session.forEach(sql, mapOf("ids" to ids)) { row ->
             fetched.add(row.int("actor_id"))
+        }
+
+        assertEquals(ids, fetched)
+    }
+
+    test fun `stream should collect all rows`() {
+        val actors = listOf(
+                insert(Actor("Kate", "Beckinsale")),
+                insert(Actor("Kate", "Winslet")),
+                insert(Actor("Tony", "Stark"))
+        )
+
+        val ids = actors.map { it.id }.toSet()
+
+        val sql = "select actor_id from actor where actor_id in (:ids)"
+
+        val fetched = session.stream(sql, mapOf("ids" to ids)) { stream ->
+            stream.map { it.int("actor_id") }.toSet()
         }
 
         assertEquals(ids, fetched)
