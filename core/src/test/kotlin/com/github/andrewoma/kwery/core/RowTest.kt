@@ -90,6 +90,8 @@ open class RowTest : AbstractSessionTest() {
             assertNull(row.clobOrNull("clob_col"))
             assertNull(row.blobOrNull("blob_col"))
             assertNull(row.bytesOrNull("binary_col"))
+            assertNull(row.characterStreamOrNull("clob_col"))
+            assertNull(row.binaryStreamOrNull("blob_col"))
             assertNotNull(row.array<Int>("array_col"))
         }
     }
@@ -110,8 +112,10 @@ open class RowTest : AbstractSessionTest() {
             assertEquals(LocalDateTime.of(2013, 11, 2, 12, 0, 2, 330000000), row.timestamp("timestamp_col").toLocalDateTime())
             assertEquals("varchar", row.string("varchar_col"))
             assertEquals("clob", row.clob("clob_col").getCharacterStream().readText())
+            assertEquals("clob", row.characterStream("clob_col").readText())
             assertEquals("AB", String(row.bytes("binary_col"), Charsets.US_ASCII).trim())
             assertEquals("BC", String(row.blob("blob_col").getBinaryStream().readBytes(), Charsets.US_ASCII))
+            assertEquals("BC", String(row.binaryStream("blob_col").readBytes(), Charsets.US_ASCII))
             assertEquals(listOf(1, 2), row.array<Int>("array_col"))
         }
     }
