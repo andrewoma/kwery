@@ -58,7 +58,6 @@ public class ThreadLocalSession(val dataSource: DataSource,
                 return hashMapOf()
             }
         }
-        private val log = LoggerFactory.getLogger(javaClass<ThreadLocalSession>())
 
         public fun initialise(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
@@ -69,14 +68,10 @@ public class ThreadLocalSession(val dataSource: DataSource,
         public fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
             val config = configs.get(name)
-
-            if (config == null) {
-                log.warn("A session has not been initialised for this thread")
-                return
-            }
+            check(config != null, "A session has not been initialised for this thread")
 
             try {
-                closeSession(commitTransaction, config)
+                closeSession(commitTransaction, config!!)
             } finally {
                 configs.remove(name)
             }
@@ -132,12 +127,12 @@ public class ThreadLocalSession(val dataSource: DataSource,
         return session.batchUpdate(sql, parametersList, options)
     }
 
-    override fun <K> batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
-        return session.batchUpdate(sql, parametersList, options, f)
+    override fun <K> insert(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
+        return session.insert(sql, parameters, options, f)
     }
 
-    override fun <K> update(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
-        return session.update(sql, parameters, options, f)
+    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
+        return session.batchInsert(sql, parametersList, options, f)
     }
 
     override fun forEach(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit) {

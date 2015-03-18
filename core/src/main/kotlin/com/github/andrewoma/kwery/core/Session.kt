@@ -45,18 +45,18 @@ trait Session {
                       parameters: Map<String, Any?> = mapOf(),
                       options: UpdateOptions = defaultUpdateOptions): Int
 
+    public fun <K> insert(sql: String,
+                          parameters: Map<String, Any?> = mapOf(),
+                          options: UpdateOptions = defaultUpdateOptions, f: (Row) -> K): Pair<Int, K>
+
     public fun batchUpdate(sql: String,
                            parametersList: List<Map<String, Any?>>,
                            options: UpdateOptions = defaultUpdateOptions): List<Int>
 
-    public fun <K> batchUpdate(sql: String,
+    public fun <K> batchInsert(sql: String,
                                parametersList: List<Map<String, Any?>>,
                                options: UpdateOptions = defaultUpdateOptions,
                                f: (Row) -> K): List<Pair<Int, K>>
-
-    public fun <K> update(sql: String,
-                          parameters: Map<String, Any?> = mapOf(),
-                          options: UpdateOptions, f: (Row) -> K): Pair<Int, K>
 
     public fun <R> stream(sql: String,
                       parameters: Map<String, Any?> = mapOf(),

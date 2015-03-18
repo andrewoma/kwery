@@ -57,7 +57,7 @@ class BatchUpdateTest : AbstractFilmSessionTest() {
         val sql = "insert into actor(first_name, last_name, last_update) " +
                 "values (:first_name, :last_name, :last_update)"
 
-        val list = session.batchUpdate(sql, actors.map { it.toMap() }) { row -> row.resultSet.getInt(1) }
+        val list = session.batchInsert(sql, actors.map { it.toMap() }) { row -> row.resultSet.getInt(1) }
         assertEquals(3, list.size())
         list.forEach {
             assertEquals(1, it.first)

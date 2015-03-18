@@ -209,7 +209,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val sql = sql(name) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
 
         val inserted = if (generateKeys) {
-            val list = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name),
+            val list = session.batchInsert(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name),
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) {(sum, value) -> sum + value }
@@ -240,7 +240,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val parameters = table.objectMap(session, value, columns, nf)
 
         val (count, inserted) = if (generateKeys) {
-            val (count, key) = session.update(sql, parameters, updateOptions(name), { table.rowMapper(table.idColumns, nf)(it) })
+            val (count, key) = session.insert(sql, parameters, updateOptions(name), { table.rowMapper(table.idColumns, nf)(it) })
             check(count == 1, "${name} failed to insert any rows")
             count to table.copy(value, table.idColumns(id(key)).toMap()) // Generated key
         } else {

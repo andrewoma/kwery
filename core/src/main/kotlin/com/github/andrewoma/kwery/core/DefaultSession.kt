@@ -93,7 +93,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <K> batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
+    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
         require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
 
         return withPreparedStatement(sql, parametersList, options.copy(useGeneratedKeys = true)) {(statement, ps) ->
@@ -127,7 +127,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun <K> update(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
+    override public fun <K> insert(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
         return withPreparedStatement(sql, listOf(parameters), options.copy(useGeneratedKeys = true)) {(statement, ps) ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -153,9 +153,9 @@ public class DefaultSession(override val connection: Connection,
             val rs = ps.executeQuery()
             try {
                 interceptor.executed(statement)
-                val resultSetStream = RowStream(rs)
-                val result = f(resultSetStream)
-                statement.copy(rowsCounts = listOf(resultSetStream.count)) to result
+                val rowStream = RowStream(rs)
+                val result = f(rowStream)
+                statement.copy(rowsCounts = listOf(rowStream.count)) to result
             } finally {
                 rs.close()
             }
