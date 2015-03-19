@@ -22,13 +22,13 @@
 
 package com.github.andrewoma.kwery.example.film
 
-import org.junit.ClassRule
-import org.junit.Test as test
+import com.github.andrewoma.kommon.lang.trimMargin
 import io.dropwizard.testing.ResourceHelpers
 import io.dropwizard.testing.junit.DropwizardAppRule
+import org.junit.ClassRule
 import javax.ws.rs.client.ClientBuilder
 import kotlin.test.assertEquals
-import com.github.andrewoma.kommon.lang.trimMargin
+import org.junit.Test as test
 
 class FilmApplicationAcceptanceTest {
     companion object {

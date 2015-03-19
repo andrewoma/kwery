@@ -22,9 +22,9 @@
 
 package com.github.andrewoma.kwery.example.film.resources
 
-import com.github.andrewoma.kwery.mapper.Column
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.fetcher.Node
+import com.github.andrewoma.kwery.mapper.Column
 
 trait Resource {
     val fetcher: GraphFetcher

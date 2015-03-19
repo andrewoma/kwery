@@ -22,11 +22,11 @@
 
 package com.github.andrewoma.kwery.example.film
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.dropwizard.Configuration
+import io.dropwizard.db.DataSourceFactory
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
-import com.fasterxml.jackson.annotation.JsonProperty
-import io.dropwizard.db.DataSourceFactory
 
 class FilmConfiguration : Configuration() {
     // TODO ... devise a more elegant solution. Tried Jackson's Kotlin module but

@@ -22,7 +22,8 @@
 
 package com.github.andrewoma.kwery.mappertest.example.test
 
-import com.github.andrewoma.kwery.mappertest.example.*
+import com.github.andrewoma.kwery.mappertest.example.FilmActor
+import com.github.andrewoma.kwery.mappertest.example.FilmActorDao
 import java.time.LocalDateTime
 import kotlin.properties.Delegates
 

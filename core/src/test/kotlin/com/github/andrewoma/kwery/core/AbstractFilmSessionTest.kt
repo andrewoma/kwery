@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.core
 
-import java.sql.Timestamp
 import org.junit.Assert.assertEquals
+import java.sql.Timestamp
 
 data class Actor(val firstName: String, val lastName: String?, val id: Int = 0, val lastUpdate: Timestamp = Timestamp(System.currentTimeMillis()))
 

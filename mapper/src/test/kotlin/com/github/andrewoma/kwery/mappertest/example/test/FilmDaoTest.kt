@@ -22,18 +22,18 @@
 
 package com.github.andrewoma.kwery.mappertest.example.test
 
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.fetcher.Node
+import com.github.andrewoma.kwery.fetcher.node
 import com.github.andrewoma.kwery.mappertest.example.*
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.properties.Delegates
-import org.junit.Test as test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlin.test.assertFalse
-import com.github.andrewoma.kwery.fetcher.GraphFetcher
-import com.github.andrewoma.kwery.fetcher.Node
-import com.github.andrewoma.kwery.fetcher.node
+import org.junit.Test as test
 
 class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
     var graphFetcher: GraphFetcher by Delegates.notNull()

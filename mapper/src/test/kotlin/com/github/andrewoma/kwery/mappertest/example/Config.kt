@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 import com.github.andrewoma.kwery.mapper.*
+import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 
 val domainDefaults: Map<Class<*>, *> = listOf(
         reifiedValue(FilmRating.G),

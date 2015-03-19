@@ -22,12 +22,12 @@
 
 package com.github.andrewoma.kwery.mappertest.example.test
 
-import kotlin.properties.Delegates
-import org.junit.Test as test
 import com.github.andrewoma.kwery.mappertest.example.*
+import kotlin.properties.Delegates
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+import org.junit.Test as test
 
 class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
     override var dao: ActorDao by Delegates.notNull()

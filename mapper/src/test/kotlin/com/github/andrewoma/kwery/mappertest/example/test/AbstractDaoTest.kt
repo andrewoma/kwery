@@ -22,17 +22,14 @@
 
 package com.github.andrewoma.kwery.mappertest.example.test
 
-import org.junit.Test as test
-import com.github.andrewoma.kwery.mapper.*
-import kotlin.test.assertTrue
-import org.junit.Before as before
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
+import com.github.andrewoma.kwery.mapper.AbstractDao
+import com.github.andrewoma.kwery.mapper.IdStrategy
+import com.github.andrewoma.kwery.mapper.OptimisticLockException
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
-import kotlin.test.fail
 import kotlin.properties.Delegates
+import kotlin.test.*
+import org.junit.Before as before
+import org.junit.Test as test
 
 abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : AbstractSessionTest() {
     abstract var dao: D

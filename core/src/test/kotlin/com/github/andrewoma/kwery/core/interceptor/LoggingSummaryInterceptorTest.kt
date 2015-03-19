@@ -22,9 +22,9 @@
 
 package com.github.andrewoma.kwery.core.interceptor
 
-import org.junit.Test as test
 import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor.Execution
 import kotlin.test.assertEquals
+import org.junit.Test as test
 
 class LoggingSummaryInterceptorTest {
 

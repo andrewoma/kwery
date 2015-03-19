@@ -22,18 +22,18 @@
 
 package com.github.andrewoma.kwery.example.film.jackson
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.core.JsonToken
-import java.net.URL
-import com.fasterxml.jackson.databind.ser.PropertyFilter
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.ser.PropertyWriter
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor
 import com.fasterxml.jackson.annotation.JsonFilter
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonToken
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.ser.PropertyFilter
+import com.fasterxml.jackson.databind.ser.PropertyWriter
 import com.github.andrewoma.kwery.example.film.model.AttributeSet
 import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
+import java.net.URL
 
 inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Sequence<T>) -> Unit) {
     val parser = this.getFactory().createParser(url)

@@ -22,15 +22,10 @@
 
 package com.github.andrewoma.kwery.core
 
-import java.sql.ResultSet
-import java.sql.Timestamp
-import java.sql.Date
-import java.math.BigDecimal
-import java.sql.Time
-import java.sql.Clob
-import java.sql.Blob
-import java.io.Reader
 import java.io.InputStream
+import java.io.Reader
+import java.math.BigDecimal
+import java.sql.*
 
 public class Row(val resultSet: ResultSet) {
     public fun obj(name: String): Any = requireNotNull(resultSet.getObject(name), name)

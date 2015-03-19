@@ -26,7 +26,7 @@ import com.github.andrewoma.kwery.core.ExecutingStatement
 
 public class StatementInterceptorChain(val interceptors: List<StatementInterceptor>) : StatementInterceptor {
     override fun construct(statement: ExecutingStatement) =
-            interceptors.fold(statement) {result, interceptor -> interceptor.construct(result) }
+            interceptors.fold(statement) { result, interceptor -> interceptor.construct(result) }
 
     override fun preparing(statement: ExecutingStatement) =
             interceptors.fold(statement) { result, interceptor -> interceptor.preparing(result) }
@@ -44,5 +44,5 @@ public class StatementInterceptorChain(val interceptors: List<StatementIntercept
     }
 
     override fun exception(statement: ExecutingStatement, e: Exception) =
-        interceptors.fold(e) { result, interceptor -> interceptor.exception(statement, result) }
+            interceptors.fold(e) { result, interceptor -> interceptor.exception(statement, result) }
 }

@@ -22,11 +22,11 @@
 
 package com.github.andrewoma.kwery.core.interceptor
 
+import com.github.andrewoma.kommon.util.StopWatch
+import com.github.andrewoma.kwery.core.ExecutingStatement
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import com.github.andrewoma.kwery.core.ExecutingStatement
-import java.util.concurrent.TimeUnit.*
-import com.github.andrewoma.kommon.util.StopWatch
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 /**
  * LoggingInterceptor logs full SQL statements to the logger provided with parameters bound inline.

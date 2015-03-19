@@ -22,18 +22,18 @@
 
 package com.github.andrewoma.kwery.mappertest
 
-import com.github.andrewoma.kwery.core.ManualTransaction
-import kotlin.properties.Delegates
-import com.github.andrewoma.kwery.core.Session
-import org.junit.Before as before
 import com.github.andrewoma.kwery.core.DefaultSession
-import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import org.junit.After as after
-import org.apache.tomcat.jdbc.pool.DataSource
-import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import org.junit.rules.TestName
-import org.junit.Rule as rule
+import com.github.andrewoma.kwery.core.ManualTransaction
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.Dialect
+import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import org.apache.tomcat.jdbc.pool.DataSource
+import org.junit.rules.TestName
+import kotlin.properties.Delegates
+import org.junit.After as after
+import org.junit.Before as before
+import org.junit.Rule as rule
 
 private val testDataSource: DataSource by Delegates.lazy {
     val dataSource = DataSource()

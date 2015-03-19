@@ -22,14 +22,14 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
-import kotlin.properties.Delegates
-import org.junit.Test as test
-import com.github.andrewoma.kwery.mapper.listener.*
-import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
-import kotlin.test.assertTrue
-import kotlin.test.assertEquals
 import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.mapper.listener.*
+import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
+import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
+import kotlin.properties.Delegates
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.junit.Test as test
 
 class DaoListenerPostCommitTest : AbstractSessionTest() {
     var dao: ActorDao by Delegates.notNull()

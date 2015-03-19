@@ -22,19 +22,14 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
-import org.junit.Test as test
-import com.github.andrewoma.kwery.mapper.listener.DeferredEventHandler
-import com.github.andrewoma.kwery.mapper.listener.InsertEvent
-import com.github.andrewoma.kwery.mapper.listener.UpdateEvent
-import com.github.andrewoma.kwery.mapper.listener.DeleteEvent
-import kotlin.properties.Delegates
-import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
-import kotlin.test.assertEquals
-import com.github.andrewoma.kwery.mapper.listener.PreCommitListener
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.Table
-import com.github.andrewoma.kwery.mapper.listener.Event
+import com.github.andrewoma.kwery.mapper.listener.*
+import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
+import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
+import kotlin.properties.Delegates
+import kotlin.test.assertEquals
+import org.junit.Test as test
 
 /**
  * Demonstrates a pre commit listener the saves audit records of all changes

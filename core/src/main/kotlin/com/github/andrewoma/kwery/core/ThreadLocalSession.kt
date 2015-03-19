@@ -22,12 +22,11 @@
 
 package com.github.andrewoma.kwery.core
 
-import java.sql.Connection
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
-import javax.sql.DataSource
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
-import org.slf4j.LoggerFactory
+import java.sql.Connection
+import javax.sql.DataSource
 
 /**
  * ThreadLocalSession creates sessions on a per thread basis. It allows services

@@ -22,9 +22,9 @@
 
 package com.github.andrewoma.kwery.core.dialect
 
-import java.sql.Timestamp
 import java.sql.Date
 import java.sql.Time
+import java.sql.Timestamp
 import javax.xml.bind.DatatypeConverter
 
 public open class PostgresDialect : Dialect {

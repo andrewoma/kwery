@@ -22,13 +22,13 @@
 
 package com.github.andrewoma.kwery.mapper
 
-import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.SelectOptions
-import java.util.concurrent.ConcurrentHashMap
-import com.github.andrewoma.kwery.core.UpdateOptions
-import java.util.HashMap
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
+import com.github.andrewoma.kwery.core.SelectOptions
+import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.core.UpdateOptions
 import com.github.andrewoma.kwery.mapper.listener.*
+import java.util.HashMap
+import java.util.concurrent.ConcurrentHashMap
 
 public abstract class AbstractDao<T : Any, ID : Any>(
         val session: Session,

@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.core
 
-import java.sql.Connection
 import com.github.andrewoma.kwery.core.dialect.Dialect
+import java.sql.Connection
 
 trait Session {
     public val currentTransaction: Transaction?
@@ -59,14 +59,14 @@ trait Session {
                                f: (Row) -> K): List<Pair<Int, K>>
 
     public fun <R> sequence(sql: String,
-                      parameters: Map<String, Any?> = mapOf(),
-                      options: SelectOptions = defaultSelectOptions,
-                      f: (Sequence<Row>) -> R): R
+                            parameters: Map<String, Any?> = mapOf(),
+                            options: SelectOptions = defaultSelectOptions,
+                            f: (Sequence<Row>) -> R): R
 
     public fun forEach(sql: String,
-                      parameters: Map<String, Any?> = mapOf(),
-                      options: SelectOptions = defaultSelectOptions,
-                      f: (Row) -> Unit): Unit
+                       parameters: Map<String, Any?> = mapOf(),
+                       options: SelectOptions = defaultSelectOptions,
+                       f: (Row) -> Unit): Unit
 
     /**
      * Binds parameters into a static SQL string.

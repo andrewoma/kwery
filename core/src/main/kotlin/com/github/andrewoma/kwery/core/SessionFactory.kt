@@ -22,7 +22,6 @@
 
 package com.github.andrewoma.kwery.core
 
-import java.sql.Connection
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor

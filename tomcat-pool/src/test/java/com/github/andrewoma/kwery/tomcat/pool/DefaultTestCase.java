@@ -43,9 +43,6 @@ import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.junit.After;
 import org.junit.Before;
 
-import java.util.HashMap;
-import java.util.Map;
-
 
 public abstract class DefaultTestCase {
 

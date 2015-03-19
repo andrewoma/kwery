@@ -22,13 +22,15 @@
 
 package com.github.andrewoma.kwery.example.film.dao
 
-import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.core.*
-
-import com.github.andrewoma.kwery.example.film.model.Name as N
-import com.github.andrewoma.kwery.example.film.model.Actor as A
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.example.film.model.Actor
 import com.github.andrewoma.kwery.example.film.model.FilmActor
+import com.github.andrewoma.kwery.mapper.AbstractDao
+import com.github.andrewoma.kwery.mapper.Table
+import com.github.andrewoma.kwery.mapper.Value
+import com.github.andrewoma.kwery.mapper.VersionedWithInt
+import com.github.andrewoma.kwery.example.film.model.Actor as A
+import com.github.andrewoma.kwery.example.film.model.Name as N
 
 
 object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedWithInt {

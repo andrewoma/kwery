@@ -23,37 +23,50 @@
 package com.github.andrewoma.kwery.example.film
 
 import com.codahale.metrics.health.HealthCheck
-
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-
 import com.github.andrewoma.kommon.collection.chunked
-
-import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import com.github.andrewoma.kwery.core.interceptor.*
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ThreadLocalSession
-
-import com.github.andrewoma.kwery.example.film.dao.*
-import com.github.andrewoma.kwery.example.film.jackson.*
-import com.github.andrewoma.kwery.example.film.jersey.*
-import com.github.andrewoma.kwery.example.film.model.*
-import com.github.andrewoma.kwery.example.film.resources.*
-import com.github.andrewoma.kwery.fetcher.*
-
+import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor
+import com.github.andrewoma.kwery.core.interceptor.StatementInterceptorChain
+import com.github.andrewoma.kwery.example.film.dao.ActorDao
+import com.github.andrewoma.kwery.example.film.dao.FilmActorDao
+import com.github.andrewoma.kwery.example.film.dao.FilmDao
+import com.github.andrewoma.kwery.example.film.dao.LanguageDao
+import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilter
+import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilterMixIn
+import com.github.andrewoma.kwery.example.film.jackson.withObjectStream
+import com.github.andrewoma.kwery.example.film.jersey.LoggingListener
+import com.github.andrewoma.kwery.example.film.jersey.SqlExceptionMapper
+import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
+import com.github.andrewoma.kwery.example.film.model.Actor
+import com.github.andrewoma.kwery.example.film.model.Film
+import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
+import com.github.andrewoma.kwery.example.film.model.Language
+import com.github.andrewoma.kwery.example.film.resources.ActorResource
+import com.github.andrewoma.kwery.example.film.resources.FilmResource
+import com.github.andrewoma.kwery.example.film.resources.LanguageResource
+import com.github.andrewoma.kwery.fetcher.CollectionProperty
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.fetcher.Property
+import com.github.andrewoma.kwery.fetcher.Type
 import com.github.andrewoma.kwery.mapper.Dao
-
+import com.github.andrewoma.kwery.mapper.listener.*
+import com.google.common.cache.CacheBuilder
+import com.google.common.cache.CacheLoader
+import com.google.common.cache.LoadingCache
 import com.google.common.io.Resources
 import io.dropwizard.Application
+import io.dropwizard.assets.AssetsBundle
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
-import io.dropwizard.assets.AssetsBundle
-import com.github.andrewoma.kwery.mapper.listener.*
-import com.github.andrewoma.kwery.core.Session
-import com.google.common.cache.*
-import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 
 class FilmApplication : Application<FilmConfiguration>() {
     val log = LoggerFactory.getLogger(javaClass)

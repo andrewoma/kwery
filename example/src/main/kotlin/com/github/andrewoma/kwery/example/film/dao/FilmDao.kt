@@ -22,14 +22,12 @@
 
 package com.github.andrewoma.kwery.example.film.dao
 
-import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.core.*
-
-import com.github.andrewoma.kwery.example.film.model.Film as F
-import java.time.temporal.ChronoUnit
-import com.github.andrewoma.kwery.example.film.model.FilmActor
-import com.github.andrewoma.kwery.example.film.model.Actor
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.example.film.model.Film
+import com.github.andrewoma.kwery.example.film.model.FilmActor
+import com.github.andrewoma.kwery.mapper.*
+import java.time.temporal.ChronoUnit
+import com.github.andrewoma.kwery.example.film.model.Film as F
 
 object filmTable : Table<F, Int>("film", tableConfig), VersionedWithInt {
     // @formatter:off

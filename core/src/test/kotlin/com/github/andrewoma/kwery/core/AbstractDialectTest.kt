@@ -22,19 +22,19 @@
 
 package com.github.andrewoma.kwery.core
 
-import javax.sql.DataSource
 import com.github.andrewoma.kwery.core.dialect.Dialect
-import org.junit.Test as test
-import java.sql.Time
-import java.sql.Date
-import java.sql.Timestamp
-import kotlin.test.assertEquals
-import java.io.ByteArrayInputStream
-import java.io.StringReader
-import java.sql.SQLFeatureNotSupportedException
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import org.postgresql.largeobject.LargeObjectManager
+import java.io.ByteArrayInputStream
+import java.io.StringReader
+import java.sql.Date
+import java.sql.SQLFeatureNotSupportedException
+import java.sql.Time
+import java.sql.Timestamp
+import javax.sql.DataSource
 import javax.sql.PooledConnection
+import kotlin.test.assertEquals
+import org.junit.Test as test
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String

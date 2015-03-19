@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.core
 
-import org.junit.Test as test
 import kotlin.test.assertEquals
+import org.junit.Test as test
 
 class ManualTransactionTest : AbstractFilmSessionTest() {
     override var startTransactionByDefault: Boolean = false

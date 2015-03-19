@@ -22,15 +22,15 @@
 
 package com.github.andrewoma.kwery.core.interceptor
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import com.github.andrewoma.kommon.util.StopWatch
 import com.github.andrewoma.kwery.core.ExecutingStatement
-import java.util.Collections
-import java.util.ArrayList
-import java.util.concurrent.TimeUnit
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.lang.Math.max
+import java.util.ArrayList
+import java.util.Collections
 import java.util.Formatter
+import java.util.concurrent.TimeUnit
 
 /**
  * LoggingSummaryInterceptor produces a summary report of all statements that have occurred on a

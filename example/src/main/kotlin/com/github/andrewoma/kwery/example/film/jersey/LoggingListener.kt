@@ -22,14 +22,14 @@
 
 package com.github.andrewoma.kwery.example.film.jersey
 
-import org.glassfish.jersey.server.monitoring.ApplicationEventListener
+import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor
 import org.glassfish.jersey.server.monitoring.ApplicationEvent
+import org.glassfish.jersey.server.monitoring.ApplicationEventListener
 import org.glassfish.jersey.server.monitoring.RequestEvent
 import org.glassfish.jersey.server.monitoring.RequestEventListener
-import javax.ws.rs.ext.Provider
-import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor
 import org.slf4j.LoggerFactory
-import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import javax.ws.rs.ext.Provider
 
 
 Provider

@@ -22,20 +22,20 @@
 
 package com.github.andrewoma.kwery.core
 
-import org.junit.Test as test
+import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import org.junit.Before as before
-import kotlin.test.assertEquals
+import com.github.andrewoma.kwery.tomcat.pool.StatementCache
+import org.postgresql.PGStatement
+import java.lang.reflect.Proxy
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.sql.PooledConnection
-import com.github.andrewoma.kwery.core.dialect.PostgresDialect
-import org.postgresql.PGStatement
-import java.lang.reflect.Proxy
-import kotlin.test.assertTrue
-import com.github.andrewoma.kwery.tomcat.pool.StatementCache
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import kotlin.test.assertTrue
+import org.junit.Before as before
+import org.junit.Test as test
 
 class ThreadLocalSessionTest {
     companion object {
@@ -141,11 +141,11 @@ class ThreadLocalSessionTest {
     test fun `Multiple datasources should be supported on same thread`() {
         val hsqlSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), name = "hsql")
         assertEquals("HSQLDB", hsqlSession.use {
-            hsqlSession.select(dbNameSql) { it.string("name")}.single()
+            hsqlSession.select(dbNameSql) { it.string("name") }.single()
         }.trim())
 
         assertEquals("PostgreSQL", session.use {
-            session.select(dbNameSql) { it.string("name")}.single()
+            session.select(dbNameSql) { it.string("name") }.single()
         }.trim())
     }
 

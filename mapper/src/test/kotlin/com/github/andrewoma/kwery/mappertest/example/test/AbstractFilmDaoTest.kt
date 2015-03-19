@@ -22,20 +22,12 @@
 
 package com.github.andrewoma.kwery.mappertest.example.test
 
-import com.github.andrewoma.kwery.mappertest.example.Actor
-import kotlin.properties.Delegates
-import com.github.andrewoma.kwery.mappertest.example.ActorDao
-import com.github.andrewoma.kwery.mappertest.example.Name
-import java.time.LocalDateTime
-import com.github.andrewoma.kwery.mappertest.example.Language
-import com.github.andrewoma.kwery.mappertest.example.LanguageDao
-import com.github.andrewoma.kwery.mappertest.example.Film
-import com.github.andrewoma.kwery.mappertest.example.FilmDao
-import java.time.Duration
-import com.github.andrewoma.kwery.mappertest.example.FilmRating
-import com.github.andrewoma.kwery.mapper.AbstractDao
-import com.github.andrewoma.kwery.mappertest.example.FilmActorDao
 import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.mapper.AbstractDao
+import com.github.andrewoma.kwery.mappertest.example.*
+import java.time.Duration
+import java.time.LocalDateTime
+import kotlin.properties.Delegates
 
 abstract class AbstractFilmDaoTest<T, ID, D : AbstractDao<T, ID>> : AbstractDaoTest<T, ID, D>() {
 

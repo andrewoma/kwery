@@ -22,19 +22,17 @@
 
 package com.github.andrewoma.kwery.example.film.jersey
 
+import com.github.andrewoma.kwery.core.ThreadLocalSession
 import org.glassfish.jersey.server.model.ResourceMethod
 import org.glassfish.jersey.server.monitoring.ApplicationEvent
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener
 import org.glassfish.jersey.server.monitoring.RequestEvent
 import org.glassfish.jersey.server.monitoring.RequestEventListener
-
-import javax.ws.rs.ext.Provider
-import java.lang.reflect.Method
-
-import com.github.andrewoma.kwery.core.ThreadLocalSession
-import java.lang.annotation.RetentionPolicy
-import java.lang.annotation.Retention
 import org.slf4j.LoggerFactory
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import java.lang.reflect.Method
+import javax.ws.rs.ext.Provider
 
 Retention(RetentionPolicy.RUNTIME)
 public annotation class Transaction

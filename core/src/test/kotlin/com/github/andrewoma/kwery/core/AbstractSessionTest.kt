@@ -22,14 +22,14 @@
 
 package com.github.andrewoma.kwery.core
 
-import kotlin.properties.Delegates
-import org.junit.Before as before
-import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import org.junit.After as after
-import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import javax.sql.DataSource
 import com.github.andrewoma.kwery.core.dialect.Dialect
+import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import org.junit.rules.TestName
+import javax.sql.DataSource
+import kotlin.properties.Delegates
+import org.junit.After as after
+import org.junit.Before as before
 import org.junit.Rule as rule
 
 abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, val dialect: Dialect = HsqlDialect()) {

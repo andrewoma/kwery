@@ -22,10 +22,10 @@
 
 package com.github.andrewoma.kwery.core
 
-import org.junit.Test as test
 import java.sql.SQLException
-import kotlin.test.assertTrue
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import org.junit.Test as test
 
 class SelectUpdateTest : AbstractFilmSessionTest() {
 

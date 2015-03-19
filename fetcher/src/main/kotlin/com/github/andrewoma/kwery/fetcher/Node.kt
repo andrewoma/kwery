@@ -22,11 +22,10 @@
 
 package com.github.andrewoma.kwery.fetcher
 
-import java.util.Stack
 import java.util.LinkedHashSet
+import java.util.Stack
 import java.util.StringTokenizer
 import kotlin.reflect.KMemberProperty
-import kotlin.properties.Delegates
 
 private class AllDescendants : Node("**", setOf()) {
     override fun get(name: String) = this

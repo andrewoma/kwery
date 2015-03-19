@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.core
 
-import org.junit.Test as test
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
+import org.junit.Test as test
 
 class ReadmeExamplesTest : AbstractFilmSessionTest() {
     test fun readmeExamples() {

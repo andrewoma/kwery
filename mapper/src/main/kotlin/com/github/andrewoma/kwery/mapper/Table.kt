@@ -22,13 +22,13 @@
 
 package com.github.andrewoma.kwery.mapper
 
-import kotlin.reflect.KMemberProperty
+import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
+import com.github.andrewoma.kwery.core.Row
+import com.github.andrewoma.kwery.core.Session
 import java.util.LinkedHashSet
 import kotlin.properties.Delegates
-import com.github.andrewoma.kwery.core.Row
-import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 import kotlin.properties.ReadOnlyProperty
-import com.github.andrewoma.kwery.core.Session
+import kotlin.reflect.KMemberProperty
 
 public data class Column<T, R>(val property: (T) -> R,
                                val defaultValue: R = null,
@@ -84,10 +84,10 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
             val instance: T
             try {
                 instance = create(object : Value<T> {
-                                override fun <R> of(column: Column<T, R>): R {
-                                    return column.defaultValue
-                                }
-                            })
+                    override fun <R> of(column: Column<T, R>): R {
+                        return column.defaultValue
+                    }
+                })
             } catch(e: NullPointerException) {
                 throw RuntimeException("A table field is declared as nullable but the mapped field is non-null?", e)
             }

@@ -63,7 +63,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
     }
 
     data class Children(val valuesByTypeAndNode: MutableMap<ChildKey, MutableList<Value<Any?>>> = hashMapOf(),
-                   val idsByType: MutableMap<Type<Any?, Any?>, MutableSet<Any?>> = hashMapOf()
+                        val idsByType: MutableMap<Type<Any?, Any?>, MutableSet<Any?>> = hashMapOf()
 
     )
 
@@ -76,7 +76,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         }
 
         val type = findMatchingType(values.first().get())
-        debug { println("$indent Matched to $type")}
+        debug { println("$indent Matched to $type") }
         val properties = findMatchingProperties(type, root)
 
         fun fetchChildren(children: Children) {
@@ -241,7 +241,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
 
         val invalid = node.children.map { it.name }.toSet().subtract(type.properties.map { it.property.name })
                 .subtract(setOf(Node.all.name, Node.allDescendants.name))
-        require(invalid.isEmpty()) { "Undefined properties of type ${type.javaClass.getSimpleName()}: $invalid"}
+        require(invalid.isEmpty()) { "Undefined properties of type ${type.javaClass.getSimpleName()}: $invalid" }
 
         return matches
     }

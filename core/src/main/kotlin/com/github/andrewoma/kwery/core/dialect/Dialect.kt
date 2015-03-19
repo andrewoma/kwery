@@ -22,9 +22,9 @@
 
 package com.github.andrewoma.kwery.core.dialect
 
-import java.text.SimpleDateFormat
 import java.sql.Blob
 import java.sql.Clob
+import java.text.SimpleDateFormat
 
 // TODO ... convert this to pass in a buffer for appending - improve performance in general
 public trait Dialect {

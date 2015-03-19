@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import java.time.LocalDateTime
 import java.time.Duration
+import java.time.LocalDateTime
 
 private val defaultLocalDateTime = LocalDateTime.now()
 

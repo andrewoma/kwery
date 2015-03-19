@@ -22,11 +22,10 @@
 
 package com.github.andrewoma.kwery.example.film.dao
 
-import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.core.*
-
-import com.github.andrewoma.kwery.example.film.model.FilmActor as FA
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.example.film.model.FilmActor
+import com.github.andrewoma.kwery.mapper.*
+import com.github.andrewoma.kwery.example.film.model.FilmActor as FA
 
 
 object filmActorTable : Table<FA, FA.Id>("film_actor", tableConfig), VersionedWithTimestamp {

@@ -23,7 +23,10 @@
 package com.github.andrewoma.kwery.mappertest.example
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.fetcher.*
+import com.github.andrewoma.kwery.fetcher.CollectionProperty
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.fetcher.Property
+import com.github.andrewoma.kwery.fetcher.Type
 
 fun createFilmFetcher(session: Session): GraphFetcher {
     val languageDao = LanguageDao(session)

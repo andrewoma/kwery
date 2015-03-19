@@ -22,10 +22,10 @@
 
 package com.github.andrewoma.kwery.example.film.dao
 
-import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
-import com.github.andrewoma.kwery.mapper.*
 import com.github.andrewoma.kwery.example.film.model.FilmRating
 import com.github.andrewoma.kwery.example.film.model.Language
+import com.github.andrewoma.kwery.mapper.*
+import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 
 val domainDefaults: Map<Class<*>, *> = listOf(
         reifiedValue(FilmRating.G),

@@ -22,14 +22,14 @@
 
 package com.github.andrewoma.kwery.example.film.jersey
 
+import com.github.andrewoma.kwery.mapper.OptimisticLockException
+import io.dropwizard.jersey.errors.ErrorMessage
+import io.dropwizard.jersey.errors.LoggingExceptionMapper
+import java.sql.SQLException
+import java.sql.SQLIntegrityConstraintViolationException
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.Provider
-import java.sql.SQLException
-import io.dropwizard.jersey.errors.ErrorMessage
-import java.sql.SQLIntegrityConstraintViolationException
-import io.dropwizard.jersey.errors.LoggingExceptionMapper
-import com.github.andrewoma.kwery.mapper.OptimisticLockException
 
 Provider
 public class SqlExceptionMapper : LoggingExceptionMapper<SQLException>() {

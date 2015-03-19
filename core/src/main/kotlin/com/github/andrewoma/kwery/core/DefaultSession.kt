@@ -22,19 +22,18 @@
 
 package com.github.andrewoma.kwery.core
 
-import java.sql.Connection
-import java.util.concurrent.ConcurrentHashMap
-import java.sql.Statement
-import java.sql.PreparedStatement
-import java.sql.SQLException
-import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
-import com.github.andrewoma.kwery.core.dialect.Dialect
-import java.util.ArrayList
 import com.github.andrewoma.kommon.lang.trimMargin
+import com.github.andrewoma.kwery.core.dialect.Dialect
+import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
 import java.io.InputStream
 import java.io.Reader
+import java.sql.Connection
+import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Statement
+import java.util.ArrayList
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.support.AbstractIterator
 
 /**
@@ -144,9 +143,9 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override fun <R> sequence(sql: String,
-                                    parameters: Map<String, Any?>,
-                                    options: SelectOptions,
-                                    f: (Sequence<Row>) -> R): R {
+                              parameters: Map<String, Any?>,
+                              options: SelectOptions,
+                              f: (Sequence<Row>) -> R): R {
 
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)

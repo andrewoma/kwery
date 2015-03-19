@@ -23,14 +23,14 @@
 package com.github.andrewoma.kwery.core
 
 import org.junit.Assert.assertEquals
-import org.junit.Test as test
-import kotlin.test.assertNull
 import java.math.BigDecimal
-import java.sql.Time
 import java.sql.SQLException
-import kotlin.test.assertNotNull
+import java.sql.Time
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import org.junit.Test as test
 
 open class RowTest : AbstractSessionTest() {
     companion object {

@@ -22,11 +22,11 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
+import com.github.andrewoma.kwery.core.SelectOptions
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.core.*
-
-import com.github.andrewoma.kwery.mappertest.example.Film as F
 import java.time.temporal.ChronoUnit
+import com.github.andrewoma.kwery.mappertest.example.Film as F
 
 object filmTable : Table<F, Int>("film", tableConfig), VersionedWithTimestamp {
     // @formatter:off

@@ -22,9 +22,11 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.core.*
-
+import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.mapper.AbstractDao
+import com.github.andrewoma.kwery.mapper.Table
+import com.github.andrewoma.kwery.mapper.Value
+import com.github.andrewoma.kwery.mapper.VersionedWithTimestamp
 import com.github.andrewoma.kwery.mappertest.example.Language as L
 
 object languageTable : Table<L, Int>("language", tableConfig), VersionedWithTimestamp {

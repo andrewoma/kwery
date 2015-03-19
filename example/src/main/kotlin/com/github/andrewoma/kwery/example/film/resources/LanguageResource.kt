@@ -23,16 +23,14 @@
 package com.github.andrewoma.kwery.example.film.resources
 
 import com.codahale.metrics.annotation.Timed
-
+import com.github.andrewoma.kwery.example.film.dao.LanguageDao
+import com.github.andrewoma.kwery.example.film.dao.languageTable
 import com.github.andrewoma.kwery.example.film.jersey.Transaction
-import com.github.andrewoma.kwery.example.film.dao.*
 import com.github.andrewoma.kwery.example.film.model.Language
-import com.github.andrewoma.kwery.mapper.Column
-
-import javax.ws.rs.*
-import javax.ws.rs.core.MediaType
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.mapper.IdStrategy
+import javax.ws.rs.*
+import javax.ws.rs.core.MediaType
 
 
 Path("/languages")

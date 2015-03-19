@@ -22,10 +22,11 @@
 
 package com.github.andrewoma.kwery.mappertest.example.test
 
+import com.github.andrewoma.kwery.mappertest.example.Language
+import com.github.andrewoma.kwery.mappertest.example.LanguageDao
+import java.time.LocalDateTime
 import kotlin.properties.Delegates
 import org.junit.Test as test
-import com.github.andrewoma.kwery.mappertest.example.*
-import java.time.LocalDateTime
 
 class LanguageDaoTest : AbstractFilmDaoTest<Language, Int, LanguageDao>() {
     override var dao: LanguageDao by Delegates.notNull()

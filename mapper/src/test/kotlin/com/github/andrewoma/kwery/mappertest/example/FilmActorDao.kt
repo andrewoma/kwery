@@ -22,9 +22,8 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.core.*
-
 import com.github.andrewoma.kwery.mappertest.example.FilmActor as FA
 
 object filmActorTable : Table<FA, FA.Id>("film_actor", tableConfig), VersionedWithTimestamp {

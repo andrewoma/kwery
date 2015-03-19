@@ -22,13 +22,13 @@
 
 package com.github.andrewoma.kwery.fetcher
 
-import org.junit.Test as test
-import org.junit.Before as before
 import kotlin.reflect.KMemberProperty
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import org.junit.Before as before
+import org.junit.Test as test
 
 class GraphFetcherTest {
 

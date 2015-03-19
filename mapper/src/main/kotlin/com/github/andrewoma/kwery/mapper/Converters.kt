@@ -23,16 +23,16 @@
 package com.github.andrewoma.kwery.mapper
 
 import com.github.andrewoma.kwery.core.Row
-import java.sql.Timestamp
 import java.math.BigDecimal
+import java.sql.Connection
+import java.sql.Date
+import java.sql.Time
+import java.sql.Timestamp
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.temporal.TemporalUnit
 import java.time.temporal.ChronoUnit
-import java.sql.Connection
-import java.sql.Time
-import java.sql.Date
+import java.time.temporal.TemporalUnit
 
 public open class Converter<R>(
         public val from: (Row, String) -> R,
@@ -135,7 +135,7 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
         }
 )
 
-public class EnumByNameConverter<T:Enum<T>>(type: Class<T>) : SimpleConverter<T>(
+public class EnumByNameConverter<T : Enum<T>>(type: Class<T>) : SimpleConverter<T>(
         { row, c -> java.lang.Enum.valueOf(type, row.string(c)) },
         { it.name() }
 )

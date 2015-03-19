@@ -22,11 +22,7 @@
 
 package com.github.andrewoma.kwery.core.dialect
 
-import java.sql.Timestamp
-import java.sql.Blob
-import java.sql.Clob
-import java.sql.Date
-import java.sql.Time
+import java.sql.*
 
 public open class HsqlDialect : Dialect {
 

@@ -23,11 +23,11 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import org.junit.Before as before
 import org.junit.Test as test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-import kotlin.test.assertNotNull
 
 class ThreadLocalSessionDelegationTest {
     companion object {

@@ -23,15 +23,13 @@
 package com.github.andrewoma.kwery.example.film.resources
 
 import com.codahale.metrics.annotation.Timed
-
+import com.github.andrewoma.kwery.example.film.dao.ActorDao
+import com.github.andrewoma.kwery.example.film.dao.actorTable
 import com.github.andrewoma.kwery.example.film.jersey.Transaction
-import com.github.andrewoma.kwery.example.film.dao.*
 import com.github.andrewoma.kwery.example.film.model.Actor
-import com.github.andrewoma.kwery.mapper.Column
-
+import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-import com.github.andrewoma.kwery.fetcher.GraphFetcher
 
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
