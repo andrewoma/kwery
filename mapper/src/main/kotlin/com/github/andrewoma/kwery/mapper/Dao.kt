@@ -45,7 +45,7 @@ public trait Dao<T : Any, ID : Any> {
 
     public fun batchInsert(values: List<T>, idStrategy: IdStrategy = defaultIdStrategy): List<T>
 
-    public fun unsafeBatchUpdate(values: List<T>): List<Int>
+    public fun unsafeBatchUpdate(values: List<T>)
 
     public fun batchUpdate(values: List<Pair<T, T>>): List<T>
 

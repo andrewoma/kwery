@@ -235,6 +235,21 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
+    test fun `Unsafe batch updates should update all values`() {
+        if (dao.table.idColumns.size() > 1) return
+
+        val inserted = insert(2)
+        val mutated = inserted.map { mutateContents(it) }
+
+        dao.unsafeBatchUpdate(mutated)
+
+        val found = dao.findByIds(inserted.map { id(it) })
+
+        for (value in mutated) {
+            assertTrue(contentsEqual(value, found[id(value)]!!))
+        }
+    }
+
     test fun `Batch updates should reject updates of same version`() {
         if (dao.table.versionColumn == null) return
 

@@ -262,7 +262,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             return findById(ids.first())?.let { mapOf(id(it) to it) } ?: mapOf()
         }
 
-        // TODO ... support compound ids
+        // TODO ... support compound ids? No nice way of doing this without spamming statement caches
         if (table.idColumns.size() != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
 
         val values = if (session.dialect.supportsArrayBasedIn) {
@@ -288,9 +288,26 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     protected inline fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, f)
 
-    override fun unsafeBatchUpdate(values: List<T>): List<Int> {
-        // TODO
-        throw UnsupportedOperationException()
+    override fun unsafeBatchUpdate(values: List<T>) {
+        val name = "unsafeBatchUpdate"
+
+        val updates = values.map { table.objectMap(session, it, table.allColumns) }
+
+        val sql = sql(name) {
+            "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
+        }
+
+        val counts = session.batchUpdate(sql, updates, updateOptions(name))
+
+        check(counts.size() == values.size(), "${name} updated ${counts.size()} rows, but expected ${values.size()}")
+
+        for ((i, count) in counts.withIndex()) {
+            check(count == 1) { "Batch update failed to update row with id ${id(values[i])}" }
+        }
+
+        for (value in values) {
+            fireEvent(listOf(UpdateEvent(table, id(value), value, null)))
+        }
     }
 
     protected fun version(value: T): Any {
