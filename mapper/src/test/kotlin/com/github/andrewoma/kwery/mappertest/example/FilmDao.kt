@@ -71,7 +71,7 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
         val params = filmTable.objectMap(session, Film().copy(title = title, releaseYear = releaseYear))
 
         return session.select(sql, params, SelectOptions("findWithActors"), combine(f.mapper, a.mapper))
-                .join {(film, actors) -> film.copy(actors = actors.toSet()) }
+                .join { film, actors -> film.copy(actors = actors.toSet()) }
                 .firstOrNull()
     }
 

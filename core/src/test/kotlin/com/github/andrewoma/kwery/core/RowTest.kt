@@ -33,7 +33,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 open class RowTest : AbstractSessionTest() {
-    class object {
+    companion object {
         var initialised = false
     }
 

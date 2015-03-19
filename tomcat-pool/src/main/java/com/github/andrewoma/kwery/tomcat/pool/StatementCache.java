@@ -177,9 +177,9 @@ public class StatementCache extends StatementDecoratorInterceptor {
             throws InstantiationException, IllegalAccessException, InvocationTargetException {
         boolean process = process(this.types, method, false);
         if (process) {
-            Object result = null;
+            Object result;
             CachedStatement statementProxy = new CachedStatement((Statement) statement, sql);
-            result = constructor.newInstance(new Object[]{statementProxy});
+            result = constructor.newInstance(statementProxy);
             statementProxy.setActualProxy(result);
             statementProxy.setConnection(proxy);
             statementProxy.setConstructor(constructor);
@@ -269,7 +269,7 @@ public class StatementCache extends StatementDecoratorInterceptor {
                 CachedStatement proxy = new CachedStatement(getDelegate(), getSql());
                 try {
                     //create a new facade
-                    Object actualProxy = getConstructor().newInstance(new Object[]{proxy});
+                    Object actualProxy = getConstructor().newInstance(proxy);
                     proxy.setActualProxy(actualProxy);
                     proxy.setConnection(getConnection());
                     proxy.setConstructor(getConstructor());

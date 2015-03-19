@@ -31,7 +31,7 @@ import kotlin.test.assertEquals
 import com.github.andrewoma.kommon.lang.trimMargin
 
 class FilmApplicationAcceptanceTest {
-    class object {
+    companion object {
         ClassRule public val rule: DropwizardAppRule<FilmConfiguration> =
                 DropwizardAppRule(javaClass<FilmApplication>(), ResourceHelpers.resourceFilePath("dev.yml"))
     }

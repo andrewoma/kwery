@@ -35,14 +35,14 @@ import com.fasterxml.jackson.annotation.JsonFilter
 import com.github.andrewoma.kwery.example.film.model.AttributeSet
 import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
 
-inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Stream<T>) -> Unit) {
+inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Sequence<T>) -> Unit) {
     val parser = this.getFactory().createParser(url)
     check(parser.nextToken() == JsonToken.START_ARRAY, "Expected an array")
     check(parser.nextToken() == JsonToken.START_OBJECT, "Expected an object")
 
     try {
         val iterator = this.readValues<T>(parser, javaClass<T>())
-        f(object : Stream<T> {
+        f(object : Sequence<T> {
             override fun iterator() = iterator
         })
     } finally {

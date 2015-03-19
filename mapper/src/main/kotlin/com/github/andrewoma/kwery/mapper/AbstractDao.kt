@@ -212,7 +212,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             val list = session.batchInsert(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name),
                     { table.rowMapper(table.idColumns, nf)(it) })
 
-            val count = list.map { it.first }.fold(0) {(sum, value) -> sum + value }
+            val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
             check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
 
             values.zip(list.map { it.second }).map {
@@ -221,7 +221,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             }
         } else {
             val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name))
-            val count = counts.fold(0) {(sum, value) -> sum + value }
+            val count = counts.fold(0) { sum, value -> sum + value }
             check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
             values
         }
@@ -350,7 +350,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             }
         }
 
-        for ((old, new) in values.stream().map { it.first }.zip(updates.stream().map { it.second })) {
+        for ((old, new) in values.sequence().map { it.first }.zip(updates.sequence().map { it.second })) {
             fireEvent(listOf(UpdateEvent(table, id(old), new, old)))
         }
 

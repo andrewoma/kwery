@@ -31,7 +31,7 @@ public trait Dialect {
     fun bind(value: Any, limit: Int): String
 
     fun bindArray(value: java.sql.Array, limit: Int, prefix: String = "", postfix: String = "") =
-            (value.getArray() as Array<*>).stream().map {
+            (value.getArray() as Array<*>).sequence().map {
                 if (it == null) "null" else bind(it, limit)
             }.joinToString(",", prefix, postfix)
 

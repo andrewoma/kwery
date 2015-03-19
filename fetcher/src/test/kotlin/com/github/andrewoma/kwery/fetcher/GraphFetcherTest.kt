@@ -51,7 +51,7 @@ class GraphFetcherTest {
     val continents = map(Continent::id, continentEurope, continentAsia, continentAustralia)
 
     val country = TrackedType(Type(javaClass<Country>(), { it.id }, { ids -> countries.filter { ids.contains(it.key) } }, listOf(
-            Property(Country::continent, continent.type, { it.continent?.id }, {(c, con) -> c.copy(continent = con) })
+            Property(Country::continent, continent.type, { it.continent?.id }, { c, con -> c.copy(continent = con) })
     )))
 
     val countryEngland = Country("GB", "England", Continent("EU"))
@@ -60,8 +60,8 @@ class GraphFetcherTest {
     val countries = map(Country::id, countryEngland, countryJapan, countryAustralia)
 
     val language = TrackedType(Type(javaClass<Language>(), { it.id }, { ids -> languages.filter { ids.contains(it.key) } }, listOf(
-            Property(Language::country, country.type, { it.country?.id }, {(l, c) -> l.copy(country = c) }),
-            Property(Language::country2, country.type, { it.country2?.id }, {(l, c) -> l.copy(country2 = c) })
+            Property(Language::country, country.type, { it.country?.id }, { l, c -> l.copy(country = c) }),
+            Property(Language::country2, country.type, { it.country2?.id }, { l, c -> l.copy(country2 = c) })
     )))
 
     val languageEnglish = Language("E", "English", Country("GB"), Country("JP"))
@@ -70,7 +70,7 @@ class GraphFetcherTest {
     val languages = map(Language::id, languageEnglish, languageJapanese, languageAustralian)
 
     val actor = TrackedType(Type(javaClass<Actor>(), { it.id }, { ids -> actors.filter { ids.contains(it.key) } }, listOf(
-            Property(Actor::language, language.type, { it.language.id }, {(a, l) -> a.copy(language = l) })
+            Property(Actor::language, language.type, { it.language.id }, { a, l -> a.copy(language = l) })
     )))
 
     val actor1 = Actor(1, "Brad", "Spit", Language("E"))
@@ -86,10 +86,10 @@ class GraphFetcherTest {
             film2.id to listOf(actor1, actor2)
     )
 
-    val filmLanguage = Property(Film::language, language.type, { it.language.id }, {(f, l) -> f.copy(language = l) })
-    val filmOriginalLanguage = Property(Film::originalLanguage, language.type, { it.originalLanguage?.id }, {(f, l) -> f.copy(originalLanguage = l) })
+    val filmLanguage = Property(Film::language, language.type, { it.language.id }, { f, l -> f.copy(language = l) })
+    val filmOriginalLanguage = Property(Film::originalLanguage, language.type, { it.originalLanguage?.id }, { f, l -> f.copy(originalLanguage = l) })
 
-    val filmActors = CollectionProperty(Film::actors, actor.type, { it.id }, {(f, a) -> f.copy(actors = a.toSet()) }, { ids ->
+    val filmActors = CollectionProperty(Film::actors, actor.type, { it.id }, { f, a -> f.copy(actors = a.toSet()) }, { ids ->
         actorsByFilm.filter { ids.contains(it.key) }
     })
 

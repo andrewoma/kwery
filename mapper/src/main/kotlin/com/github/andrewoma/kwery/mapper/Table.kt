@@ -40,6 +40,8 @@ public data class Column<T, R>(val property: (T) -> R,
                                val isNullable: Boolean
 ) {
     public fun of(value: R): Pair<Column<T, R>, R> = Pair(this, value)
+
+    suppress("BASE_WITH_NULLABLE_UPPER_BOUND") // TODO ... operator and function for similar things is ugly
     public fun plus(value: R?): Pair<Column<T, R>, R?> = Pair(this, value)
 
     override fun toString(): String {
@@ -162,8 +164,9 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     public fun objectMap(session: Session, value: T, columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
         val map = hashMapOfExpectedSize<String, Any?>(columns.size())
         for (column in columns) {
-            [suppress("UNCHECKED_CAST")] // Compiler crashes without cast
-            (map[nf(column)] = (column as Column<T, Any?>).converter.to(session.connection, column.property(value)))
+            [suppress("UNCHECKED_CAST")]
+            val col = column as Column<T, Any?>
+            map[nf(column)] = col.converter.to(session.connection, column.property(value))
         }
         return map
     }
@@ -172,8 +175,9 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         val idCols = idColumns(id)
         val map = hashMapOfExpectedSize<String, Any?>(idCols.size())
         for ((column, value) in idCols) {
-            [suppress("UNCHECKED_CAST")] // Compiler crashes without cast
-            (map[nf(column)] = (column as Column<T, Any?>).converter.to(session.connection, value))
+            [suppress("UNCHECKED_CAST")]
+            val col = column as Column<T, Any?>
+            map[nf(column)] = col.converter.to(session.connection, value)
         }
         return map
     }

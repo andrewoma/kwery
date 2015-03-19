@@ -32,7 +32,7 @@ class Value<T>(val get: () -> T, val set: (T) -> Unit) {
 
 public class GraphFetcher(val types: Set<Type<*, *>>) {
     private val typeCache: MutableMap<Class<*>, Type<*, *>> = ConcurrentHashMap()
-    private val noType: Type<*, *> = Type({ it }, { mapOf() })
+    private val noType: Type<*, *> = Type<Any?, Any?>({ it }, { mapOf() })
     protected val debug: Boolean = false
 
     inline protected fun debug(f: () -> Unit) {
@@ -72,7 +72,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         debug {
             println("\n$indent ====================================================================================================")
             println("$indent Fetch: node=$root")
-            println(values.stream().map { "$indent     $it" }.joinToString("\n"))
+            println(values.sequence().map { "$indent     $it" }.joinToString("\n"))
         }
 
         val type = findMatchingType(values.first().get())

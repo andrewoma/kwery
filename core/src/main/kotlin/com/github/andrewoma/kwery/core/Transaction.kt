@@ -42,11 +42,11 @@ public trait ManualTransaction : Transaction {
 }
 
 class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
-    class object {
+    companion object {
         val transactionId = AtomicLong()
     }
 
-    {
+    init {
         check(session.transaction == null, "A transaction is already started for this session")
         session.connection.setAutoCommit(false)
         session.transaction = this

@@ -52,7 +52,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
 
     class SessionConfig(val startTransaction: Boolean, val session: DefaultSession?, val transaction: ManualTransaction?)
 
-    class object {
+    companion object {
         private val threadLocalSession = object : ThreadLocal<MutableMap<String, SessionConfig>>() {
             override fun initialValue(): MutableMap<String, SessionConfig> {
                 return hashMapOf()
@@ -139,8 +139,8 @@ public class ThreadLocalSession(val dataSource: DataSource,
         return session.forEach(sql, parameters, options, f)
     }
 
-    override fun <R> stream(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Stream<Row>) -> R): R {
-        return session.stream(sql, parameters, options, f)
+    override fun <R> sequence(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Sequence<Row>) -> R): R {
+        return session.sequence(sql, parameters, options, f)
     }
 
     override fun bindParameters(sql: String,

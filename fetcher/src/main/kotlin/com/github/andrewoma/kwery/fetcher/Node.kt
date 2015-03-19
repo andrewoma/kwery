@@ -34,7 +34,7 @@ private class AllDescendants : Node("**", setOf()) {
 }
 
 public open data class Node protected (val name: String, val children: Set<Node>) {
-    class object {
+    companion object {
         public val all: Node = Node("*", setOf())
         public val allDescendants: Node = AllDescendants()
 

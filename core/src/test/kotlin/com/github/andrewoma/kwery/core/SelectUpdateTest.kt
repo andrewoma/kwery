@@ -108,8 +108,8 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
 
         val sql = "select actor_id from actor where actor_id in (:ids)"
 
-        val fetched = session.stream(sql, mapOf("ids" to ids)) { stream ->
-            stream.map { it.int("actor_id") }.toSet()
+        val fetched = session.sequence(sql, mapOf("ids" to ids)) { seq ->
+            seq.map { it.int("actor_id") }.toSet()
         }
 
         assertEquals(ids, fetched)

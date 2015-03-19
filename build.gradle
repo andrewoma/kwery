@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlinVersion = '0.10.770'
+        kotlinVersion = '0.11.91'
     }
     repositories {
         jcenter()
@@ -28,6 +28,7 @@ subprojects {
     }
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
         compile 'org.slf4j:slf4j-api:1.7.7'
         testCompile 'junit:junit:4.11'
     }
@@ -121,7 +122,7 @@ project(':example') {
         compile 'io.dropwizard:dropwizard-db:0.8.0'
         compile 'io.dropwizard:dropwizard-assets:0.8.0'
         compile 'org.hsqldb:hsqldb:2.3.2'
-        compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.5.1'
+        compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.5.1.1.KotlinM11-SNAPSHOT'
         compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.5.1'
         compile 'org.postgresql:postgresql:9.3-1102-jdbc4'
         compile 'com.github.andrewoma.kommon:kommon:0.1-SNAPSHOT'

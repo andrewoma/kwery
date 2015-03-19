@@ -38,7 +38,7 @@ import kotlin.test.assertNotNull
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 
 class ThreadLocalSessionTest {
-    class object {
+    companion object {
         var initialised = false
         val session = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
         val dao = SessionInfoDao(session) // Test shared dao singleton
@@ -183,8 +183,7 @@ object postgresLoggingInterceptor : LoggingInterceptor() {
     }
 
     override fun additionalInfo(statement: ExecutingStatement): String {
-        println()
-        val pgStatement = (Proxy.getInvocationHandler(statement.statement) as StatementCache.CachedStatement)
+        val pgStatement = (Proxy.getInvocationHandler(statement.statement!!) as StatementCache.CachedStatement)
                 .getStatement() as PGStatement
 
         total++

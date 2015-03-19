@@ -46,7 +46,7 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
                                      val infoQueryThresholdInMs: Long = 1000L,
                                      val parameterLimit: Int = -1
 ) : StatementInterceptor {
-    class object {
+    companion object {
         public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
 
@@ -91,7 +91,7 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
         val rowCount = when (count.size()) {
             0 -> ""
             1 -> ". Rows affected: ${count.first()}"
-            else -> ". Rows affected: ${count.reduce {(sum, i) -> sum + i }} (${count.joinToString(", ")})"
+            else -> ". Rows affected: ${count.reduce { sum, i -> sum + i }} (${count.joinToString(", ")})"
         }
 
         val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.executedTiming} ($closedTiming)${rowCount}"

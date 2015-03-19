@@ -33,7 +33,7 @@ import org.junit.rules.TestName
 import org.junit.Rule as rule
 
 abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, val dialect: Dialect = HsqlDialect()) {
-    class object {
+    companion object {
         val initialised: MutableSet<String> = hashSetOf()
     }
 

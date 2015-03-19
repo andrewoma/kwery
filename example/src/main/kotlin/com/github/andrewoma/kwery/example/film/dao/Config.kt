@@ -24,7 +24,6 @@ package com.github.andrewoma.kwery.example.film.dao
 
 import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kommon.collection.plus
 import com.github.andrewoma.kwery.example.film.model.FilmRating
 import com.github.andrewoma.kwery.example.film.model.Language
 
@@ -43,12 +42,12 @@ val domainConverters: Map<Class<*>, Converter<*>> = listOf(
 val converters: Map<Class<*>, Converter<*>> = standardConverters + timeConverters + domainConverters
 
 object languageConverter : SimpleConverter<Language>(
-        {(row, c) -> Language(row.int(c)) },
+        { row, c -> Language(row.int(c)) },
         { it.id }
 )
 
 object filmRatingConverter : SimpleConverter<FilmRating>(
-        {(row, c) -> FilmRating.valueOf(row.string(c).replace('-', '_')) },
+        { row, c -> FilmRating.valueOf(row.string(c).replace('-', '_')) },
         { it.name().replace('_', '-') }
 )
 

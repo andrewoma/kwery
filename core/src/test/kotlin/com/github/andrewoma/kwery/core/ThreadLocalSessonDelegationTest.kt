@@ -30,7 +30,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertNotNull
 
 class ThreadLocalSessionDelegationTest {
-    class object {
+    companion object {
         var initialised = false
         val session = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
     }
@@ -95,7 +95,7 @@ class ThreadLocalSessionDelegationTest {
 
             val expected = setOf("hello", "there")
             assertEquals(expected, values)
-            assertEquals(expected, session.stream(select) { it.map { it.string("value") }.toSet() })
+            assertEquals(expected, session.sequence(select) { it.map { it.string("value") }.toSet() })
         }
     }
 

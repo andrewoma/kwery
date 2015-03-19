@@ -50,7 +50,7 @@ public class DefaultSession(override val connection: Connection,
                             override val defaultSelectOptions: SelectOptions = SelectOptions(),
                             override val defaultUpdateOptions: UpdateOptions = UpdateOptions()) : Session {
 
-    class object {
+    companion object {
         private val namedQueryCache = ConcurrentHashMap<StatementCacheKey, BoundQuery>()
     }
 
@@ -60,7 +60,7 @@ public class DefaultSession(override val connection: Connection,
     var transaction: Transaction? = null
 
     override public fun <R> select(sql: String, parameters: Map<String, Any?>, options: SelectOptions, mapper: (Row) -> R): List<R> {
-        return withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
+        return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
 
             val result = arrayListOf<R>()
@@ -82,7 +82,7 @@ public class DefaultSession(override val connection: Connection,
     override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions): List<Int> {
         require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
 
-        return withPreparedStatement(sql, parametersList, options) {(statement, ps) ->
+        return withPreparedStatement(sql, parametersList, options) { statement, ps ->
             for (parameters in parametersList) {
                 bindParameters(parameters, statement)
                 ps.addBatch()
@@ -96,7 +96,7 @@ public class DefaultSession(override val connection: Connection,
     override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
         require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
 
-        return withPreparedStatement(sql, parametersList, options.copy(useGeneratedKeys = true)) {(statement, ps) ->
+        return withPreparedStatement(sql, parametersList, options.copy(useGeneratedKeys = true)) { statement, ps ->
             for (parameters in parametersList) {
                 bindParameters(parameters, statement)
                 ps.addBatch()
@@ -119,7 +119,7 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override public fun update(sql: String, parameters: Map<String, Any?>, options: UpdateOptions): Int {
-        return withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
+        return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
             interceptor.executed(statement)
@@ -128,7 +128,7 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override public fun <K> insert(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
-        return withPreparedStatement(sql, listOf(parameters), options.copy(useGeneratedKeys = true)) {(statement, ps) ->
+        return withPreparedStatement(sql, listOf(parameters), options.copy(useGeneratedKeys = true)) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
             interceptor.executed(statement)
@@ -143,12 +143,12 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <R> stream(sql: String,
+    override fun <R> sequence(sql: String,
                                     parameters: Map<String, Any?>,
                                     options: SelectOptions,
-                                    f: (Stream<Row>) -> R): R {
+                                    f: (Sequence<Row>) -> R): R {
 
-        return withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
+        return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()
             try {
@@ -162,7 +162,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    private class RowStream(val rs: ResultSet) : Stream<Row> {
+    private class RowStream(val rs: ResultSet) : Sequence<Row> {
         var count: Int = 0
 
         override fun iterator(): Iterator<Row> {
@@ -180,7 +180,7 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override public fun forEach(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit): Unit {
-        withPreparedStatement(sql, listOf(parameters), options) {(statement, ps) ->
+        withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()
             try {

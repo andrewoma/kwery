@@ -53,7 +53,6 @@ public abstract class DefaultTestCase {
     protected int threadcount = 10;
 
     public org.apache.tomcat.jdbc.pool.DataSource createDefaultDataSource() {
-        org.apache.tomcat.jdbc.pool.DataSource datasource = null;
         PoolConfiguration p = new DefaultProperties();
         p.setFairQueue(false);
         p.setJmxEnabled(false);
@@ -70,7 +69,8 @@ public abstract class DefaultTestCase {
         p.setMinIdle(threadcount);
         p.setLogAbandoned(false);
         p.setRemoveAbandoned(false);
-        datasource = new org.apache.tomcat.jdbc.pool.DataSource();
+
+        org.apache.tomcat.jdbc.pool.DataSource datasource = new org.apache.tomcat.jdbc.pool.DataSource();
         datasource.setPoolProperties(p);
         return datasource;
     }
@@ -89,13 +89,5 @@ public abstract class DefaultTestCase {
         }
         datasource = null;
         System.gc();
-    }
-
-    private static final String PROP_MAXACTIVE = "maxActive";
-
-    private static final Map<String, String> RENAMED = new HashMap<String, String>();
-
-    static {
-        RENAMED.put(PROP_MAXACTIVE, "maxTotal");
     }
 }

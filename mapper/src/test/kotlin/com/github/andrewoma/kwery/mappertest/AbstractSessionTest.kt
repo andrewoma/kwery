@@ -44,7 +44,7 @@ private val testDataSource: DataSource by Delegates.lazy {
 }
 
 abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDataSource, val dialect: Dialect = HsqlDialect()) {
-    class object {
+    companion object {
         val initialised = hashMapOf<String, Any?>()
     }
 

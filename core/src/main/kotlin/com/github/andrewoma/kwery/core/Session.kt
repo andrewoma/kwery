@@ -58,10 +58,10 @@ trait Session {
                                options: UpdateOptions = defaultUpdateOptions,
                                f: (Row) -> K): List<Pair<Int, K>>
 
-    public fun <R> stream(sql: String,
+    public fun <R> sequence(sql: String,
                       parameters: Map<String, Any?> = mapOf(),
                       options: SelectOptions = defaultSelectOptions,
-                      f: (Stream<Row>) -> R): R
+                      f: (Sequence<Row>) -> R): R
 
     public fun forEach(sql: String,
                       parameters: Map<String, Any?> = mapOf(),

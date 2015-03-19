@@ -42,7 +42,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
 
     class Request(val stopWatch: StopWatch, val executions: MutableList<Execution>)
 
-    class object {
+    companion object {
         val requests: ThreadLocal<Request> = ThreadLocal()
         val nanoToMs = 1000000
         val headings = array("", "Calls", "Exec", "Close", "Rows", "")
@@ -103,7 +103,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
             val widths = calculateWidths(headings, totals, summaries)
             val format = "\n    %${widths[0]}s  %,${widths[1]}d  %,${widths[2]}.${3}f  %,${widths[3]}.${3}f  %,${widths[4]}d  %${widths[5]}.${1}f%%"
             val headingsFormat = "    %${widths[0]}s  %${widths[1]}s  %${widths[2]}s  %${widths[3]}s  %${widths[4]}s  %${widths[5]}s"
-            val totalWidth = widths.reduce {(accum, i) -> accum + i }
+            val totalWidth = widths.reduce { accum, i -> accum + i }
 
             val sb = StringBuilder(150 + ((15 + totalWidth) * (summaries.size() + 1)))
 
@@ -137,7 +137,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
         fun summariseRequest(executions: MutableList<Execution>): Pair<ExecutionSummary, List<ExecutionSummary>> {
             // Prematurely optimise with some imperative code to summarise without lots of collection creation
             // Group by statement name (and collect totals)
-            Collections.sort(executions, {(e1, e2) -> e1.name.compareTo(e2.name) })
+            Collections.sort(executions, { e1, e2 -> e1.name.compareTo(e2.name) })
             val summaries = ArrayList<ExecutionSummary>(executions.size() + 1)
 
             var total = ExecutionSummary("Total", 0L, 0L, 0L, 0L)
@@ -160,7 +160,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
             }
 
             // Sort by closed time descending (usually what you want unless streaming)
-            Collections.sort(summaries, {(s1, s2) -> s1.closedTime.compareTo(s2.closedTime) * -1 })
+            Collections.sort(summaries, { s1, s2 -> s1.closedTime.compareTo(s2.closedTime) * -1 })
 
             return total to summaries
         }
@@ -193,7 +193,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
 
     override fun closed(statement: ExecutingStatement) {
         if (statement.context != null) {
-            val rowCount = statement.rowsCounts.fold(0L, {(acc, i) -> acc + i })
+            val rowCount = statement.rowsCounts.fold(0L, { acc, i -> acc + i })
             requests.get()?.executions?.add(statement.context?.copy(closed = System.nanoTime(), rowCount = rowCount)!!)
         }
     }

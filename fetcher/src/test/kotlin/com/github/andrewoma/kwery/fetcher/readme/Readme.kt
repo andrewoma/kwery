@@ -52,11 +52,11 @@ fun readme() {
     // For types that reference other types describe how to apply fetched values
     val film = Type(Film::id, { filmDao.findByIds(it) }, listOf(
             // 1 to 1
-            Property(Film::language, language, { it.language.id }, {(f, l) -> f.copy(language = l) }),
+            Property(Film::language, language, { it.language.id }, { f, l -> f.copy(language = l) }),
 
             // 1 to many requires a function to describe how to fetch the related objects
             CollectionProperty(Film::actors, actor, { it.id },
-                    {(f, a) -> f.copy(actors = a.toSet()) },
+                    { f, a -> f.copy(actors = a.toSet()) },
                     { actorDao.findByFilmIds(it) })
     ))
 

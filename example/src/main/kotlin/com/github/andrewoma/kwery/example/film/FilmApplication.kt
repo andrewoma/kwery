@@ -177,17 +177,17 @@ class FilmApplication : Application<FilmConfiguration>() {
         val actor = Type(Actor::id, { daos.actor.findByIds(it) })
 
         val film = Type(Film::id, { daos.film.findByIds(it) }, listOf(
-                Property(Film::language, language, { it.language.id }, {(f, l) -> f.copy(language = l) }),
-                Property(Film::originalLanguage, language, { it.originalLanguage?.id }, {(f, l) -> f.copy(originalLanguage = l) }),
+                Property(Film::language, language, { it.language.id }, { f, l -> f.copy(language = l) }),
+                Property(Film::originalLanguage, language, { it.originalLanguage?.id }, { f, l -> f.copy(originalLanguage = l) }),
                 CollectionProperty(Film::actors, actor, { it.id },
-                        {(f, a) -> f.copy(actors = a.toSet()) },
+                        { f, a -> f.copy(actors = a.toSet()) },
                         { daos.actor.findByFilmIds(daos.filmActor.findByFilmIds(it)) })
         ))
 
         // The model defines a cycle, so set the actor properties after film is defined
         // While models support cycles, fetching cycles isn't recommended
         actor.properties = listOf(CollectionProperty(Actor::films, film, { it.id },
-                {(a, f) -> a.copy(films = f.toSet()) },
+                { a, f -> a.copy(films = f.toSet()) },
                 { daos.film.findByActorIds(daos.filmActor.findByActorIds(it)) }))
 
         return GraphFetcher(setOf(language, actor, film))

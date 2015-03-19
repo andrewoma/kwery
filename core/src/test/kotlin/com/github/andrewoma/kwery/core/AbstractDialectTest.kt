@@ -28,7 +28,6 @@ import org.junit.Test as test
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
-import com.github.andrewoma.kommon.collection.plus
 import kotlin.test.assertEquals
 import java.io.ByteArrayInputStream
 import java.io.StringReader

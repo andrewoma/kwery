@@ -35,10 +35,10 @@ fun createFilmFetcher(session: Session): GraphFetcher {
     val actor = Type(Actor::id, { actorDao.findByIds(it) })
 
     val film = Type(Film::id, { filmDao.findByIds(it) }, listOf(
-            Property(Film::language, language, { it.language.id }, {(f, l) -> f.copy(language = l) }),
-            Property(Film::originalLanguage, language, { it.originalLanguage?.id }, {(f, l) -> f.copy(originalLanguage = l) }),
+            Property(Film::language, language, { it.language.id }, { f, l -> f.copy(language = l) }),
+            Property(Film::originalLanguage, language, { it.originalLanguage?.id }, { f, l -> f.copy(originalLanguage = l) }),
             CollectionProperty(Film::actors, actor, { it.id },
-                    {(f, a) -> f.copy(actors = a.toSet()) },
+                    { f, a -> f.copy(actors = a.toSet()) },
                     { actorDao.findByFilmIds(it) })
     ))
 
