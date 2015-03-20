@@ -152,16 +152,16 @@ public class DefaultSession(override val connection: Connection,
             val rs = ps.executeQuery()
             try {
                 interceptor.executed(statement)
-                val rowStream = RowStream(rs)
-                val result = f(rowStream)
-                statement.copy(rowsCounts = listOf(rowStream.count)) to result
+                val rowSequence = RowSequence(rs)
+                val result = f(rowSequence)
+                statement.copy(rowsCounts = listOf(rowSequence.count)) to result
             } finally {
                 rs.close()
             }
         }
     }
 
-    private class RowStream(val rs: ResultSet) : Sequence<Row> {
+    private class RowSequence(val rs: ResultSet) : Sequence<Row> {
         var count: Int = 0
 
         override fun iterator(): Iterator<Row> {
