@@ -14,6 +14,9 @@ buildscript {
     }
 }
 
+apply plugin: 'net.researchgate.release'
+
+createReleaseTag.dependsOn ':core:uploadArchives', ':fetcher:uploadArchives', ':mapper:uploadArchives', ':tomcat-pool:uploadArchives'
 
 allprojects {
     group = 'com.github.andrewoma.kwery'

@@ -21,9 +21,6 @@
  */
 
 apply plugin: 'com.bmuschko.nexus'
-apply plugin: 'net.researchgate.release'
-
-createReleaseTag.dependsOn uploadArchives
 
 modifyPom {
     project {
