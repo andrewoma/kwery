@@ -129,16 +129,11 @@ to expose a simple model via RESTful web services via [DropWizard](http://dropwi
 
 Kwery is unstable. It's currently being developed for a side project, so features are added as required.
 
+[0.1](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery) is available
+in Maven Central and is compatible with Kotlin M11.
+
 #### Building
 
-Kwery depends on kommon which is also currently unreleased. To build kommon and install to your local repository:
-```bash
-git clone https://github.com/andrewoma/kommon.git
-cd kommon
-./gradlew check install
-```
-
-To build kwery itself:
 ```bash
 git clone https://github.com/andrewoma/kwery.git
 cd kwery
@@ -182,7 +177,6 @@ Robustness/Performance:
 Misc:
 * Better IDE support for highlighting inline SQL. Vote for [KT-6610](https://youtrack.jetbrains.com/issue/KT-6610)
 * Create a guava backed statement cache for Tomcat's connection pool?
-* Release to Maven Central
 
 #### License
 This project is licensed under a MIT license.
