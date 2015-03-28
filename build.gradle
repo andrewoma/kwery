@@ -135,6 +135,8 @@ project(':example') {
 
     mainClassName = 'com.github.andrewoma.kwery.example.film.FilmPackage'
 
+    applicationDefaultJvmArgs = ["-Xmx512m"]
+
     run {
         args project.hasProperty("appArgs") ? Eval.me(appArgs) : ['server', 'src/main/resources/dev.yml']
     }
