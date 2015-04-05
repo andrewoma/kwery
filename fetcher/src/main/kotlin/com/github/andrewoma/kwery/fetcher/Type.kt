@@ -40,30 +40,46 @@ open class Type<T, ID> (
 ) {
     open fun supports(obj: Any?) = obj?.javaClass?.isAssignableFrom(javaClass)!!
 
-    override fun toString() = javaClass.getSimpleName() + "(" + properties.map { it.property.name }.join(", ") + ")"
+    override fun toString() = javaClass.getSimpleName() + "(" + properties.map { it.name }.join(", ") + ")"
 }
 
 [suppress("BASE_WITH_NULLABLE_UPPER_BOUND")]
 open class BaseProperty<C, T, ID>(
         val id: (C) -> ID?,
         val type: Type<T, ID>,
-        open val property: KMemberProperty<*, *>
+        val name: String
 )
 
 [suppress("BASE_WITH_NULLABLE_UPPER_BOUND")]
 class Property<C, T, ID>(
-        override val property: KMemberProperty<C, T?>,
+        val get: (C) -> T?,
         type: Type<T, ID>,
         id: (C) -> ID?,
-        val apply: (C, T) -> C
-) : BaseProperty<C, T, ID>(id, type, property)
+        val apply: (C, T) -> C,
+        name: String
+) : BaseProperty<C, T, ID>(id, type, name)
+
+[suppress("BASE_WITH_NULLABLE_UPPER_BOUND")]
+fun Property<C, T, ID> (property: KMemberProperty<C, T?>,
+                        type: Type<T, ID>,
+                        id: (C) -> ID?,
+                        apply: (C, T) -> C
+): Property<C, T, ID> = Property({ property.get(it) }, type, id, apply, property.name)
 
 class CollectionProperty<C, T, ID>(
-        override val property: KMemberProperty<C, Collection<T>>,
         type: Type<T, ID>,
         id: (C) -> ID,
         val apply: (C, Collection<T>) -> C,
-        val fetch: (Collection<ID>) -> Map<ID, Collection<T>>
-) : BaseProperty<C, T, ID>(id, type, property) {
-    override fun toString() = property.name
+        val fetch: (Collection<ID>) -> Map<ID, Collection<T>>,
+        name: String
+) : BaseProperty<C, T, ID>(id, type, name) {
+    override fun toString() = name
 }
+
+fun CollectionProperty<C, T, ID>(
+        property: KMemberProperty<C, Collection<T>>,
+        type: Type<T, ID>,
+        id: (C) -> ID,
+        apply: (C, Collection<T>) -> C,
+        fetch: (Collection<ID>) -> Map<ID, Collection<T>>
+) : CollectionProperty<C, T, ID> = CollectionProperty(type, id, apply, fetch, property.name)

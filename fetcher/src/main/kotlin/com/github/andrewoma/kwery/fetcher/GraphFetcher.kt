@@ -139,7 +139,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
 
                         // Collect children
                         if (!node.children.isEmpty() || node == Node.allDescendants) {
-                            val child = Value({ property.property.get(value.get()) }, { value.set(property.apply(value.get(), it) as T) })
+                            val child = Value({ property.get(value.get()) }, { value.set(property.apply(value.get(), it) as T) })
                             children.valuesByTypeAndNode.getOrPut(ChildKey(property.type, node)) { arrayListOf() }.add(child)
 
                             if (!(fetched[property.type]?.containsKey(id) ?: false)) {
@@ -175,7 +175,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
                         required.add(id)
                     }
                 }
-                debug { println("$indent Required collection ${property.property.name} for ids: $required") }
+                debug { println("$indent Required collection ${property.name} for ids: $required") }
 
                 val fetchedById = property.fetch(required)
 
@@ -233,13 +233,13 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         val matches = hashSetOf<Pair<BaseProperty<*, *, *>, Node>>()
 
         for (property in type.properties) {
-            val match = node[property.property.name]
+            val match = node[property.name]
             if (match != null) {
                 matches.add(property to match)
             }
         }
 
-        val invalid = node.children.map { it.name }.toSet().subtract(type.properties.map { it.property.name })
+        val invalid = node.children.map { it.name }.toSet().subtract(type.properties.map { it.name })
                 .subtract(setOf(Node.all.name, Node.allDescendants.name))
         require(invalid.isEmpty()) { "Undefined properties of type ${type.javaClass.getSimpleName()}: $invalid" }
 
