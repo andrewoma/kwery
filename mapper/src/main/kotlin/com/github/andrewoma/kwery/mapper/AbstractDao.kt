@@ -27,6 +27,8 @@ import com.github.andrewoma.kwery.core.SelectOptions
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.UpdateOptions
 import com.github.andrewoma.kwery.mapper.listener.*
+import java.sql.Array
+import java.sql.SQLFeatureNotSupportedException
 import java.util.HashMap
 import java.util.concurrent.ConcurrentHashMap
 
@@ -274,7 +276,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             try {
                 session.select(sql, mapOf("ids" to array), selectOptions(name), table.rowMapper(columns))
             } finally {
-                array.free()
+                freeIfSupported(array)
             }
         } else {
             val sql = sql(name to columns) {
@@ -284,6 +286,14 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         }
 
         return values.map { id(it) to it }.toMap()
+    }
+
+    private fun freeIfSupported(array: Array) {
+        try {
+            array.free()
+        } catch(e: SQLFeatureNotSupportedException) {
+            // Ignore and hope the driver cleans up properly
+        }
     }
 
     protected inline fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, f)
