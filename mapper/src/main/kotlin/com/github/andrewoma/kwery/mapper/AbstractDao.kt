@@ -75,7 +75,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun Collection<ID>.copyToSqlArray(): java.sql.Array {
-        return session.connection.createArrayOf(idSqlType, this.copyToArray<Any>())
+        return session.connection.createArrayOf(idSqlType, this.toTypedArray<Any>())
     }
 
     protected fun selectOptions(name: String): SelectOptions =
@@ -125,7 +125,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         require(table is Versioned<*>) { "table must be Versioned to use update. Use unsafeUpdate for unversioned tables" }
 
         val versionColumn = table.versionColumn!!
-        [suppress("UNCHECKED_CAST")]
+        @suppress("UNCHECKED_CAST")
         val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(oldValue))
         val result = table.copy(newValue, mapOf(versionColumn to newVersion))
 
@@ -335,7 +335,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             val (old, new) = it
             require(id(old) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(old)} ${id(new)}" }
 
-            [suppress("UNCHECKED_CAST")]
+            @suppress("UNCHECKED_CAST")
             val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(old))
 
             val result = table.copy(new, mapOf(versionColumn to newVersion))
@@ -360,7 +360,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             }
         }
 
-        for ((old, new) in values.sequence().map { it.first }.zip(updates.sequence().map { it.second })) {
+        for ((old, new) in values.asSequence().map { it.first }.zip(updates.asSequence().map { it.second })) {
             fireEvent(listOf(UpdateEvent(table, id(old), new, old)))
         }
 
@@ -384,12 +384,12 @@ public enum class IdStrategy {
      * Auto will automatically set the strategy to Generated or Explicit based on whether a
      * non-default id value is provided in the value inserted
      */
-    Auto
+    Auto,
 
     /**
      * Forces the use of generated keys
      */
-    Generated
+    Generated,
 
     /**
      * Inserts the id from the value explicitly, not using generated keys

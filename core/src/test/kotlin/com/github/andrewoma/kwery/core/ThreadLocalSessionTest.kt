@@ -55,7 +55,7 @@ class ThreadLocalSessionTest {
                     connection numeric(20)
                 )
             """
-            session.use { for (statement in sql.split(";")) session.update(statement) }
+            session.use { for (statement in sql.split(";".toRegex())) session.update(statement) }
         }
 
         session.use { session.update("delete from sessions_test") }
@@ -69,7 +69,7 @@ class ThreadLocalSessionTest {
         sessions
     }
 
-    test(expected = javaClass<IllegalStateException>()) fun `Uninitialised thread should be rejected`() {
+    test(expected = IllegalStateException::class) fun `Uninitialised thread should be rejected`() {
         dao.insertCurrent()
     }
 
@@ -96,7 +96,7 @@ class ThreadLocalSessionTest {
 
         val executor = Executors.newFixedThreadPool(threads)
 
-        requests.times {
+        repeat(requests) {
             executor.submit {
                 ThreadLocalSession.initialise()
                 try {

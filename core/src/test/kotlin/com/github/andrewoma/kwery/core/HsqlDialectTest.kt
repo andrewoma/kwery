@@ -61,7 +61,7 @@ class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
         blob.setBytes(1, "12345".toByteArray())
         assertEquals("X'3132'", dialect.bind(blob, 2))
 
-        val array = session.connection.createArrayOf("varchar", array("12345"))
+        val array = session.connection.createArrayOf("varchar", arrayOf("12345"))
         assertEquals("array['12']", dialect.bind(array, 2))
     }
 }

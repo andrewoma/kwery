@@ -34,7 +34,7 @@ data class Actor(val name: Name, val id: Int = -1, val lastUpdate: LocalDateTime
 fun Actor(id: Int = -1) = Actor(Name("", ""), id, defaultLocalDateTime)
 
 enum class FilmRating {
-    G PG PG_13 R NC_17
+    G, PG, PG_13, R, NC_17
 }
 
 data class Film (

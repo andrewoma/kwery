@@ -32,7 +32,7 @@ public class PrefixedColumns<T : Any, ID>(val prefix: String, table: Table<T, ID
         if (row.objectOrNull("${prefix}__${column!!.name}") == null) null else mapper(row)
     }
 
-    val select: String = columns.stream().map { "${prefix}.${it.name} ${prefix}__${it.name}" }.joinToString(", ")
+    val select: String = columns.asSequence().map { "${prefix}.${it.name} ${prefix}__${it.name}" }.joinToString(", ")
 }
 
 fun <T, ID> Table<T, ID>.prefixed(prefix: String, columns: Set<Column<T, *>> = this.defaultColumns) = PrefixedColumns(prefix, this, columns)

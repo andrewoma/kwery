@@ -25,7 +25,7 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import java.sql.Connection
 
-trait Session {
+interface Session {
     public val currentTransaction: Transaction?
 
     public val connection: Connection

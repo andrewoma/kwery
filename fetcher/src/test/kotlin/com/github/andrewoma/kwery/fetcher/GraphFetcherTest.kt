@@ -117,7 +117,7 @@ class GraphFetcherTest {
         assertEquals(language.type, fetcher.findMatchingType(languages.values().first()))
     }
 
-    test(expected = javaClass<IllegalArgumentException>()) fun testFindMatchingTypeRejectsUnknown() {
+    test(expected = IllegalArgumentException::class) fun testFindMatchingTypeRejectsUnknown() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         assertEquals(film, fetcher.findMatchingType(""))
     }

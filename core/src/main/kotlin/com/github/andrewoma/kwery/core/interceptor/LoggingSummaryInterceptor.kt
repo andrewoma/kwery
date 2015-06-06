@@ -45,7 +45,7 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
     companion object {
         val requests: ThreadLocal<Request> = ThreadLocal()
         val nanoToMs = 1000000
-        val headings = array("", "Calls", "Exec", "Close", "Rows", "")
+        val headings = arrayOf("", "Calls", "Exec", "Close", "Rows", "")
 
         public fun start() {
             check(requests.get() == null, "LoggingSummaryInterceptor already started")

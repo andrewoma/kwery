@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.ExecutingStatement
 
-public trait StatementInterceptor {
+public interface StatementInterceptor {
     public fun construct(statement: ExecutingStatement): ExecutingStatement = statement
 
     public fun preparing(statement: ExecutingStatement): ExecutingStatement = statement

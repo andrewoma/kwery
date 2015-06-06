@@ -72,7 +72,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         debug {
             println("\n$indent ====================================================================================================")
             println("$indent Fetch: node=$root")
-            println(values.sequence().map { "$indent     $it" }.joinToString("\n"))
+            println(values.asSequence().map { "$indent     $it" }.joinToString("\n"))
         }
 
         val type = findMatchingType(values.first().get())

@@ -23,7 +23,7 @@
 package com.github.andrewoma.kwery.mapper
 
 
-public trait Dao<T : Any, ID : Any> {
+public interface Dao<T : Any, ID : Any> {
     public val defaultColumns: Set<Column<T, *>>
     public val defaultIdStrategy: IdStrategy
 

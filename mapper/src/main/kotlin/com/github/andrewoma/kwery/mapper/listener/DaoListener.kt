@@ -27,7 +27,7 @@ import com.github.andrewoma.kwery.core.SessionCallback
 import com.github.andrewoma.kwery.core.Transaction
 import com.github.andrewoma.kwery.mapper.Table
 
-public trait Listener {
+public interface Listener {
     fun onEvent(session: Session, events: List<Event>)
 }
 

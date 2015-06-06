@@ -26,7 +26,7 @@ import com.codahale.metrics.health.HealthCheck
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+//import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.andrewoma.kommon.collection.chunked
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ThreadLocalSession
@@ -129,7 +129,7 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     fun createDb(session: ThreadLocalSession) {
-        for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";")) {
+        for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";".toRegex()).toTypedArray()) {
             session.use { session.update(sql) }
         }
     }
@@ -138,7 +138,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         bootstrap.addBundle(AssetsBundle("/static", "/", "index.html", "static"))
 
         val mapper = bootstrap.getObjectMapper()
-        mapper.registerModule(KotlinModule())
+//        mapper.registerModule(KotlinModule())
         mapper.registerModule(JSR310Module())
 
         mapper.addMixIn(javaClass<HasAttributeSet>(), javaClass<AttributeSetFilterMixIn>())

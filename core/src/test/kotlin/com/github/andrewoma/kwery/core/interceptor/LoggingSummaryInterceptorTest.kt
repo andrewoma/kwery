@@ -44,7 +44,7 @@ Executed 4 statements in 21.923 ms (closed in 52.205 ms) affecting 6,663 rows us
             ActorDao.findByIds      1   1.339   1.748    200   3.3%
          LanguageDao.findByIds      1   1.357   1.496      1   2.9%"""
 
-        assertEquals(expected.replaceAll("!", ""), generateReport(requestTime, executions))
+        assertEquals(expected.replace("!".toRegex(), ""), generateReport(requestTime, executions))
     }
 
     test fun `Summary report should aggregate calls to same statement`() {
@@ -67,7 +67,7 @@ Executed 8 statements in 43.846 ms (closed in 104.410 ms) affecting 19,989 rows 
             ActorDao.findByIds      2   2.678   3.496     400   3.3%
          LanguageDao.findByIds      2   2.715   2.992       2   2.9%"""
 
-        assertEquals(expected.replaceAll("!", ""), generateReport(requestTime, executions))
+        assertEquals(expected.replace("!".toRegex(), ""), generateReport(requestTime, executions))
     }
 
     fun generateReport(requestTime: Long, executions: MutableList<Execution>): String {

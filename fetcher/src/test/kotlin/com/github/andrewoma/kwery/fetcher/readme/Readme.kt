@@ -33,7 +33,7 @@ data class Language(val id: Int, val name: String)
 data class Film(val id: Int, val language: Language, val actors: Set<Actor>,
                 val title: String, val releaseYear: Int)
 
-[suppress("UNUSED_PARAMETER")]
+@suppress("UNUSED_PARAMETER")
 class Dao<ID, T> {
     fun findByIds(id: Collection<ID>): Map<ID, T> = mapOf()
     fun findByFilmIds(id: Collection<ID>): Map<ID, Collection<T>> = mapOf()

@@ -90,7 +90,7 @@ class FilmData {
 }
 
 fun initialiseFilmSchema(session: Session): FilmData {
-    for (statement in filmSchema.split(";")) {
+    for (statement in filmSchema.split(";".toRegex())) {
         session.update(statement)
     }
 

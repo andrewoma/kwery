@@ -25,14 +25,14 @@ package com.github.andrewoma.kwery.mapper
 import java.time.LocalDateTime
 
 
-public trait Versioned<T> {
+public interface Versioned<T> {
     fun nextVersion(old: T): T
 }
 
-public trait VersionedWithTimestamp : Versioned<LocalDateTime> {
+public interface VersionedWithTimestamp : Versioned<LocalDateTime> {
     override fun nextVersion(old: LocalDateTime) = LocalDateTime.now()
 }
 
-public trait VersionedWithInt : Versioned<Int> {
+public interface VersionedWithInt : Versioned<Int> {
     override fun nextVersion(old: Int) = old + 1
 }

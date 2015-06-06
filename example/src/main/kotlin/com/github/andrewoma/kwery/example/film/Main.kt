@@ -27,7 +27,7 @@ import java.io.File
 fun main(args: Array<String>) {
     // Default to dev config if unspecified and it's available
     val config = "example/src/main/resources/dev.yml"
-    val defaults = array("server", config)
+    val defaults = arrayOf("server", config)
 
     FilmApplication().run(*if (args.isEmpty() && File(config).exists()) defaults else args)
 }

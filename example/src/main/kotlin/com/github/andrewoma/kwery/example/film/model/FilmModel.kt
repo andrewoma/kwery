@@ -53,7 +53,7 @@ data class Film (
 fun Film(id: Int = 0): Film = Film(id, "", "", 0, Language(-1), null, Duration.ZERO, null, version = 0)
 
 enum class FilmRating {
-    G PG PG_13 R NC_17
+    G, PG, PG_13, R, NC_17
 }
 
 data class FilmActor(val id: FilmActor.Id) {
@@ -68,17 +68,17 @@ data class Language (
 
 fun Language(id: Int = 0): Language = Language(id, "", 0)
 
-trait Version {
+interface Version {
     val version: Int
 }
 
 // TODO ... move AttributeSet logic to be external to the model itself into the Jackson filter definition
-enum class AttributeSet { Id All }
+enum class AttributeSet { Id, All }
 
-trait HasAttributeSet {
+interface HasAttributeSet {
     fun attributeSet(): AttributeSet
 }
 
-trait AttributeSetByVersion : HasAttributeSet, Version {
+interface AttributeSetByVersion : HasAttributeSet, Version {
     override fun attributeSet() = if (this.version == 0) AttributeSet.Id else AttributeSet.All
 }

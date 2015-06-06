@@ -43,14 +43,14 @@ open class Type<T, ID> (
     override fun toString() = javaClass.getSimpleName() + "(" + properties.map { it.name }.join(", ") + ")"
 }
 
-[suppress("BASE_WITH_NULLABLE_UPPER_BOUND")]
+@suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
 open class BaseProperty<C, T, ID>(
         val id: (C) -> ID?,
         val type: Type<T, ID>,
         val name: String
 )
 
-[suppress("BASE_WITH_NULLABLE_UPPER_BOUND")]
+@suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
 class Property<C, T, ID>(
         val get: (C) -> T?,
         type: Type<T, ID>,
@@ -59,7 +59,7 @@ class Property<C, T, ID>(
         name: String
 ) : BaseProperty<C, T, ID>(id, type, name)
 
-[suppress("BASE_WITH_NULLABLE_UPPER_BOUND")]
+@suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
 fun Property<C, T, ID> (property: KMemberProperty<C, T?>,
                         type: Type<T, ID>,
                         id: (C) -> ID?,

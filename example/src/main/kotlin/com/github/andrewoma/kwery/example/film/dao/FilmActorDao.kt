@@ -43,14 +43,14 @@ class FilmActorDao(session: Session) : AbstractDao<FA, FA.Id>(session, filmActor
     fun findByFilmIds(ids: Collection<Int>): List<FilmActor> {
         val name = "findByFilmIds"
         val sql = sql(name) { "select $columns from ${table.name} where film_id in(unnest(:ids))" }
-        val idsArray = session.connection.createArrayOf("int", ids.copyToArray<Any>())
+        val idsArray = session.connection.createArrayOf("int", ids.toTypedArray())
         return session.select(sql, mapOf("ids" to idsArray), selectOptions(name), table.rowMapper())
     }
 
     fun findByActorIds(ids: Collection<Int>): List<FilmActor> {
         val name = "findByActorIds"
         val sql = sql(name) { "select $columns from ${table.name} where actor_id in(unnest(:ids))" }
-        val idsArray = session.connection.createArrayOf("int", ids.copyToArray<Any>())
+        val idsArray = session.connection.createArrayOf("int", ids.toTypedArray())
         return session.select(sql, mapOf("ids" to idsArray), selectOptions(name), table.rowMapper())
     }
 }

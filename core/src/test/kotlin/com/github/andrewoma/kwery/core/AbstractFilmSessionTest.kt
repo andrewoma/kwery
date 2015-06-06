@@ -40,7 +40,7 @@ open class AbstractFilmSessionTest : AbstractSessionTest() {
             )
         """
 
-        for (statement in sql.split(";")) {
+        for (statement in sql.split(";".toRegex())) {
             session.update(statement)
         }
     }

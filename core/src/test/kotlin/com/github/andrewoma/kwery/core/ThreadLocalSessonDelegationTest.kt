@@ -47,7 +47,7 @@ class ThreadLocalSessionDelegationTest {
                     value varchar(1000)
                 )
             """
-            session.use { for (statement in sql.split(";")) session.update(statement) }
+            session.use { for (statement in sql.split(";".toRegex())) session.update(statement) }
         }
 
         session.use { session.update("delete from delegate_test") }

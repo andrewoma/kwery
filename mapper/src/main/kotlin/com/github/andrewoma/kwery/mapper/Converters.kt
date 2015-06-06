@@ -71,7 +71,7 @@ public object localDateTimeConverter : SimpleConverter<LocalDateTime>(
 public inline fun <reified T> ArrayConverter(sqlType: String): Converter<List<T>> {
     return Converter(
             { row, c -> row.array<T>(c).toList() },
-            { c, v -> c.createArrayOf(sqlType, v.copyToArray()) }
+            { c, v -> c.createArrayOf(sqlType, v.toTypedArray()) }
     )
 }
 

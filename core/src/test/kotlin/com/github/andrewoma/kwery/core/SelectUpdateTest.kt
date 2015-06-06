@@ -62,11 +62,11 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
         assertEquals(0, selectActors(setOf(actor.id)).size())
     }
 
-    test(expected = javaClass<IllegalArgumentException>()) fun `missing select parameters should be rejected`() {
+    test(expected = IllegalArgumentException::class) fun `missing select parameters should be rejected`() {
         session.select("select * from actor where actor_id = :actor_id") {}
     }
 
-    test(expected = javaClass<SQLException>()) fun `bad SQL should be rejected`() {
+    test(expected = SQLException::class) fun `bad SQL should be rejected`() {
         session.select("select * from junk") {}
     }
 

@@ -36,7 +36,7 @@ Provider
 public class LoggingListener : ApplicationEventListener {
     private val log = LoggerFactory.getLogger(javaClass<LoggingListener>())
 
-    enum class LogType { none summary statements all }
+    enum class LogType { none, summary, statements, all }
 
     override fun onEvent(event: ApplicationEvent) {
     }

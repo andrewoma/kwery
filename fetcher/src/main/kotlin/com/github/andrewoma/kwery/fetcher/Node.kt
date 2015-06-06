@@ -32,7 +32,7 @@ private class AllDescendants : Node("**", setOf()) {
     override fun toString() = name
 }
 
-public open data class Node protected (val name: String, val children: Set<Node>) {
+public open data class Node protected constructor(val name: String, val children: Set<Node>) {
     companion object {
         public val all: Node = Node("*", setOf())
         public val allDescendants: Node = AllDescendants()

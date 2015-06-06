@@ -24,11 +24,11 @@ package com.github.andrewoma.kwery.core
 
 import java.util.concurrent.atomic.AtomicLong
 
-trait SessionCallback {
+interface SessionCallback {
     fun invoke(session: Session)
 }
 
-public trait Transaction {
+public interface Transaction {
     public var rollbackOnly: Boolean
     public fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
     public fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
@@ -36,7 +36,7 @@ public trait Transaction {
     public val id: Long
 }
 
-public trait ManualTransaction : Transaction {
+public interface ManualTransaction : Transaction {
     public fun commit()
     public fun rollback()
 }
@@ -66,7 +66,7 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
         return handler(name, postRollbackHandlers, ifAbsent)
     }
 
-    [suppress("UNCHECKED_CAST")]
+    @suppress("UNCHECKED_CAST")
     fun handler(name: String, handlers: MutableMap<String, SessionCallback>, ifAbsent: () -> SessionCallback): SessionCallback {
         return handlers.getOrPut(name) { ifAbsent() }
     }

@@ -49,7 +49,7 @@ public data class Column<T, R>(val property: (T) -> R,
     }
 }
 
-public trait Value<T> {
+public interface Value<T> {
     fun <R> of(column: Column<T, R>): R
 }
 
@@ -71,7 +71,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     public abstract fun idColumns(id: ID): Set<Pair<Column<T, *>, *>>
 
     public fun <R> addColumn(column: Column<T, R>): Column<T, R> {
-        [suppress("UNCHECKED_CAST")]
+        @suppress("UNCHECKED_CAST")
         (allColumns as MutableSet<Any?>).add(column)
         return column
     }
@@ -148,14 +148,14 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         if (nullable) return null
         val value = config.defaults[type]
         checkNotNull(value, "Default value undefined for type: ${type.getName()}")
-        [suppress("UNCHECKED_CAST")]
+        @suppress("UNCHECKED_CAST")
         return value as T
     }
 
     public fun copy(value: T, properties: Map<Column<T, *>, *>): T {
         return create(object : Value<T> {
             override fun <R> of(column: Column<T, R>): R {
-                [suppress("UNCHECKED_CAST")]
+                @suppress("UNCHECKED_CAST")
                 return if (properties.contains(column)) properties[column] as R else column.property(value)
             }
         })
@@ -164,7 +164,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     public fun objectMap(session: Session, value: T, columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
         val map = hashMapOfExpectedSize<String, Any?>(columns.size())
         for (column in columns) {
-            [suppress("UNCHECKED_CAST")]
+            @suppress("UNCHECKED_CAST")
             val col = column as Column<T, Any?>
             map[nf(column)] = col.converter.to(session.connection, column.property(value))
         }
@@ -175,7 +175,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         val idCols = idColumns(id)
         val map = hashMapOfExpectedSize<String, Any?>(idCols.size())
         for ((column, value) in idCols) {
-            [suppress("UNCHECKED_CAST")]
+            @suppress("UNCHECKED_CAST")
             val col = column as Column<T, Any?>
             map[nf(column)] = col.converter.to(session.connection, value)
         }

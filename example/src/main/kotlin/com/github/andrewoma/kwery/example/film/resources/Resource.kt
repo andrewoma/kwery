@@ -26,7 +26,7 @@ import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.fetcher.Node
 import com.github.andrewoma.kwery.mapper.Column
 
-trait Resource {
+interface Resource {
     val fetcher: GraphFetcher
 
     fun <T> parameters(vararg parameters: Pair<Column<T, *>, Any?>): Map<Column<T, *>, Any?> {

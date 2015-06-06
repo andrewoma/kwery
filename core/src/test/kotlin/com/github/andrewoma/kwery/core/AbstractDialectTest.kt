@@ -42,7 +42,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
     override fun afterSessionSetup() {
         initialise(dialect.javaClass.getName()) {
 
-            for (statement in sql.split(";")) {
+            for (statement in sql.split(";".toRegex())) {
                 session.update(statement)
             }
         }
@@ -64,7 +64,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
         val sql = "select id from test where id " + dialect.arrayBasedIn("ids")
         val ids = setOf("b", "c")
-        val idsArray = session.connection.createArrayOf("varchar", ids.copyToArray())
+        val idsArray = session.connection.createArrayOf("varchar", ids.toTypedArray())
         val bound = session.bindParameters(sql, mapOf("ids" to idsArray))
 
         val actual = session.select(bound) { row ->
@@ -129,7 +129,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             "varchar_col" to value.varchar,
             "blob_col" to toBlob(value.blob),
             "clob_col" to toClob(value.clob),
-            "array_col" to session.connection.createArrayOf("int", value.ints.copyToArray())
+            "array_col" to session.connection.createArrayOf("int", value.ints.toTypedArray())
     )
 
     test fun `Allocate ids should contain a unique sequence of ids`() {
@@ -139,7 +139,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         val iterations = 5
 
         val all = hashSetOf<Long>()
-        iterations.times {
+        repeat(iterations) {
             val ids = session.select(dialect.allocateIds(count, "test_seq", "id")) { row ->
                 row.long("id")
             }

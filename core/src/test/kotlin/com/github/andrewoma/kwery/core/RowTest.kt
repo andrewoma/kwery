@@ -64,7 +64,7 @@ open class RowTest : AbstractSessionTest() {
                     'varchar', X'4243', 'clob', ARRAY[1, 2])
         """
         if (!initialised) {
-            for (statement in sql.split(";")) {
+            for (statement in sql.split(";".toRegex())) {
                 session.update(statement)
             }
             initialised = true
@@ -106,27 +106,27 @@ open class RowTest : AbstractSessionTest() {
             assertEquals(2.1.toFloat(), row.float("decimal_col"))
             assertEquals(2.1.toDouble(), row.double("decimal_col"), 0.001)
             assertEquals(BigDecimal("2.1"), row.bigDecimal("decimal_col"))
-            assertEquals(Time(13, 1, 2), row.time("time_col"))
+            assertEquals(Time.valueOf("13:01:02"), row.time("time_col"))
             assertEquals(LocalDate.of(2014, 12, 1), row.date("date_col").toLocalDate())
             assertEquals(LocalDate.of(2014, 12, 1), (row.obj("date_col") as java.sql.Date).toLocalDate())
             assertEquals(LocalDateTime.of(2013, 11, 2, 12, 0, 2, 330000000), row.timestamp("timestamp_col").toLocalDateTime())
             assertEquals("varchar", row.string("varchar_col"))
             assertEquals("clob", row.clob("clob_col").getCharacterStream().readText())
             assertEquals("clob", row.characterStream("clob_col").readText())
-            assertEquals("AB", String(row.bytes("binary_col"), Charsets.US_ASCII).trim())
+            assertEquals("AB", String(row.bytes("binary_col"), Charsets.US_ASCII).trim { it.toInt() == 0 })
             assertEquals("BC", String(row.blob("blob_col").getBinaryStream().readBytes(), Charsets.US_ASCII))
             assertEquals("BC", String(row.binaryStream("blob_col").readBytes(), Charsets.US_ASCII))
             assertEquals(listOf(1, 2), row.array<Int>("array_col"))
         }
     }
 
-    test(expected = javaClass<SQLException>()) fun `invalid column name should be rejected`() {
+    test(expected = SQLException::class) fun `invalid column name should be rejected`() {
         session.select("select * from row_test where int_col is null") { row ->
             row.booleanOrNull("does_not_exist")
         }
     }
 
-    test(expected = javaClass<IllegalArgumentException>()) fun `null encountered fetching a nonnull column should be rejected`() {
+    test(expected = IllegalArgumentException::class) fun `null encountered fetching a nonnull column should be rejected`() {
         session.select("select * from row_test where int_col is null") { row ->
             row.boolean("boolean_col")
         }
