@@ -22,10 +22,28 @@
 
 package com.github.andrewoma.kwery.core
 
+import java.sql.Statement
+
 abstract class StatementOptions(
+        /**
+         * An optional name for the query for logging and monitoring.
+         */
         val name: String? = null,
+
+        /**
+         * Applies the name to SQL as an inline comment for query logs. (TODO - implement)
+         */
         val applyNameToQuery: Boolean = false,
-        val usePreparedStatement: Boolean = true
+
+        /**
+         * If true, always use a prepared statement to execute statements. (TODO - PreparedStatements are always used)
+         */
+        val usePreparedStatement: Boolean = true,
+
+        /**
+         * Invoked before a statement is executed allowing the setting of infrequently used settings such as fetch direction.
+         */
+        val beforeExecution: (Statement) -> Unit = {}
 ) {
     abstract val cacheKey: Any?
 }
@@ -33,29 +51,33 @@ abstract class StatementOptions(
 open class SelectOptions(
         name: String? = null,
         applyNameToQuery: Boolean = false,
-        usePreparedStatement: Boolean = true
-) : StatementOptions(name, applyNameToQuery, usePreparedStatement) {
+        usePreparedStatement: Boolean = true,
+        beforeExecution: (Statement) -> Unit = {}
+) : StatementOptions(name, applyNameToQuery, usePreparedStatement, beforeExecution) {
 
     override val cacheKey = listOf(name, applyNameToQuery)
 
     fun copy(name: String? = this.name,
              applyNameToQuery: Boolean = this.applyNameToQuery,
-             usePreparedStatement: Boolean = this.usePreparedStatement
-    ): SelectOptions = SelectOptions(name, applyNameToQuery, usePreparedStatement)
+             usePreparedStatement: Boolean = this.usePreparedStatement,
+             beforeExecution: (Statement) -> Unit = this.beforeExecution
+    ): SelectOptions = SelectOptions(name, applyNameToQuery, usePreparedStatement, beforeExecution)
 }
 
 open class UpdateOptions(
         name: String? = null,
         applyNameToQuery: Boolean = false,
         usePreparedStatement: Boolean = true,
+        beforeExecution: (Statement) -> Unit = {},
         val useGeneratedKeys: Boolean = false
-) : StatementOptions(name, applyNameToQuery, usePreparedStatement) {
+) : StatementOptions(name, applyNameToQuery, usePreparedStatement, beforeExecution) {
 
     override val cacheKey = name
 
     fun copy(name: String? = this.name,
              applyNameToQuery: Boolean = this.applyNameToQuery,
              usePreparedStatement: Boolean = this.usePreparedStatement,
+             beforeExecution: (Statement) -> Unit = this.beforeExecution,
              useGeneratedKeys: Boolean = this.useGeneratedKeys
-    ): UpdateOptions = UpdateOptions(name, applyNameToQuery, usePreparedStatement, useGeneratedKeys)
+    ): UpdateOptions = UpdateOptions(name, applyNameToQuery, usePreparedStatement, beforeExecution, useGeneratedKeys)
 }

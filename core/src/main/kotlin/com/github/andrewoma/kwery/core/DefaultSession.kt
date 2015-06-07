@@ -241,6 +241,7 @@ public class DefaultSession(override val connection: Connection,
                 Statement.RETURN_GENERATED_KEYS else Statement.NO_GENERATED_KEYS
 
             statement = statement.copy(statement = connection.prepareStatement(statement.preparedSql, generatedKeys))
+            options.beforeExecution(statement.statement!!)
             interceptor.prepared(statement)
 
             val (s, result) = f(statement, statement.statement as PreparedStatement)
