@@ -42,7 +42,7 @@ class FilmActorDao(session: Session) : AbstractDao<FA, FA.Id>(session, filmActor
     fun findByFilmIds(ids: Collection<Int>): List<FilmActor> {
         val name = "findByFilmIds"
         val sql = sql(name) { "select $columns from ${table.name} where film_id in (:ids)" }
-        return session.select(sql, mapOf("ids" to ids), selectOptions(name), table.rowMapper())
+        return session.select(sql, mapOf("ids" to ids), options(name), table.rowMapper())
     }
 }
 

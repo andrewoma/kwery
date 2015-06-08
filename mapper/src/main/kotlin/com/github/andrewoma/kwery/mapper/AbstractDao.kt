@@ -23,9 +23,8 @@
 package com.github.andrewoma.kwery.mapper
 
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
-import com.github.andrewoma.kwery.core.SelectOptions
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.UpdateOptions
+import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.mapper.listener.*
 import java.sql.Array
 import java.sql.SQLFeatureNotSupportedException
@@ -78,24 +77,21 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         return session.connection.createArrayOf(idSqlType, this.toTypedArray<Any>())
     }
 
-    protected fun selectOptions(name: String): SelectOptions =
-            session.defaultSelectOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
-
-    protected fun updateOptions(name: String): UpdateOptions =
-            session.defaultUpdateOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
+    protected fun options(name: String): StatementOptions =
+            session.defaultStatementOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
 
     override fun findById(id: ID, columns: Set<Column<T, *>>): T? {
         val name = "findById"
         val sql = sql(name to columns) {
             "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.equate(" and ")}"
         }
-        return session.select(sql, table.idMap(session, id, nf), selectOptions(name), table.rowMapper(columns)).firstOrNull()
+        return session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
     }
 
     override fun findAll(columns: Set<Column<T, *>>): List<T> {
         val name = "findAll"
         val sql = sql(name to columns) { "select ${columns.join()} \nfrom ${table.name}" }
-        return session.select(sql, mapOf(), selectOptions(name), table.rowMapper(columns))
+        return session.select(sql, mapOf(), options(name), table.rowMapper(columns))
     }
 
     override fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>>): List<T> {
@@ -107,7 +103,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val sql = sql(Triple(name, exampleColumns, columns)) {
             "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
         }
-        return session.select(sql, exampleMap, selectOptions(name), table.rowMapper(columns))
+        return session.select(sql, exampleMap, options(name), table.rowMapper(columns))
     }
 
     private fun isGeneratedKey(value: T?, strategy: IdStrategy): Boolean = when (strategy) {
@@ -161,7 +157,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
         val (sql, parameters) = if (deltaOnly) delta() else full()
 
-        val count = session.update(sql, parameters, updateOptions(name))
+        val count = session.update(sql, parameters, options(name))
         if (count == 0) {
             throw OptimisticLockException("The same version (${oldMap[versionCol]}) of ${table.name} with id ${id(oldValue)} has been updated by another transaction")
         }
@@ -182,7 +178,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     override fun delete(id: ID): Int {
         val name = "delete"
         val sql = sql(name) { "delete from ${table.name} where ${table.idColumns.equate(" and ")}" }
-        val count = session.update(sql, table.idMap(session, id, nf), updateOptions(name))
+        val count = session.update(sql, table.idMap(session, id, nf), options(name))
 
         fireEvent(listOf(DeleteEvent(table, id, null)))
 
@@ -196,7 +192,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
         }
         val newMap = table.objectMap(session, newValue, table.allColumns)
-        return session.update(sql, newMap, updateOptions(name))
+        return session.update(sql, newMap, options(name))
     }
 
     override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {
@@ -211,7 +207,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val sql = sql(name) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
 
         val inserted = if (generateKeys) {
-            val list = session.batchInsert(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name),
+            val list = session.batchInsert(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name),
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
@@ -222,7 +218,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
                 table.copy(value, table.idColumns((id(idValue))).toMap())
             }
         } else {
-            val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, updateOptions(name))
+            val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name))
             val count = counts.fold(0) { sum, value -> sum + value }
             check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
             values
@@ -242,11 +238,11 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val parameters = table.objectMap(session, value, columns, nf)
 
         val (count, inserted) = if (generateKeys) {
-            val (count, key) = session.insert(sql, parameters, updateOptions(name), { table.rowMapper(table.idColumns, nf)(it) })
+            val (count, key) = session.insert(sql, parameters, options(name), { table.rowMapper(table.idColumns, nf)(it) })
             check(count == 1, "${name} failed to insert any rows")
             count to table.copy(value, table.idColumns(id(key)).toMap()) // Generated key
         } else {
-            val count = session.update(sql, parameters, updateOptions(name))
+            val count = session.update(sql, parameters, options(name))
             count to value
         }
         check(count == 1, "${name} failed to insert any rows")
@@ -274,7 +270,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             }
             val array = ids.copyToSqlArray()
             try {
-                session.select(sql, mapOf("ids" to array), selectOptions(name), table.rowMapper(columns))
+                session.select(sql, mapOf("ids" to array), options(name), table.rowMapper(columns))
             } finally {
                 freeIfSupported(array)
             }
@@ -282,7 +278,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             val sql = sql(name to columns) {
                 "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
             }
-            session.select(sql, mapOf("ids" to ids), selectOptions(name), table.rowMapper(columns))
+            session.select(sql, mapOf("ids" to ids), options(name), table.rowMapper(columns))
         }
 
         return values.map { id(it) to it }.toMap()
@@ -307,7 +303,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
         }
 
-        val counts = session.batchUpdate(sql, updates, updateOptions(name))
+        val counts = session.batchUpdate(sql, updates, options(name))
 
         check(counts.size() == values.size(), "${name} updated ${counts.size()} rows, but expected ${values.size()}")
 
@@ -352,7 +348,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and ${versionCol} = :$oldVersionParam"
         }
 
-        val counts = session.batchUpdate(sql, updates.map { it.first }, updateOptions(name))
+        val counts = session.batchUpdate(sql, updates.map { it.first }, options(name))
         check(counts.size() == values.size(), "${name} updated ${counts.size()} rows, but expected ${values.size()}")
         for ((count, value) in counts.zip(values)) {
             if (count == 0) {
@@ -373,7 +369,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         require(table.idColumns.size() == 1, "Compound ids are not supported")
 
         val sql = session.dialect.allocateIds(count, table.sequence!!, table.idColumns.first().name)
-        return session.select(sql, mapOf(), selectOptions("allocateIds")) { row ->
+        return session.select(sql, mapOf(), options("allocateIds")) { row ->
             id(table.rowMapper(table.idColumns, nf)(row))
         }
     }

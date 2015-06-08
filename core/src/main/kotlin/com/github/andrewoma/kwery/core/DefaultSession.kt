@@ -46,8 +46,8 @@ import kotlin.support.AbstractIterator
 public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                            override val defaultSelectOptions: SelectOptions = SelectOptions(),
-                            override val defaultUpdateOptions: UpdateOptions = UpdateOptions()) : Session {
+                            override val defaultStatementOptions: StatementOptions = StatementOptions()
+                            ) : Session {
 
     companion object {
         private val namedQueryCache = ConcurrentHashMap<StatementCacheKey, BoundQuery>()
@@ -58,7 +58,7 @@ public class DefaultSession(override val connection: Connection,
 
     var transaction: Transaction? = null
 
-    override public fun <R> select(sql: String, parameters: Map<String, Any?>, options: SelectOptions, mapper: (Row) -> R): List<R> {
+    override public fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
 
@@ -78,7 +78,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions): List<Int> {
+    override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
         require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
 
         return withPreparedStatement(sql, parametersList, options) { statement, ps ->
@@ -92,7 +92,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
+    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
         require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
 
         return withPreparedStatement(sql, parametersList, options.copy(useGeneratedKeys = true)) { statement, ps ->
@@ -117,7 +117,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun update(sql: String, parameters: Map<String, Any?>, options: UpdateOptions): Int {
+    override public fun update(sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -126,7 +126,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun <K> insert(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
+    override public fun <K> insert(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
         return withPreparedStatement(sql, listOf(parameters), options.copy(useGeneratedKeys = true)) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -144,7 +144,7 @@ public class DefaultSession(override val connection: Connection,
 
     override fun <R> sequence(sql: String,
                               parameters: Map<String, Any?>,
-                              options: SelectOptions,
+                              options: StatementOptions,
                               f: (Sequence<Row>) -> R): R {
 
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
@@ -178,7 +178,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun forEach(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit): Unit {
+    override public fun forEach(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit): Unit {
         withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()
@@ -231,17 +231,13 @@ public class DefaultSession(override val connection: Connection,
             statement = interceptor.construct(statement)
 
             statement = statement.copy(inClauseSizes = inClauseSizes(parameters))
-            val namedQuery = namedQueryCache.getOrPut(StatementCacheKey(sql, statement.inClauseSizes, options.cacheKey)) {
+            val namedQuery = namedQueryCache.getOrPut(StatementCacheKey(sql, statement.inClauseSizes, options.name to options.applyNameToQuery)) {
                 statement = statement.copy(sql = sql.trimMargin())
                 BoundQuery(statement.sql, statement.inClauseSizes)
             }
             statement = interceptor.preparing(statement.copy(preparedSql = namedQuery.query, preparedParameters = namedQuery.bindings))
 
-            val generatedKeys = if (options is UpdateOptions && options.useGeneratedKeys)
-                Statement.RETURN_GENERATED_KEYS else Statement.NO_GENERATED_KEYS
-
-            statement = statement.copy(statement = connection.prepareStatement(statement.preparedSql, generatedKeys))
-            options.beforeExecution(statement.statement!!)
+            statement = statement.copy(statement = prepareStatement(statement.preparedSql!!, options))
             interceptor.prepared(statement)
 
             val (s, result) = f(statement, statement.statement as PreparedStatement)
@@ -256,6 +252,36 @@ public class DefaultSession(override val connection: Connection,
                 statement.statement?.close()
             }
         }
+    }
+
+    private fun prepareStatement(sql: String, options: StatementOptions): PreparedStatement {
+        val statement = if (options.useGeneratedKeys || options.generatedKeyColumns.isNotEmpty()) {
+            if (options.generatedKeyColumns.isNotEmpty()) {
+                connection.prepareStatement(sql, options.generatedKeyColumns.toTypedArray())
+            } else {
+                connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+            }
+        } else if (options.resultSetHoldability == null) {
+            connection.prepareStatement(sql, options.resultSetType, options.resultSetConcurrency)
+        } else {
+            connection.prepareStatement(sql, options.resultSetType, options.resultSetConcurrency, options.resultSetHoldability)
+        }
+
+        statement.setFetchSize(options.fetchSize)
+        statement.setFetchDirection(options.fetchDirection)
+        statement.setPoolable(options.poolable)
+        statement.setMaxFieldSize(options.maxFieldSize)
+        statement.setQueryTimeout(options.queryTimeout)
+
+        if (options.maxRows <= Integer.MAX_VALUE) {
+            statement.setMaxRows(options.maxRows.toInt())
+        } else {
+            statement.setLargeMaxRows(options.maxRows)
+        }
+
+        options.beforeExecution(statement)
+
+        return statement
     }
 
     private fun bindParameters(parameters: Map<String, Any?>, statement: ExecutingStatement): PreparedStatement {

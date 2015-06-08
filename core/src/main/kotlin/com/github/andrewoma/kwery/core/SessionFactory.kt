@@ -30,14 +30,14 @@ import javax.sql.DataSource
 public class SessionFactory(val dataSource: DataSource,
                             val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                            val defaultSelectOptions: SelectOptions = SelectOptions(),
-                            val defaultUpdateOptions: UpdateOptions = UpdateOptions()
+                            val defaultStatementOptions: StatementOptions = StatementOptions()
+
 ) {
 
     public fun <R> use(f: (Session) -> R): R {
         val connection = dataSource.getConnection()
         try {
-            val session = DefaultSession(connection, dialect, interceptor, defaultSelectOptions, defaultUpdateOptions)
+            val session = DefaultSession(connection, dialect, interceptor, defaultStatementOptions)
             return f(session)
         } finally {
             connection.close()

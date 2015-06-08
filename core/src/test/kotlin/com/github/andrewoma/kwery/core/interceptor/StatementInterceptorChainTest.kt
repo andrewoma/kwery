@@ -23,7 +23,7 @@
 package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.ExecutingStatement
-import com.github.andrewoma.kwery.core.SelectOptions
+import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.hsqlDataSource
@@ -33,7 +33,7 @@ import org.junit.Test as test
 
 class StatementInterceptorChainTest {
     val calls = arrayListOf<String>()
-    val statement = ExecutingStatement(ThreadLocalSession(hsqlDataSource, HsqlDialect()), hashMapOf(), "sql", listOf(), SelectOptions())
+    val statement = ExecutingStatement(ThreadLocalSession(hsqlDataSource, HsqlDialect()), hashMapOf(), "sql", listOf(), StatementOptions())
     val chain = StatementInterceptorChain(listOf(Interceptor("1"), Interceptor("2")))
 
     inner class Interceptor(val name: String) : StatementInterceptor {

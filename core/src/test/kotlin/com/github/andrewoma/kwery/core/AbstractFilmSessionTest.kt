@@ -55,7 +55,7 @@ open class AbstractFilmSessionTest : AbstractSessionTest() {
     fun insert(actor: Actor): Actor {
         return if (actor.id == 0) {
             val sql = "insert into actor(first_name, last_name, last_update) values (:first_name, :last_name, :last_update)"
-            val (count, key) = session.insert(sql, actor.toMap(), UpdateOptions(useGeneratedKeys = true)) { it.resultSet.getInt(1) }
+            val (count, key) = session.insert(sql, actor.toMap(), StatementOptions(useGeneratedKeys = true)) { it.resultSet.getInt(1) }
             assertEquals(1, count)
             actor.copy(id = key)
         } else {

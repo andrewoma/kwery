@@ -46,8 +46,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
                                 override val dialect: Dialect,
                                 val interceptor: StatementInterceptor = noOpStatementInterceptor,
                                 val name: String = defaultThreadLocalSessionName,
-                                override val defaultSelectOptions: SelectOptions = SelectOptions(),
-                                override val defaultUpdateOptions: UpdateOptions = UpdateOptions()) : Session {
+                                override val defaultStatementOptions: StatementOptions = StatementOptions()) : Session {
 
     class SessionConfig(val startTransaction: Boolean, val session: DefaultSession?, val transaction: ManualTransaction?)
 
@@ -105,7 +104,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
             val configs = threadLocalSession.get()
             val config = configs.get(name) ?: error("A session has not been initialised for this thread")
             return if (config.session == null) {
-                val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultSelectOptions, defaultUpdateOptions)
+                val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultStatementOptions)
                 val transaction = if (!config.startTransaction) null else session.manualTransaction()
                 configs.put(name, SessionConfig(config.startTransaction, session, transaction))
                 session
@@ -114,31 +113,31 @@ public class ThreadLocalSession(val dataSource: DataSource,
             }
         }
 
-    override fun <R> select(sql: String, parameters: Map<String, Any?>, options: SelectOptions, mapper: (Row) -> R): List<R> {
+    override fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return session.select(sql, parameters, options, mapper)
     }
 
-    override fun update(sql: String, parameters: Map<String, Any?>, options: UpdateOptions): Int {
+    override fun update(sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
         return session.update(sql, parameters, options)
     }
 
-    override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions): List<Int> {
+    override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
         return session.batchUpdate(sql, parametersList, options)
     }
 
-    override fun <K> insert(sql: String, parameters: Map<String, Any?>, options: UpdateOptions, f: (Row) -> K): Pair<Int, K> {
+    override fun <K> insert(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
         return session.insert(sql, parameters, options, f)
     }
 
-    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: UpdateOptions, f: (Row) -> K): List<Pair<Int, K>> {
+    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
         return session.batchInsert(sql, parametersList, options, f)
     }
 
-    override fun forEach(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Row) -> Unit) {
+    override fun forEach(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit) {
         return session.forEach(sql, parameters, options, f)
     }
 
-    override fun <R> sequence(sql: String, parameters: Map<String, Any?>, options: SelectOptions, f: (Sequence<Row>) -> R): R {
+    override fun <R> sequence(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Sequence<Row>) -> R): R {
         return session.sequence(sql, parameters, options, f)
     }
 

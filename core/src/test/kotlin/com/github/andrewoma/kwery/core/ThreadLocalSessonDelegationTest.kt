@@ -103,8 +103,7 @@ class ThreadLocalSessionDelegationTest {
         session.use {
             assertNotNull(session.connection)
             assertNotNull(session.dialect)
-            assertNotNull(session.defaultSelectOptions)
-            assertNotNull(session.defaultUpdateOptions)
+            assertNotNull(session.defaultStatementOptions)
         }
     }
 

@@ -132,6 +132,8 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 [0.1](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery) is available
 in Maven Central and is compatible with Kotlin M11.
 
+0.2-SNAPSHOT is compatible with Kotlin M12.
+
 #### Building
 
 ```bash
@@ -148,11 +150,9 @@ General cleanup and improve test coverage.
 
 Core:
 * Documentation
-* Oracle dialect
 * Support direct execution (currently everything is via a PreparedStatement)
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
 * Make statement cache configurable (so a bounded Guava cache can be used)
-* Add transaction isolation level options
 
 DAO:
 * Documentation

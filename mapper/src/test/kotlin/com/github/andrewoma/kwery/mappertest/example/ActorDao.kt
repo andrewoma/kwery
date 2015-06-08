@@ -50,7 +50,7 @@ class ActorDao(session: Session, val filmActorDao: FilmActorDao) :
     fun findByLastNames(lastNames: List<String>): List<A> {
         val sql = "select $columns from ${table.name} where last_name in (:last_names)"
         val parameters = mapOf("last_names" to lastNames)
-        return session.select(sql, parameters, selectOptions("findByLastNames"), table.rowMapper())
+        return session.select(sql, parameters, options("findByLastNames"), table.rowMapper())
     }
 
     fun findByFilmIds(ids: Collection<Int>): Map<Int, Collection<Actor>> {

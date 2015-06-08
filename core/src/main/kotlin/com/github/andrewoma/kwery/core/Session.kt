@@ -32,40 +32,38 @@ interface Session {
 
     public val dialect: Dialect
 
-    val defaultSelectOptions: SelectOptions
-
-    val defaultUpdateOptions: UpdateOptions
+    val defaultStatementOptions: StatementOptions
 
     public fun <R> select(sql: String,
                           parameters: Map<String, Any?> = mapOf(),
-                          options: SelectOptions = defaultSelectOptions,
+                          options: StatementOptions = defaultStatementOptions,
                           mapper: (Row) -> R): List<R>
 
     public fun update(sql: String,
                       parameters: Map<String, Any?> = mapOf(),
-                      options: UpdateOptions = defaultUpdateOptions): Int
+                      options: StatementOptions = defaultStatementOptions): Int
 
     public fun <K> insert(sql: String,
                           parameters: Map<String, Any?> = mapOf(),
-                          options: UpdateOptions = defaultUpdateOptions, f: (Row) -> K): Pair<Int, K>
+                          options: StatementOptions = defaultStatementOptions, f: (Row) -> K): Pair<Int, K>
 
     public fun batchUpdate(sql: String,
                            parametersList: List<Map<String, Any?>>,
-                           options: UpdateOptions = defaultUpdateOptions): List<Int>
+                           options: StatementOptions = defaultStatementOptions): List<Int>
 
     public fun <K> batchInsert(sql: String,
                                parametersList: List<Map<String, Any?>>,
-                               options: UpdateOptions = defaultUpdateOptions,
+                               options: StatementOptions = defaultStatementOptions,
                                f: (Row) -> K): List<Pair<Int, K>>
 
     public fun <R> sequence(sql: String,
                             parameters: Map<String, Any?> = mapOf(),
-                            options: SelectOptions = defaultSelectOptions,
+                            options: StatementOptions = defaultStatementOptions,
                             f: (Sequence<Row>) -> R): R
 
     public fun forEach(sql: String,
                        parameters: Map<String, Any?> = mapOf(),
-                       options: SelectOptions = defaultSelectOptions,
+                       options: StatementOptions = defaultStatementOptions,
                        f: (Row) -> Unit): Unit
 
     /**

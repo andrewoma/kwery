@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import com.github.andrewoma.kwery.core.SelectOptions
 import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.mapper.*
 import java.time.temporal.ChronoUnit
 import com.github.andrewoma.kwery.mappertest.example.Film as F
@@ -70,7 +70,7 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
 
         val params = filmTable.objectMap(session, Film().copy(title = title, releaseYear = releaseYear))
 
-        return session.select(sql, params, SelectOptions("findWithActors"), combine(f.mapper, a.mapper))
+        return session.select(sql, params, StatementOptions("findWithActors"), combine(f.mapper, a.mapper))
                 .join { film, actors -> film.copy(actors = actors.toSet()) }
                 .firstOrNull()
     }
@@ -90,7 +90,7 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
         """
         val params = filmTable.objectMap(session, Film().copy(title = title, releaseYear = releaseYear))
 
-        return session.select(sql, params, SelectOptions("findWithLanguages")) { row ->
+        return session.select(sql, params, StatementOptions("findWithLanguages")) { row ->
             f.mapper(row).copy(language = l.mapper(row), originalLanguage = ol.optionalMapper(row))
         }.firstOrNull()
     }
