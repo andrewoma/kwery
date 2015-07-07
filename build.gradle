@@ -106,6 +106,18 @@ project(':core') {
     }
 }
 
+project(':transactional') {
+    dependencies {
+        compile project(':core')
+        compile 'aopalliance:aopalliance:1.0'
+        compile 'cglib:cglib-nodep:3.1'
+        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
+        testCompile 'org.apache.logging.log4j:log4j-core:2.1'
+        testCompile 'ch.qos.logback:logback-classic:1.1.2'
+        testCompile 'org.hsqldb:hsqldb:2.3.2'
+    }
+}
+
 project(':example') {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'application'

@@ -1,0 +1,1 @@
+General purpose transactional interceptors for kwery 
