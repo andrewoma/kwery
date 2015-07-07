@@ -53,17 +53,23 @@ transactional open class ConcreteService(val session: Session) {
         insert(session, value)
         throw IllegalArgumentException("ignore")
     }
+
+    transactional(manual = true) open fun manualTransactions() {
+        session.transaction { insert(session, "value1") }
+        session.transaction { insert(session, "value2"); session.currentTransaction?.rollbackOnly = true }
+        session.transaction { insert(session, "value3") }
+    }
 }
 
 fun insert(session: Session, value: String) = session.update("insert into test(value) values (:value)", mapOf("value" to value))
 
 class TransactionalInterceptorTest {
     companion object {
-        val dataSource = DataSource().let { ds ->
-            ds.setDefaultAutoCommit(true)
-            ds.setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
-            ds.setUrl("jdbc:hsqldb:mem:transactional_test")
-            ds
+        val dataSource = with(DataSource()) {
+            setDefaultAutoCommit(true)
+            setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
+            setUrl("jdbc:hsqldb:mem:transactional_test")
+            this
         }
     }
 
@@ -91,6 +97,11 @@ class TransactionalInterceptorTest {
     test fun `should intercept classes via interfaces`() {
         interfaceService.insert("value")
         assertEquals(findAll(), listOf("value"))
+    }
+
+    test fun `should support manual transactions`() {
+        service.manualTransactions()
+        assertEquals(findAll(), listOf("value1", "value3"))
     }
 
     test fun `should rollback on exceptions by default`() {

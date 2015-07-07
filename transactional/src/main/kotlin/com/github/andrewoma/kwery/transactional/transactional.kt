@@ -30,6 +30,9 @@ Target(ElementType.METHOD, ElementType.TYPE)
 Retention(RetentionPolicy.RUNTIME)
 Inherited
 annotation public class transactional(
+        /**
+         * The name of the data source to use in the transaction
+         */
         public val name: String = defaultThreadLocalSessionName,
 
         /**
@@ -40,5 +43,11 @@ annotation public class transactional(
         /**
          * A list of exceptions to *not* rollback on. Ignore exceptions take precedence over rollbackOn
          */
-        public val ignore: Array<KClass<out Exception>> = arrayOf()
+        public val ignore: Array<KClass<out Exception>> = arrayOf(),
+
+        /**
+         * If true, a session will be initialised but a transaction will not be started.
+         * Transactions can be manually managed via the Session transaction functions.
+         */
+        public val manual: Boolean = false
 )

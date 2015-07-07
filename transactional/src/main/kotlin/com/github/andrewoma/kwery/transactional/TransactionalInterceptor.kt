@@ -43,7 +43,7 @@ class TransactionalInterceptor : MethodInterceptor {
     private fun invoke(transactional: transactional, invocation: MethodInvocation): Any? {
         var commit = true
         try {
-            ThreadLocalSession.initialise(true, transactional.name)
+            ThreadLocalSession.initialise(!transactional.manual, transactional.name)
             return invocation.proceed()
         } catch(e: Exception) {
             commit = !rollbackOnException(transactional, e)
@@ -64,8 +64,7 @@ class TransactionalInterceptor : MethodInterceptor {
     }
 
     private fun rollbackOnException(transactional: transactional, e: Exception): Boolean {
-        val rollback = isInstance(transactional.rollbackOn, e)
-        return rollback && !isInstance(transactional.ignore, e)
+        return isInstance(transactional.rollbackOn, e) && !isInstance(transactional.ignore, e)
     }
 
     private fun getTransactional(invocation: MethodInvocation) =
