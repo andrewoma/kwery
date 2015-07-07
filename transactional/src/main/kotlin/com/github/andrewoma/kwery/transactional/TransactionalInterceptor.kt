@@ -26,6 +26,7 @@ import com.github.andrewoma.kwery.core.ThreadLocalSession
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
 import kotlin.reflect.KClass
+import kotlin.reflect.jvm.java
 
 class TransactionalInterceptor : MethodInterceptor {
 
@@ -52,20 +53,15 @@ class TransactionalInterceptor : MethodInterceptor {
         }
     }
 
-    // -----------------------------------------------------------------------------------------------------------------
     // Hacks to work around annotations KClass to Class conversions not working in M12
-    // -----------------------------------------------------------------------------------------------------------------
-    val KClass<*>.jClass: Class<*>
-        get() = this.javaClass.getDeclaredField("jClass").let { it.setAccessible(true); it }.get(this) as Class<*>
-
-
+    // TODO - Remove this when conversions via filter functions don't throw ClassCastException
     private fun isInstance(exceptions: Array<KClass<out Exception>>, exception: Exception): Boolean {
         for (e in exceptions) {
-            if (e.jClass.isInstance(exception)) return true
+            val clazz: Class<out Exception> = e.java
+            if (clazz.isInstance(exception)) return true
         }
         return false
     }
-    // -----------------------------------------------------------------------------------------------------------------
 
     private fun rollbackOnException(transactional: transactional, e: Exception): Boolean {
         val rollback = isInstance(transactional.rollbackOn, e)
