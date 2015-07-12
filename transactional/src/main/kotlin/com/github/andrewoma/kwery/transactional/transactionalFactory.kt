@@ -30,7 +30,7 @@ import org.aopalliance.intercept.MethodInvocation
 import kotlin.reflect.KMemberProperty
 import kotlin.reflect.jvm.javaField
 
-object transactionalProxyFactory {
+object transactionalFactory {
     fun <T> fromInterfaces(obj: T, interfaces: Array<Class<*>> = obj.javaClass.getInterfaces()): T {
         val enhancer = Enhancer()
         enhancer.setInterfaces(interfaces)
@@ -48,7 +48,7 @@ object transactionalProxyFactory {
         return enhancer.create() as T
     }
 
-    fun <T> fromClass(obj: T, args: List<KMemberProperty<T, *>>): T {
+    fun <T> fromClass(obj: T, vararg args: KMemberProperty<T, *>): T {
         return fromClass(obj, args.map { it.javaField!!.getType() }.toTypedArray(), args.map { it.get(obj) }.toTypedArray())
     }
 

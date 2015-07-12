@@ -28,6 +28,7 @@ import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import org.apache.tomcat.jdbc.pool.DataSource
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.fail
 import org.junit.Before as before
 import org.junit.Test as test
@@ -61,6 +62,27 @@ transactional open class ConcreteService(val session: Session) {
     }
 }
 
+transactional open class Outer(val session: Session, val inner: Inner) {
+    open fun bothInsert(innerValue: String, outerValue: String) {
+        insert(session, outerValue)
+        inner.insert(innerValue)
+    }
+    open fun outerFails(innerValue: String, outerValue: String) {
+        inner.insert(outerValue)
+        throw Exception("outer")
+
+    }
+    open fun innerFails(innerValue: String, outerValue: String) {
+        insert(session, outerValue)
+        inner.fail()
+    }
+}
+
+transactional open class Inner(val session: Session) {
+    open fun insert(value: String) = insert(session, value)
+    open fun fail() = throw Exception("inner")
+}
+
 fun insert(session: Session, value: String) = session.update("insert into test(value) values (:value)", mapOf("value" to value))
 
 class TransactionalInterceptorTest {
@@ -82,8 +104,13 @@ class TransactionalInterceptorTest {
     }
 
     val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
-    val interfaceService: Service = transactionalProxyFactory.fromInterfaces(ServiceWithInterface(session))
-    val service: ConcreteService = transactionalProxyFactory.fromClass(ConcreteService(session), listOf(ConcreteService::session))
+
+    val interfaceService: Service = transactionalFactory.fromInterfaces(ServiceWithInterface(session))
+    val service: ConcreteService = transactionalFactory.fromClass(ConcreteService(session), ConcreteService::session)
+
+    val inner = transactionalFactory.fromClass(Inner(session), Inner::session)
+    val outer = transactionalFactory.fromClass(Outer(session, inner), Outer::session, Outer::inner)
+
 
     fun findAll() = session.use(true) {
         session.select("select value from test") { row -> row.string("value")}
@@ -111,7 +138,7 @@ class TransactionalInterceptorTest {
         } catch(e: Exception) {
         }
 
-        assertEquals(findAll(), listOf<String>())
+        assertTrue(findAll().isEmpty())
     }
 
     test fun `should commit on ignored exceptions`() {
@@ -122,5 +149,28 @@ class TransactionalInterceptorTest {
         }
 
         assertEquals(findAll(), listOf("value"))
+    }
+
+    test fun `should support nested services`() {
+        outer.bothInsert("value1", "value2")
+        assertEquals(findAll().toSet(), setOf("value1", "value2"))
+    }
+
+    test fun `should roll back both if inner service fails`() {
+        try {
+            outer.innerFails("value1", "value2")
+            fail()
+        } catch(e: Exception) {
+        }
+        assertTrue(findAll().isEmpty())
+    }
+
+    test fun `should roll back both if outer service fails`() {
+        try {
+            outer.outerFails("value1", "value2")
+            fail()
+        } catch(e: Exception) {
+        }
+        assertTrue(findAll().isEmpty())
     }
 }
