@@ -125,6 +125,22 @@ partial selects and joins as required.
 The [example module](example) demonstrates using Kwery
 to expose a simple model via RESTful web services via [DropWizard](http://dropwizard.io/).
 
+#### Transactional
+
+The [transactional module](transactional) adds general purpose transaction interceptors. e.g.
+
+```kotlin
+transactional open class MyService(val session: Session) {
+    open fun foo() {}
+}
+
+val session = ThreadLocalSession(dataSource, HsqlDialect())
+val service = transactionalFactory.fromClass(MyService(session), MyService::session)
+service.foo() // Now calls to service automatically occur within a transaction
+```
+
+See the [readme](transactional) for more information.
+
 #### Status
 
 Kwery is unstable. It's currently being developed for a side project, so features are added as required.
