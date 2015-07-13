@@ -1,0 +1,1 @@
+The transactional module provides transactional interceptors for kwery with Jersey 2.

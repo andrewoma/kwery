@@ -15,5 +15,6 @@ include 'mapper'
 include 'tomcat-pool'
 include 'example'
 include 'transactional'
+include 'transactional-jersey'
 
 rootProject.name = 'kwery'

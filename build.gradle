@@ -118,6 +118,17 @@ project(':transactional') {
     }
 }
 
+project(':transactional-jersey') {
+    dependencies {
+        compile project(':core')
+        compile 'org.glassfish.jersey.core:jersey-server:2.16'
+        testCompile 'org.apache.tomcat:tomcat-jdbc:8.0.20'
+        testCompile 'org.apache.logging.log4j:log4j-core:2.1'
+        testCompile 'ch.qos.logback:logback-classic:1.1.2'
+        testCompile 'org.hsqldb:hsqldb:2.3.2'
+    }
+}
+
 project(':example') {
     apply plugin: 'com.github.johnrengelman.shadow'
     apply plugin: 'application'
