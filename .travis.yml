@@ -2,9 +2,6 @@ language: java
 jdk:
 - oraclejdk8
 
-#before_install:
-#- travis/install-kommon.sh
-
 before_script:
 - psql -c 'create database kwery;' -U postgres
 
