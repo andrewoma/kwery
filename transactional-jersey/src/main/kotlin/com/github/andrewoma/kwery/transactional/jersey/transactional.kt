@@ -24,6 +24,7 @@ package com.github.andrewoma.kwery.transactional.jersey
 
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 import com.github.andrewoma.kwery.core.defaultThreadLocalSessionName
+import org.glassfish.jersey.server.model.Resource
 import org.glassfish.jersey.server.model.ResourceMethod
 import org.glassfish.jersey.server.monitoring.ApplicationEvent
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener
@@ -57,24 +58,23 @@ public class TransactionListener : ApplicationEventListener {
 
     override fun onEvent(event: ApplicationEvent) {
         if (event.getType() == ApplicationEvent.Type.INITIALIZATION_APP_FINISHED) {
-
-            for (resource in event.getResourceModel().getResources()) {
-                for (method in resource.getAllMethods()) {
-                    register(method)
-                }
-
-                for (childResource in resource.getChildResources()) {
-                    for (method in childResource.getAllMethods()) {
-                        register(method)
-                    }
-                }
-            }
+            registerResources(event.getResourceModel().getResources())
         }
     }
 
-    private fun register(method: ResourceMethod) {
+    private fun registerResources(resources: List<Resource>) {
+        for (resource in resources) {
+            val classAnnotation = resource.getAllMethods().firstOrNull()?.getInvocable()?.getDefinitionMethod()?.getDeclaringClass()?.getAnnotation(javaClass<transactional>())
+            for (method in resource.getAllMethods()) {
+                register(method, classAnnotation)
+            }
+            registerResources(resource.getChildResources())
+        }
+    }
+
+    private fun register(method: ResourceMethod, transactional: transactional?) {
         val definitionMethod = method.getInvocable().getDefinitionMethod()
-        val annotation = definitionMethod.getAnnotation(javaClass<transactional>())
+        val annotation = definitionMethod.getAnnotation(javaClass<transactional>()) ?: transactional
         if (annotation != null) {
             transactionals[definitionMethod] = annotation
         }
