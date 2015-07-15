@@ -126,6 +126,8 @@ project(':transactional-jersey') {
         testCompile 'org.apache.logging.log4j:log4j-core:2.1'
         testCompile 'ch.qos.logback:logback-classic:1.1.2'
         testCompile 'org.hsqldb:hsqldb:2.3.2'
+        testCompile 'org.glassfish.jersey.core:jersey-server:2.16'
+        testCompile 'io.dropwizard:dropwizard-testing:0.8.0'
     }
 }
 
