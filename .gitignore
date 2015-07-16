@@ -17,4 +17,5 @@
 /mapper/build
 /tomcat-pool/build
 /transactional/build
+/transactional-jersey/build
 target
