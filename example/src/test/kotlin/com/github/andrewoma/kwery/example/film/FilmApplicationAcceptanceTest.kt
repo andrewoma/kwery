@@ -31,7 +31,6 @@ import javax.ws.rs.client.ClientBuilder
 import kotlin.test.assertEquals
 import org.junit.Test as test
 
-Ignore
 class FilmApplicationAcceptanceTest {
     companion object {
         ClassRule public val rule: DropwizardAppRule<FilmConfiguration> =
