@@ -12,15 +12,19 @@ buildscript {
         dropwizardVersion = '0.9.0-rc3'
         jacksonVersion = '2.6.0-rc4'
         h2Version = '1.4.187'
+        aopVersion = '1.0'
+        cglibVersion = '3.1'
     }
     repositories {
         jcenter()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.1'
-        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
-        classpath 'net.researchgate:gradle-release:2.1.2'
+        classpath(
+                "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion",
+                'com.github.jengelman.gradle.plugins:shadow:1.2.1',
+                'com.bmuschko:gradle-nexus-plugin:2.3.1',
+                'net.researchgate:gradle-release:2.1.2'
+        )
     }
 }
 
@@ -42,13 +46,16 @@ subprojects {
 
     repositories {
         mavenCentral()
-//        mavenLocal()
     }
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-        compile "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-        compile "org.slf4j:slf4j-api:$slf4jVersion"
-        testCompile "junit:junit:$junitVersion"
+        compile(
+                "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion",
+                "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
+                "org.slf4j:slf4j-api:$slf4jVersion",
+        )
+        testCompile(
+                "junit:junit:$junitVersion",
+        )
     }
 
     task coverage(dependsOn: 'jacocoTestReport') << {
@@ -82,59 +89,81 @@ subprojects {
 
 project(':fetcher') {
     dependencies {
-        testCompile "com.github.andrewoma.kommon:kommon:$kommonVersion"
+        testCompile(
+                "com.github.andrewoma.kommon:kommon:$kommonVersion",
+        )
     }
 }
 
 project(':tomcat-pool') {
     dependencies {
-        compile "org.apache.tomcat:tomcat-jdbc:$tomcatVersion"
-        testCompile "com.h2database:h2:$h2Version"
+        compile(
+                "org.apache.tomcat:tomcat-jdbc:$tomcatVersion",
+        )
+        testCompile(
+                "com.h2database:h2:$h2Version",
+        )
     }
 }
 
 project(':mapper') {
     dependencies {
-        compile project(':core')
-        compile "com.github.andrewoma.kommon:kommon:$kommonVersion"
-        testCompile "org.apache.tomcat:tomcat-jdbc:$tomcatVersion"
-        testCompile "ch.qos.logback:logback-classic:$logbackVersion"
-        testCompile "org.hsqldb:hsqldb:$hsqlVersion"
-        testCompile project(':fetcher')
+        compile(
+                project(':core'),
+                "com.github.andrewoma.kommon:kommon:$kommonVersion",
+        )
+        testCompile(
+                project(':fetcher'),
+                "org.apache.tomcat:tomcat-jdbc:$tomcatVersion",
+                "ch.qos.logback:logback-classic:$logbackVersion",
+                "org.hsqldb:hsqldb:$hsqlVersion",
+        )
     }
 }
 
 project(':core') {
     dependencies {
-        compile "com.github.andrewoma.kommon:kommon:$kommonVersion"
-        testCompile "org.apache.tomcat:tomcat-jdbc:$tomcatVersion"
-        testCompile "ch.qos.logback:logback-classic:$logbackVersion"
-        testCompile "org.hsqldb:hsqldb:$hsqlVersion"
-        testCompile "org.postgresql:postgresql:$postgresVersion"
-        testCompile project(':tomcat-pool')
+        compile(
+                "com.github.andrewoma.kommon:kommon:$kommonVersion",
+        )
+        testCompile(
+                project(':tomcat-pool'),
+                "org.apache.tomcat:tomcat-jdbc:$tomcatVersion",
+                "ch.qos.logback:logback-classic:$logbackVersion",
+                "org.hsqldb:hsqldb:$hsqlVersion",
+                "org.postgresql:postgresql:$postgresVersion",
+        )
     }
 }
 
 project(':transactional') {
     dependencies {
-        compile project(':core')
-        compile 'aopalliance:aopalliance:1.0'
-        compile 'cglib:cglib-nodep:3.1'
-        testCompile "org.apache.tomcat:tomcat-jdbc:$tomcatVersion"
-        testCompile "ch.qos.logback:logback-classic:$logbackVersion"
-        testCompile "org.hsqldb:hsqldb:$hsqlVersion"
+        compile(
+                project(':core'),
+                "aopalliance:aopalliance:$aopVersion",
+                "cglib:cglib-nodep:$cglibVersion",
+        )
+        testCompile(
+                "org.apache.tomcat:tomcat-jdbc:$tomcatVersion",
+                "ch.qos.logback:logback-classic:$logbackVersion",
+                "org.hsqldb:hsqldb:$hsqlVersion",
+        )
     }
 }
 
 project(':transactional-jersey') {
     dependencies {
-        compile project(':core')
-        compile "org.glassfish.jersey.core:jersey-server:$jerseyVersion"
-        testCompile "org.apache.tomcat:tomcat-jdbc:$tomcatVersion"
-        testCompile "ch.qos.logback:logback-classic:$logbackVersion"
-        testCompile "org.hsqldb:hsqldb:$hsqlVersion"
-        testCompile "org.glassfish.jersey.core:jersey-server:$jerseyVersion"
-        testCompile "io.dropwizard:dropwizard-testing:$dropwizardVersion"
+        compile(
+                project(':core'),
+                "org.glassfish.jersey.core:jersey-server:$jerseyVersion",
+        )
+        testCompile(
+                "org.apache.tomcat:tomcat-jdbc:$tomcatVersion",
+                "ch.qos.logback:logback-classic:$logbackVersion",
+                "org.hsqldb:hsqldb:$hsqlVersion",
+                "org.glassfish.jersey.core:jersey-server:$jerseyVersion",
+                "io.dropwizard:dropwizard-testing:$dropwizardVersion",
+        )
     }
 }
 
@@ -143,20 +172,24 @@ project(':example') {
     apply plugin: 'application'
 
     dependencies {
-        compile project(':core')
-        compile project(':mapper')
-        compile project(':fetcher')
-        compile project(':tomcat-pool')
-        compile "org.hsqldb:hsqldb:$hsqlVersion"
-        compile "io.dropwizard:dropwizard-core:$dropwizardVersion"
-        compile "io.dropwizard:dropwizard-db:$dropwizardVersion"
-        compile "io.dropwizard:dropwizard-assets:$dropwizardVersion"
-        compile "org.hsqldb:hsqldb:$hsqlVersion"
-        compile "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
-        compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion"
-        compile "org.postgresql:postgresql:$postgresVersion"
-        compile "com.github.andrewoma.kommon:kommon:$kommonVersion"
-        testCompile "io.dropwizard:dropwizard-testing:$dropwizardVersion"
+        compile(
+                project(':core'),
+                project(':mapper'),
+                project(':fetcher'),
+                project(':tomcat-pool'),
+                "org.hsqldb:hsqldb:$hsqlVersion",
+                "io.dropwizard:dropwizard-core:$dropwizardVersion",
+                "io.dropwizard:dropwizard-db:$dropwizardVersion",
+                "io.dropwizard:dropwizard-assets:$dropwizardVersion",
+                "org.hsqldb:hsqldb:$hsqlVersion",
+                "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion",
+                "org.postgresql:postgresql:$postgresVersion",
+                "com.github.andrewoma.kommon:kommon:$kommonVersion",
+        )
+        testCompile(
+                "io.dropwizard:dropwizard-testing:$dropwizardVersion"
+        )
     }
 
     shadowJar {
