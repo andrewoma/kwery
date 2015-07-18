@@ -14,7 +14,8 @@ transactional public class FilmResource(session: Session) : Resource {
     GET fun find(): List<Film> {
         session.select(...)
     }
-}```
+}
+```
 
 The `transaction` annotation accepts 2 parameters:
 - `manual`. If true, a session will be initialised but no transaction will be started. This allows the use

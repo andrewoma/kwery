@@ -154,7 +154,8 @@ transactional public class FilmResource() : Resource {
     GET fun find(): List<Film> {
         ...
     }
-}```
+}
+```
 
 See the [readme](transactional-jersey) for more information.
 
