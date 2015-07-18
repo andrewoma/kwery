@@ -145,7 +145,7 @@ See the [readme](transactional) for more information.
 
 The [transactional-jersey module](transactional-jersey) adds transaction annotations for Jersey.
 
-Registering [src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt](TransactionListener)
+Registering [TransactionListener](src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt)
 as a Jersey provider allows the `transactional` attribute to declare resource classes or methods as transactional.  
 
 ```kotlin
