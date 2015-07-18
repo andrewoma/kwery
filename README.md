@@ -141,6 +141,23 @@ service.foo() // Now calls to service automatically occur within a transaction
 
 See the [readme](transactional) for more information.
 
+#### Transactional for Jersey
+
+The [transactional-jersey module](transactional-jersey) adds transaction annotations for Jersey.
+
+Registering [src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt](TransactionListener)
+as a Jersey provider allows the `transactional` attribute to declare resource classes or methods as transactional.  
+
+```kotlin
+Path("/films")
+transactional public class FilmResource() : Resource {
+    GET fun find(): List<Film> {
+        ...
+    }
+}```
+
+See the [readme](transactional-jersey) for more information.
+
 #### Status
 
 Kwery is unstable. It's currently being developed for a side project, so features are added as required.
