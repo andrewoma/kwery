@@ -166,7 +166,8 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 [0.1](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery) is available
 in Maven Central and is compatible with Kotlin M11.
 
-0.2-SNAPSHOT is compatible with Kotlin M12.
+[0.2](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery) is compatible with Kotlin M12,
+adding transactional interceptors.
 
 #### Building
 
