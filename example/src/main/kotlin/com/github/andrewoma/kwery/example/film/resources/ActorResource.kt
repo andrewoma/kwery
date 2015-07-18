@@ -25,17 +25,17 @@ package com.github.andrewoma.kwery.example.film.resources
 import com.codahale.metrics.annotation.Timed
 import com.github.andrewoma.kwery.example.film.dao.ActorDao
 import com.github.andrewoma.kwery.example.film.dao.actorTable
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
 import com.github.andrewoma.kwery.example.film.model.Actor
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.transactional.jersey.transactional
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
-public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
-    Transaction Timed GET
+    Timed GET
     fun find(QueryParam("firstName") firstName: String?,
              QueryParam("lastName") lastName: String?,
              QueryParam("fetch") root: String?): List<Actor> {
@@ -48,7 +48,7 @@ public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFe
         return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)
     }
 
-    Transaction Timed GET Path("/{id}")
+    Timed GET Path("/{id}")
     fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Actor {
         return actorDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }

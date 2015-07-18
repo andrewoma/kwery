@@ -25,18 +25,18 @@ package com.github.andrewoma.kwery.example.film.resources
 import com.codahale.metrics.annotation.Timed
 import com.github.andrewoma.kwery.example.film.dao.LanguageDao
 import com.github.andrewoma.kwery.example.film.dao.languageTable
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
 import com.github.andrewoma.kwery.example.film.model.Language
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.mapper.IdStrategy
+import com.github.andrewoma.kwery.transactional.jersey.transactional
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
 Path("/languages")
 Produces(MediaType.APPLICATION_JSON)
-public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
-    Transaction Timed GET
+transactional public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
+    Timed GET
     fun find(QueryParam("name") name: String?): List<Language> {
 
         val filter = parameters(languageTable.Name + name)
@@ -44,22 +44,22 @@ public class LanguageResource(val languageDao: LanguageDao, override val fetcher
         return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keySet())
     }
 
-    Transaction Timed GET Path("/{id}")
+    Timed GET Path("/{id}")
     fun findById(PathParam("id") id: Int): Language {
         return languageDao.findById(id) ?: throw NotFoundException("$id not found")
     }
 
-    Transaction Timed POST
+    Timed POST
     fun create(language: Language): Int {
         return languageDao.insert(language.copy(version = 1), IdStrategy.Generated).id
     }
 
-    Transaction Timed PUT Path("/{id}")
+    Timed PUT Path("/{id}")
     fun update(PathParam("id") id: Int, language: Language): Int {
         return languageDao.update(Language(id).copy(version = language.version), language).version
     }
 
-    Transaction Timed DELETE Path("/{id}")
+    Timed DELETE Path("/{id}")
     fun delete(PathParam("id") id: Int) {
         if (languageDao.delete(id) == 0) throw NotFoundException("$id not found")
     }

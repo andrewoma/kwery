@@ -177,6 +177,7 @@ project(':example') {
                 project(':mapper'),
                 project(':fetcher'),
                 project(':tomcat-pool'),
+                project(':transactional-jersey'),
                 "org.hsqldb:hsqldb:$hsqlVersion",
                 "io.dropwizard:dropwizard-core:$dropwizardVersion",
                 "io.dropwizard:dropwizard-db:$dropwizardVersion",

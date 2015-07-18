@@ -25,18 +25,18 @@ package com.github.andrewoma.kwery.example.film.resources
 import com.codahale.metrics.annotation.Timed
 import com.github.andrewoma.kwery.example.film.dao.FilmDao
 import com.github.andrewoma.kwery.example.film.dao.filmTable
-import com.github.andrewoma.kwery.example.film.jersey.Transaction
 import com.github.andrewoma.kwery.example.film.model.Film
 import com.github.andrewoma.kwery.example.film.model.FilmRating
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
+import com.github.andrewoma.kwery.transactional.jersey.transactional
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
 Path("/films")
 Produces(MediaType.APPLICATION_JSON)
-public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
-    Transaction Timed GET
+transactional public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
+    Timed GET
     fun find(QueryParam("title") title: String?,
              QueryParam("releaseYear") releaseYear: Int?,
              QueryParam("rating") rating: FilmRating?,
@@ -51,7 +51,7 @@ public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetch
         return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet()).fetch(root)
     }
 
-    Transaction Timed GET Path("/{id}")
+    Timed GET Path("/{id}")
     fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Film {
         return filmDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }

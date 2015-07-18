@@ -43,7 +43,6 @@ import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilterMixIn
 import com.github.andrewoma.kwery.example.film.jackson.withObjectStream
 import com.github.andrewoma.kwery.example.film.jersey.LoggingListener
 import com.github.andrewoma.kwery.example.film.jersey.SqlExceptionMapper
-import com.github.andrewoma.kwery.example.film.jersey.TransactionListener
 import com.github.andrewoma.kwery.example.film.model.Actor
 import com.github.andrewoma.kwery.example.film.model.Film
 import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
@@ -57,6 +56,7 @@ import com.github.andrewoma.kwery.fetcher.Property
 import com.github.andrewoma.kwery.fetcher.Type
 import com.github.andrewoma.kwery.mapper.Dao
 import com.github.andrewoma.kwery.mapper.listener.*
+import com.github.andrewoma.kwery.transactional.jersey.TransactionListener
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
