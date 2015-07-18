@@ -158,11 +158,11 @@ cd kwery
 ./gradlew check install
 ```
 
-To open in IntelliJ, just open the ``build.gradle`` file and IntelliJ will generate the project automatically.
+Note: The tests require a local postgres database named `kwery`. e.g. `psql -c 'create database kwery;' -U postgres`
+
+To open in IntelliJ, just open the `build.gradle` file and IntelliJ will generate the project automatically.
 
 #### Roadmap
-
-General cleanup and improve test coverage.
 
 Core:
 * Documentation
@@ -182,8 +182,6 @@ Fetcher:
 
 Modules:
 * Dropwizard metrics integration
-* Jersey transaction/session integration (factor out from example)
-* Create a test module, factoring out common code like AbstractSessionTest
 * Separate out JDK 1.8 and build the rest against 1.7+
 
 Robustness/Performance:

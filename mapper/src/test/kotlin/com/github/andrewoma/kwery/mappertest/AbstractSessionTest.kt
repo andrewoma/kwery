@@ -28,6 +28,7 @@ import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import com.github.andrewoma.kwery.core.util.with
 import org.apache.tomcat.jdbc.pool.DataSource
 import org.junit.rules.TestName
 import kotlin.properties.Delegates
@@ -35,12 +36,10 @@ import org.junit.After as after
 import org.junit.Before as before
 import org.junit.Rule as rule
 
-private val testDataSource: DataSource by Delegates.lazy {
-    val dataSource = DataSource()
-    dataSource.setDefaultAutoCommit(true)
-    dataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
-    dataSource.setUrl("jdbc:hsqldb:mem:kwerydao")
-    dataSource
+private val testDataSource = DataSource().with {
+    setDefaultAutoCommit(true)
+    setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
+    setUrl("jdbc:hsqldb:mem:kwerydao")
 }
 
 abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDataSource, val dialect: Dialect = HsqlDialect()) {

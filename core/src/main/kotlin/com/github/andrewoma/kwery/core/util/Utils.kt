@@ -20,21 +20,9 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.core
+package com.github.andrewoma.kwery.core.util
 
-import com.github.andrewoma.kwery.core.util.with
-import org.apache.tomcat.jdbc.pool.DataSource
-import kotlin.properties.Delegates
-
-val hsqlDataSource = DataSource().with {
-    setDefaultAutoCommit(true)
-    setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
-    setUrl("jdbc:hsqldb:mem:kwery")
-}
-
-val postgresDataSource = DataSource().with {
-    setDefaultAutoCommit(true)
-    setDriverClassName("org.postgresql.Driver")
-    setUrl("jdbc:postgresql://localhost:5432/kwery")
-    setJdbcInterceptors("com.github.andrewoma.kwery.tomcat.pool.StatementCache")
+public inline fun <T, R> T.with(f: T.() -> R): T {
+    this.f()
+    return this
 }
