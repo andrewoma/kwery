@@ -1,6 +1,6 @@
 The transactional-jersey module provides transactional interceptors for kwery with Jersey 2.
 
-Registering [src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt](TransactionListener)
+Registering [TransactionListener](src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt)
 as a Jersey provider allows the `transactional` attribute to declare resource classes (or methods) as transactional.
 
 Any `ThreadLocalSessions` will then automatically participate in a transaction. Transactions will
