@@ -5,7 +5,7 @@ to expose a simple model via RESTful web services.
 
 Features:
 * Model persistence using Kwery's mapper module (e.g. [ActorDao](src/main/kotlin/com/github/andrewoma/kwery/example/film/dao/ActorDao.kt))
-* Transactions using a [Jersey interceptor](src/main/kotlin/com/github/andrewoma/kwery/example/film/jersey/Transactions.kt) and Kwery's ThreadLocalSession
+* Transactions using the [transaction-jersey](../transaction-jersey) module
 * Filtering using Kwery's `Dao.findByExample`
 * Graph fetching of related entities on a per request basis
 * Logging of either full statements or summaries on a per request basis
@@ -15,9 +15,9 @@ Here's a snippet from [ActorResource](src/main/kotlin/com/github/andrewoma/kwery
 ```kotlin
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
-public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
-    Transaction Timed GET
+    Timed GET
     fun find(QueryParam("firstName") firstName: String?,
              QueryParam("lastName") lastName: String?,
              QueryParam("fetch") root: String?): List<Actor> {

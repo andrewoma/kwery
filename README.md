@@ -13,7 +13,7 @@ Kwery's manifesto:
 
 #### Core
 
-The core module is a fairly thin wrapper over JDBC, providing support for named parameters, logging
+The [core module](core) is a fairly thin wrapper over JDBC, providing support for named parameters, logging
 and transactions.
 ```kotlin
 class Actor(val firstName: String, val lastName: String, val lastUpdate: Timestamp)
@@ -29,7 +29,7 @@ val actors = session.select(sql, mapOf("first_name" to "Brad")) { row ->
 
 #### Mapper
 
-The mapper module builds on core to provide typical DAO (Data Access Object) functionality.
+The [mapper module](mapper) module builds on core to provide typical DAO (Data Access Object) functionality.
 
 As Kwery believes your domain model shouldn't be tainted by mapping annotations,
 it uses a ``Table`` object to define the mapping between rows and objects.
@@ -72,7 +72,7 @@ a more comprehensive example.
 #### Graph Fetcher
 
 DAOs only fetch data from their linked table by default. To fetch an object graph, using
-a graph fetcher is the recommended method.
+a [graph fetcher](fetcher) is the recommended method.
 
 Given a graph specification, the fetcher attempts to fetch the graph in the minimum
 number of queries possible. It does this by batching together requests for the same
