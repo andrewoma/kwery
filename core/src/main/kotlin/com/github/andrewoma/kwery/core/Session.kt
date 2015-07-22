@@ -56,7 +56,7 @@ interface Session {
                                options: StatementOptions = defaultStatementOptions,
                                f: (Row) -> K): List<Pair<Int, K>>
 
-    public fun <R> sequence(sql: String,
+    public fun <R> asSequence(sql: String,
                             parameters: Map<String, Any?> = mapOf(),
                             options: StatementOptions = defaultStatementOptions,
                             f: (Sequence<Row>) -> R): R

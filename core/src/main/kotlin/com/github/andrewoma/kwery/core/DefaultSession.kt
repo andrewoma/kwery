@@ -142,7 +142,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <R> sequence(sql: String,
+    override fun <R> asSequence(sql: String,
                               parameters: Map<String, Any?>,
                               options: StatementOptions,
                               f: (Sequence<Row>) -> R): R {

@@ -108,7 +108,7 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
 
         val sql = "select actor_id from actor where actor_id in (:ids)"
 
-        val fetched = session.sequence(sql, mapOf("ids" to ids)) { seq ->
+        val fetched = session.asSequence(sql, mapOf("ids" to ids)) { seq ->
             seq.map { it.int("actor_id") }.toSet()
         }
 

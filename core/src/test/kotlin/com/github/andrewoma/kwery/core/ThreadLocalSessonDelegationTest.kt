@@ -95,7 +95,7 @@ class ThreadLocalSessionDelegationTest {
 
             val expected = setOf("hello", "there")
             assertEquals(expected, values)
-            assertEquals(expected, session.sequence(select) { it.map { it.string("value") }.toSet() })
+            assertEquals(expected, session.asSequence(select) { it.map { it.string("value") }.toSet() })
         }
     }
 

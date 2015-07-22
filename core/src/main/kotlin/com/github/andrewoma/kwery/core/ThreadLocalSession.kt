@@ -139,8 +139,8 @@ public class ThreadLocalSession(val dataSource: DataSource,
         return session.forEach(sql, parameters, options, f)
     }
 
-    override fun <R> sequence(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Sequence<Row>) -> R): R {
-        return session.sequence(sql, parameters, options, f)
+    override fun <R> asSequence(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Sequence<Row>) -> R): R {
+        return session.asSequence(sql, parameters, options, f)
     }
 
     override fun bindParameters(sql: String,
