@@ -46,7 +46,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
                                 override val dialect: Dialect,
                                 val interceptor: StatementInterceptor = noOpStatementInterceptor,
                                 val name: String = defaultThreadLocalSessionName,
-                                override val defaultStatementOptions: StatementOptions = StatementOptions()) : Session {
+                                override val defaultOptions: StatementOptions = StatementOptions()) : Session {
 
     class SessionConfig(val startTransaction: Boolean, val session: DefaultSession?, val transaction: ManualTransaction?)
 
@@ -106,7 +106,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
             val configs = threadLocalSession.get()
             val config = configs.get(name) ?: error("A session has not been initialised for this thread")
             return if (config.session == null) {
-                val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultStatementOptions)
+                val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultOptions)
                 val transaction = if (!config.startTransaction) null else session.manualTransaction()
                 configs.put(name, SessionConfig(config.startTransaction, session, transaction))
                 session

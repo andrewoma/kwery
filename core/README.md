@@ -59,11 +59,34 @@ in-built logging interceptors.
 
 [LoggingInterceptor](src/main/kotlin/com/github/andrewoma/kwery/core/interceptor/LoggingInterceptor.kt) logs
 full statements. Varying the log level controls when it logs statements and it includes a threshold to work
-as a "slow query log".
+as a "slow query log". 
+```
+19:50:40.049 [main] DEBUG c.g.a.k.c.i.LoggingInterceptor - 
+insert into film(title, release_year, language_id, original_language_id, length, rating, last_update, special_features) 
+values ('Underworld: Evolution', 2006, 1003, null, 6360000, 'R', '2015-07-22 19:50:40.038', array['Behind the Scenes']);
+Successfully executed FilmDao.insert in 0.311 ms (0.437 ms). Rows affected: 1. TXN: 1
+```
+
+[LoggingSummaryInterceptor](src/main/kotlin/com/github/andrewoma/kwery/core/interceptor/LoggingSummaryInterceptor.kt)
+logs a summary of statements executed. It's designed to collect timings for complex requests, giving a
+breakdown per query. See the [LoggingListener](../example/src/main/kotlin/com/github/andrewoma/kwery/example/film/jersey/LoggingListener.kt)
+in the example project to see how it can be used to wrap http requests:  
+```
+Executed 4 statements in 21.923 ms (closed in 52.205 ms) affecting 6,663 rows using 25.6% of request total (203.573 ms):
+                                Calls    Exec   Close   Rows      
+               FilmDao.findAll      1   3.525  27.283  1,000  52.3%
+    FilmActorDao.findByFilmIds      1  15.701  21.679  5,462  41.5%
+            ActorDao.findByIds      1   1.339   1.748    200   3.3%
+         LanguageDao.findByIds      1   1.357   1.496      1   2.9%
+```
  
 #### Using a Session
- 
+
 ##### Queries
+
+`Session` provides several methods for querying data. 
+
+
 ##### Binding Parameters
 ##### Statement Options
 ##### Updates

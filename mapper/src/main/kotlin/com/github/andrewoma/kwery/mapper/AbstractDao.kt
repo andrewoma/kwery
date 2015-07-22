@@ -78,7 +78,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun options(name: String): StatementOptions =
-            session.defaultStatementOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
+            session.defaultOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
 
     override fun findById(id: ID, columns: Set<Column<T, *>>): T? {
         val name = "findById"

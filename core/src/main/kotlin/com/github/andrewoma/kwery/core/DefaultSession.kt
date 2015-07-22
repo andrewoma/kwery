@@ -46,7 +46,7 @@ import kotlin.support.AbstractIterator
 public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                            override val defaultStatementOptions: StatementOptions = StatementOptions()
+                            override val defaultOptions: StatementOptions = StatementOptions()
                             ) : Session {
 
     companion object {
