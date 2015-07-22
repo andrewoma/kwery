@@ -96,7 +96,7 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
 
         val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.executedTiming} ($closedTiming)${rowCount}"
         val message = if (context.exception == null) {
-            "\nSucessfully executed $timing"
+            "\nSuccessfully executed $timing"
         } else {
             "\nFailed to execute $timing\nReason: ${context.exception.getMessage()}"
         }
