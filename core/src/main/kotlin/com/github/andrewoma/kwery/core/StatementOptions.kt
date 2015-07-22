@@ -25,6 +25,9 @@ package com.github.andrewoma.kwery.core
 import java.sql.ResultSet
 import java.sql.Statement
 
+/**
+ * StatementOptions allows configuration of JDBC statement options
+ */
 data class StatementOptions(
         /**
          * An optional name for the query for logging and monitoring.
@@ -37,7 +40,7 @@ data class StatementOptions(
         val applyNameToQuery: Boolean = false,
 
         /**
-         * If true, always use a prepared statement to execute statements. Not implemented yet.
+         * If true, always use a prepared statement to execute statements. Not implemented yet - always used PreparedStatements
          */
         val usePreparedStatement: Boolean = true,
 

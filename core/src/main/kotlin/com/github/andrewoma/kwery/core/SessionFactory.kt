@@ -27,17 +27,20 @@ import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
 import javax.sql.DataSource
 
+/**
+ * SessionFactory provides sessions from a pooled DataSource
+ */
 public class SessionFactory(val dataSource: DataSource,
                             val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                            val defaultStatementOptions: StatementOptions = StatementOptions()
+                            val defaultOptions: StatementOptions = StatementOptions()
 
 ) {
 
     public fun <R> use(f: (Session) -> R): R {
         val connection = dataSource.getConnection()
         try {
-            val session = DefaultSession(connection, dialect, interceptor, defaultStatementOptions)
+            val session = DefaultSession(connection, dialect, interceptor, defaultOptions)
             return f(session)
         } finally {
             connection.close()

@@ -27,6 +27,10 @@ import java.io.Reader
 import java.math.BigDecimal
 import java.sql.*
 
+/**
+ * Row is a thin wrapper over the JDBC ResultSet to provide clean and consistent
+ * null handling.
+ */
 public class Row(val resultSet: ResultSet) {
     public fun obj(name: String): Any = requireNotNull(resultSet.getObject(name), name)
     public fun objectOrNull(name: String): Any? = resultSet.getObject(name)
@@ -88,9 +92,9 @@ public class Row(val resultSet: ResultSet) {
         return if (resultSet.wasNull()) listOf() else (value.getArray() as Array<Any>).toList() as List<T>
     }
 
-    fun <T : Any> valueOrNull(value: T): T? = if (resultSet.wasNull()) null else value
+    private fun <T : Any> valueOrNull(value: T): T? = if (resultSet.wasNull()) null else value
 
-    fun <T : Any> requireNotNull(value: T?, name: String): T {
+    private fun <T : Any> requireNotNull(value: T?, name: String): T {
         require(!resultSet.wasNull(), "Unexpected null for column '$name'")
         return value!!
     }

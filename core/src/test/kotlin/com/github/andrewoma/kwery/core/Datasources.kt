@@ -22,17 +22,17 @@
 
 package com.github.andrewoma.kwery.core
 
-import com.github.andrewoma.kwery.core.util.with
+import com.github.andrewoma.kwery.core.util.apply
 import org.apache.tomcat.jdbc.pool.DataSource
 import kotlin.properties.Delegates
 
-val hsqlDataSource = DataSource().with {
+val hsqlDataSource = DataSource().apply {
     setDefaultAutoCommit(true)
     setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
     setUrl("jdbc:hsqldb:mem:kwery")
 }
 
-val postgresDataSource = DataSource().with {
+val postgresDataSource = DataSource().apply {
     setDefaultAutoCommit(true)
     setDriverClassName("org.postgresql.Driver")
     setUrl("jdbc:postgresql://localhost:5432/kwery")

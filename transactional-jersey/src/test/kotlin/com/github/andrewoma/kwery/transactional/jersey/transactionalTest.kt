@@ -26,7 +26,7 @@ import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.github.andrewoma.kwery.core.util.with
+import com.github.andrewoma.kwery.core.util.apply
 import io.dropwizard.testing.junit.ResourceTestRule
 import org.apache.tomcat.jdbc.pool.DataSource
 import org.junit.Before
@@ -77,7 +77,7 @@ fun insert(session: Session, value: String) = session.update("insert into test(v
 
 class TransactionalTest {
     companion object {
-        val dataSource = DataSource().with {
+        val dataSource = DataSource().apply {
             setDefaultAutoCommit(true)
             setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
             setUrl("jdbc:hsqldb:mem:transactional_test")

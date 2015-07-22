@@ -28,7 +28,7 @@ import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.github.andrewoma.kwery.core.util.with
+import com.github.andrewoma.kwery.core.util.apply
 import org.apache.tomcat.jdbc.pool.DataSource
 import org.junit.rules.TestName
 import kotlin.properties.Delegates
@@ -36,7 +36,7 @@ import org.junit.After as after
 import org.junit.Before as before
 import org.junit.Rule as rule
 
-private val testDataSource = DataSource().with {
+private val testDataSource = DataSource().apply {
     setDefaultAutoCommit(true)
     setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
     setUrl("jdbc:hsqldb:mem:kwerydao")

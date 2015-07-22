@@ -188,6 +188,7 @@ Core:
 * Support direct execution (currently everything is via a PreparedStatement)
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
 * Make statement cache configurable (so a bounded Guava cache can be used)
+* Use enums in StatementOptions instead of the JDBC ints
 
 DAO:
 * Documentation

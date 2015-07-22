@@ -22,7 +22,7 @@
 
 package com.github.andrewoma.kwery.core.util
 
-public inline fun <T, R> T.with(f: T.() -> R): T {
+public inline fun <T, R> T.apply(f: T.() -> R): T {
     this.f()
     return this
 }
