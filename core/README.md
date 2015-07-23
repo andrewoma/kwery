@@ -101,7 +101,7 @@ val actors = session.select(sql) { row ->
 As shown above, in addition to the query, `select` takes a row function that maps the result to objects.
 The row function has a [Row](src/main/kotlin/com/github/andrewoma/kwery/core/Row.kt) parameter to extract data from the underlying `ResultSet`. 
 
-`Row` is a thin wrapper over `ResultSet` providing a cleaner api for dealing with null results in Kotlin.
+`Row` is a thin wrapper over `ResultSet` providing a cleaner api for dealing with `null` results in Kotlin.
 
 `select` also supports an optional `Map` of parameters.
 
@@ -121,7 +121,7 @@ to set some of less frequently used JDBC settings.
 
 `asSequence` executes a query, providing the results as a sequence for streaming.
 
-This allows flexible processing of large result sets without loading them into memory.
+This allows for flexible processing of large result sets without loading them into memory.
 
 ```kotlin
 val sql = "select first_name, last_name from actor"
@@ -136,8 +136,8 @@ fun writeToFile(actors: Sequence<Pair<String, String>) {
 }
 ```
 
-`Sequences` provide great flexibility for processing, in particular using `map` to transform them into 
-a sequence of 
+`Sequences` provide great flexibility for processing, in particular using `map` to lazily transform them into 
+a sequence of objects.
 
 ###### forEach
 
