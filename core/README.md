@@ -84,11 +84,77 @@ Executed 4 statements in 21.923 ms (closed in 52.205 ms) affecting 6,663 rows us
 
 ##### Queries
 
-`Session` provides several methods for querying data. 
+`Session` provides several methods for querying data, but `select` is the most commonly used method.
 
+###### select
 
-##### Binding Parameters
-##### Statement Options
+`select` executes a query returning the results as `List`.
+
+```kotlin
+val sql = "select first_name, last_name from actor"
+
+val actors = session.select(sql) { row ->
+    row.string("first_name") to row.string("last_name")
+}
+```
+
+As shown above, in addition to the query, `select` takes a row function that maps the result to objects.
+The row function has a [Row](src/main/kotlin/com/github/andrewoma/kwery/core/Row.kt) parameter to extract data from the underlying `ResultSet`. 
+
+`Row` is a thin wrapper over `ResultSet` providing a cleaner api for dealing with null results in Kotlin.
+
+`select` also supports an optional `Map` of parameters.
+
+```kotlin
+val sql = "select first_name, last_name from actor where first_name = :name"
+val params = mapOf("name" to "Bill")
+
+val actors = session.select(sql, params) { row ->
+    row.string("first_name") to row.string("last_name")
+}
+```
+
+Finally, `select` accepts a [StatementOptions](src/main/kotlin/com/github/andrewoma/kwery/core/StatementOptions.kt)
+to set some of less frequently used JDBC settings.
+
+###### asSequence
+
+`asSequence` executes a query, providing the results as a sequence for streaming.
+
+This allows flexible processing of large result sets without loading them into memory.
+
+```kotlin
+val sql = "select first_name, last_name from actor"
+
+session.asSequence(sql) { rows ->
+    val actors = rows.map { row.string("first_name") to row.string("last_name") }
+    writeToFile(actors)    
+}
+
+fun writeToFile(actors: Sequence<Pair<String, String>) {
+    ...
+}
+```
+
+`Sequences` provide great flexibility for processing, in particular using `map` to transform them into 
+a sequence of 
+
+###### forEach
+
+`forEach` is an alternative method for streaming results.
+
+It is slightly more concise than `asSequence`, but less flexible as processing must be done inline.
+
+```kotlin
+val sql = "select first_name, last_name from actor"
+
+val outputStream = ...
+session.forEach(sql) { row ->
+    val actor = row.map { row.string("first_name") to row.string("last_name") }
+    writeToFile(outputStream, actor)    
+}
+```
+
 ##### Updates
 ##### Transactions
 ##### Batching
