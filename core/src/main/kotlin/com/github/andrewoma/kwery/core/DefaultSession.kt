@@ -37,6 +37,8 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.support.AbstractIterator
 
 /**
+ * DefaultSession wraps an single underlying JDBC connection.
+ *
  * DefaultSession is NOT thread safe. It seems the underlying JDBC drivers are patchy with thread safety
  * on a single connection, so it seems a little pointless to make this safe.
  *

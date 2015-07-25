@@ -28,14 +28,42 @@ interface SessionCallback {
     fun invoke(session: Session)
 }
 
+/**
+ * Transaction defines the currently executing transaction
+ */
 public interface Transaction {
+    /**
+     * If set to true, forces the transaction to roll back
+     */
     public var rollbackOnly: Boolean
+
+    /**
+     * Adds a call back that is invoked prior to committing.
+     * Can be used for adding things like audit logging into the current transaction.
+     */
     public fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+
+    /**
+     * Adds a call back that is invoked after committing.
+     * Can be used for adding things like invalidating caches after commit.
+     */
     public fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+
+    /**
+     * Adds a call back that is invoked after rolling back.
+     */
     public fun postRollbackHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+
+    /**
+     * A unique id associated with this transaction.
+     * It has no purpose other than to provide a useful identifier for logging
+     */
     public val id: Long
 }
 
+/**
+ * ManualTransaction allows explicit control over whether to commit or roll back transactions
+ */
 public interface ManualTransaction : Transaction {
     public fun commit()
     public fun rollback()

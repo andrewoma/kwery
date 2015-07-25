@@ -156,5 +156,80 @@ session.forEach(sql) { row ->
 ```
 
 ##### Updates
-##### Transactions
+
+###### update
+
+`update` is essentially identical to `select` except that it returns the count of rows affected instead
+ of a result set.
+ 
+```kotlin
+val sql = "update actor set first_name = :first_name where last_name = 'Bennet'"
+val count = session.update(sql, mapOf("first_name" to "Felicity"))
+```
+
+###### insert
+
+`insert` is a variant of update that supports generated keys.
+
+```sql
+create table test (key serial, value varchar(1000))
+```
+
+```kotlin
+val sql = "insert into test(value) values (:value)"
+val (count, key) = session.insert(insertSql, mapOf("value" to "foo")) { it.int("key") }
+```
+
 ##### Batching
+
+To batch insert or update, use the `batchInsert` and `batchUpdate` functions respectively.
+
+They work the same way as their single row counterparts, but accept and return lists instead.
+
+##### Transactions
+
+Session's `transaction` function starts a transaction for the lifetime of the supplied function block.
+
+```kotlin
+session.transaction {
+    session.update(...)
+    session.update(...)
+}
+```
+
+In the above example, the transaction is implicitly committed unless an exception is thrown.
+
+The `transaction` function also exposes a `Transaction` object that provides the ability 
+force a roll back without throwing an exception.
+
+```kotlin
+session.transaction { t ->
+    if (...) {
+        t.rollbackOnly = true 
+    }
+}
+```
+
+The `transaction` object also allows the registration of handlers to be called back 
+pre commit, post commit and on rollback.
+
+These allow for use cases like synchronising caches post commit, or inserting to audit tables
+pre commit.
+
+```kotlin
+val cache = ...
+
+session.transaction { t ->
+    val actor = insert(Actor("Kate", "Beckinsale"))
+
+    t.postCommitHandler("") {
+        object : SessionCallback {
+            override fun invoke(session: Session) {
+                cache[actor.id] = actor
+            }
+        }
+    }
+}
+```
+
+Note: the commit hook design is under review and will probably change to be registered on the `Session`.
