@@ -23,9 +23,9 @@
 package com.github.andrewoma.kwery.mapper.listener
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.SessionCallback
 import com.github.andrewoma.kwery.core.Transaction
 import com.github.andrewoma.kwery.mapper.Table
+import java.util.concurrent.ConcurrentHashMap
 
 public interface Listener {
     fun onEvent(session: Session, events: List<Event>)
@@ -36,33 +36,34 @@ public data class InsertEvent(table: Table<*, *>, id: Any, val value: Any) : Eve
 public data class DeleteEvent(table: Table<*, *>, id: Any, val value: Any?) : Event(table, id)
 public data class UpdateEvent(table: Table<*, *>, id: Any, val new: Any?, val old: Any?) : Event(table, id)
 
-public class PostCommitListener(handlerFactory: () -> DeferredEventHandler) : DeferredListener(handlerFactory) {
-    override fun handler(transaction: Transaction) =
-            transaction.postCommitHandler(handlerFactory.javaClass.getName()) { handlerFactory() } as DeferredEventHandler
-}
+public abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
+    val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()
 
-public class PreCommitListener(handlerFactory: () -> DeferredEventHandler) : DeferredListener(handlerFactory) {
-    override fun handler(transaction: Transaction) =
-            transaction.preCommitHandler(handlerFactory.javaClass.getName()) { handlerFactory() } as DeferredEventHandler
-}
-
-abstract class DeferredListener(val handlerFactory: () -> DeferredEventHandler) : Listener {
     override fun onEvent(session: Session, events: List<Event>) {
-        val transaction = session.currentTransaction
-        if (transaction == null) return
+        val transaction = session.currentTransaction ?: return
 
-        for (event in events) handler(transaction).addEvent(event)
+        if (!eventsByTransaction.containsKey(transaction.id)) {
+            addCommitHook(transaction)
+        }
+
+        eventsByTransaction[transaction.id].addAll(events)
     }
 
-    abstract fun handler(transaction: Transaction): DeferredEventHandler
-}
+    private fun addCommitHook(transaction: Transaction) {
+        eventsByTransaction[transaction.id] = arrayListOf<Event>()
 
-public abstract class DeferredEventHandler : SessionCallback {
-    protected val events: MutableList<Event> = arrayListOf()
+        val onComplete: (Boolean, Session) -> Unit = { committed, session ->
+            val events = eventsByTransaction[transaction.id]
+            eventsByTransaction.remove(transaction.id)
+            onCommit(committed, events)
+        }
 
-    public open fun supports(event: Event): Boolean = true
-
-    public fun addEvent(event: Event) {
-        if (supports(event)) events.add(event)
+        if (postCommit) {
+            transaction.postCommitHandler(onComplete)
+        } else {
+            transaction.preCommitHandler { session -> onComplete(true, session) }
+        }
     }
+
+    abstract fun onCommit(committed: Boolean, events: List<Event>)
 }

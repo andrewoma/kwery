@@ -161,18 +161,18 @@ class FilmApplication : Application<FilmConfiguration>() {
 
 
         // Add a listener to invalidate on update
-        daos.language.addListener(PostCommitListener {
-            object : DeferredEventHandler() {
-                override fun invoke(session: Session) {
+        daos.language.addListener(object : DeferredListener() {
+            override fun onCommit(committed: Boolean, events: List<Event>) {
+                if (committed) {
                     for (event in events) handleEvent(event)
                 }
+            }
 
-                fun handleEvent(event: Event) {
-                    when (event) {
-                        is UpdateEvent, is DeleteEvent -> {
-                            log.info("Invalidating language cache for id ${event.id}")
-                            caches.language.invalidate(event.id)
-                        }
+            fun handleEvent(event: Event) {
+                when (event) {
+                    is UpdateEvent, is DeleteEvent -> {
+                        log.info("Invalidating language cache for id ${event.id}")
+                        caches.language.invalidate(event.id)
                     }
                 }
             }

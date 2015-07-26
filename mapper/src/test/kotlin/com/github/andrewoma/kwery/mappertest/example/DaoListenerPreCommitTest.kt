@@ -57,7 +57,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
         super.afterSessionSetup()
 
         dao = ActorDao(session, FilmActorDao(session))
-        dao.addListener(PreCommitListener { AuditHandler() })
+        dao.addListener(AuditHandler())
         session.update("delete from actor where actor_id > -1000")
         session.update("delete from audit")
     }
@@ -101,8 +101,8 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
 
     data class Audit(val transactionId: Int, val table: String, val id: Int, val operation: String, val changes: String)
 
-    inner class AuditHandler : DeferredEventHandler() {
-        override fun invoke(session: Session) {
+    inner class AuditHandler : DeferredListener(false) {
+        override fun onCommit(committed: Boolean, events: List<Event>) {
             println("AuditHandler invoked")
 
             val transactionId = ++nextTransactionId

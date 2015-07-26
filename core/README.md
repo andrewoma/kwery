@@ -222,14 +222,10 @@ val cache = ...
 session.transaction { t ->
     val actor = insert(Actor("Kate", "Beckinsale"))
 
-    t.postCommitHandler("") {
-        object : SessionCallback {
-            override fun invoke(session: Session) {
-                cache[actor.id] = actor
-            }
+    t.postCommitHandler { committed, session ->
+        if (committed) {
+            cache[actor.id] = actor
         }
     }
 }
 ```
-
-Note: the commit hook design is under review and will probably change to be registered on the `Session`.

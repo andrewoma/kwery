@@ -42,7 +42,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         super.afterSessionSetup()
 
         dao = ActorDao(session, FilmActorDao(session))
-        dao.addListener(PostCommitListener { CacheHandler() })
+        dao.addListener(CacheListener())
         cache.clear()
         session.update("delete from actor where actor_id > -1000")
     }
@@ -124,9 +124,11 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         cache.values().forEach { assertEquals(tommy, it.name) }
     }
 
-    inner class CacheHandler : DeferredEventHandler() {
-        override fun invoke(session: Session) {
+    inner class CacheListener : DeferredListener() {
+        override fun onCommit(committed: Boolean, events: List<Event>) {
             println("Post commit invoked")
+            if (!committed) return // Don't update unless committed
+
             for (event in events) {
                 println(event)
                 // In the real world, the type would probably be used to lookup the cache

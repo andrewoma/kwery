@@ -24,10 +24,6 @@ package com.github.andrewoma.kwery.core
 
 import java.util.concurrent.atomic.AtomicLong
 
-interface SessionCallback {
-    fun invoke(session: Session)
-}
-
 /**
  * Transaction defines the currently executing transaction
  */
@@ -41,18 +37,14 @@ public interface Transaction {
      * Adds a call back that is invoked prior to committing.
      * Can be used for adding things like audit logging into the current transaction.
      */
-    public fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+    public fun preCommitHandler(preCommit: (Session) -> Unit)
 
     /**
      * Adds a call back that is invoked after committing.
+     * The Boolean parameter is true if committed, false if rolled back.
      * Can be used for adding things like invalidating caches after commit.
      */
-    public fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
-
-    /**
-     * Adds a call back that is invoked after rolling back.
-     */
-    public fun postRollbackHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback
+    public fun postCommitHandler(postCommit: (Boolean, Session) -> Unit)
 
     /**
      * A unique id associated with this transaction.
@@ -82,26 +74,16 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
 
     override val id: Long = transactionId.incrementAndGet()
 
-    override fun postCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
-        return handler(name, postCommitHandlers, ifAbsent)
+    override fun preCommitHandler(preCommit: (Session) -> Unit) {
+        preCommitHandlers.add(preCommit)
     }
 
-    override fun preCommitHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
-        return handler(name, preCommitHandlers, ifAbsent)
+    override fun postCommitHandler(postCommit: (Boolean, Session) -> Unit) {
+        postCommitHandlers.add(postCommit)
     }
 
-    override fun postRollbackHandler(name: String, ifAbsent: () -> SessionCallback): SessionCallback {
-        return handler(name, postRollbackHandlers, ifAbsent)
-    }
-
-    @suppress("UNCHECKED_CAST")
-    fun handler(name: String, handlers: MutableMap<String, SessionCallback>, ifAbsent: () -> SessionCallback): SessionCallback {
-        return handlers.getOrPut(name) { ifAbsent() }
-    }
-
-    private val preCommitHandlers = hashMapOf<String, SessionCallback>()
-    private val postCommitHandlers = hashMapOf<String, SessionCallback>()
-    private val postRollbackHandlers = hashMapOf<String, SessionCallback>()
+    private val preCommitHandlers = arrayListOf<(Session) -> Unit>()
+    private val postCommitHandlers = arrayListOf<(Boolean, Session) -> Unit>()
 
     override public var rollbackOnly: Boolean = false // Can only set to true, can never unset
         set(value) {
@@ -110,16 +92,16 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
 
     override fun commit() {
         check(!rollbackOnly, "Invalid attempt to call commit after transaction is set to rollback only")
-        preCommitHandlers.values().forEach { it(session) }
+        preCommitHandlers.forEach { it(session) }
         session.connection.commit()
+        postCommitHandlers.forEach { it(true, session) }
         session.transaction = null
-        postCommitHandlers.values().forEach { it(session) }
     }
 
     override fun rollback() {
-        session.transaction = null
         session.connection.rollback()
-        postRollbackHandlers.values().forEach { it(session) }
+        postCommitHandlers.forEach { it(false, session) }
+        session.transaction = null
     }
 
     fun <R> withTransaction(f: (Transaction) -> R): R {
