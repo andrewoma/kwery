@@ -28,82 +28,101 @@ import java.sql.Statement
 /**
  * StatementOptions allows configuration of JDBC statement options
  */
-data class StatementOptions(
+public data class StatementOptions(
         /**
          * An optional name for the query for logging and monitoring.
          */
-        val name: String? = null,
+        public val name: String? = null,
 
         /**
          * Applies the name to SQL as an inline comment for query logs.
          */
-        val applyNameToQuery: Boolean = false,
+        public val applyNameToQuery: Boolean = false,
 
         /**
          * If true, always use a prepared statement to execute statements. Not implemented yet - always used PreparedStatements
          */
-        val usePreparedStatement: Boolean = true,
+        public val usePreparedStatement: Boolean = true,
 
         /**
-         * Sets the result set concurrency. Either `ResultSet.CONCUR_READ_ONLY` (default) or `ResultSet.CONCUR_UPDATABLE`
+         * Sets the result set concurrency. Defaults to ReadOnly
          */
-        val resultSetConcurrency: Int = ResultSet.CONCUR_READ_ONLY,
+        public val resultSetConcurrency: ResultSetConcurrency = ResultSetConcurrency.ReadOnly,
 
         /**
-         * Sets the result set type. One of `ResultSet.TYPE_FORWARD_ONLY` (default), `ResultSet.TYPE_SCROLL_INSENSITIVE`,
-         * or `ResultSet.TYPE_SCROLL_SENSITIVE`
+         * Sets the result set type. Defaults to ForwardOnly
          */
-        val resultSetType: Int = ResultSet.TYPE_FORWARD_ONLY,
+        public val resultSetType: ResultSetType = ResultSetType.ForwardOnly,
 
         /**
-         * Sets the result set type. One of `ResultSet.HOLD_CURSORS_OVER_COMMIT` or, `ResultSet.CLOSE_CURSORS_AT_COMMIT`.
-         * Default (null) uses the connection's default holdability
+         * Sets the result set type. Defaults to ConnectionDefault
          */
-        val resultSetHoldability: Int? = null,
+        public val resultSetHoldability: ResultSetHoldability = ResultSetHoldability.ConnectionDefault,
 
         /**
          * If true, use generated keys. Should be mutually exclusive of generatedKeyColumns
          */
-        val useGeneratedKeys: Boolean = false,
+        public val useGeneratedKeys: Boolean = false,
 
         /**
          * The generated key columns. Should be mutually exclusive of useGeneratedKeys
          */
-        val generatedKeyColumns: List<String> = listOf(),
+        public val generatedKeyColumns: List<String> = listOf(),
 
         /**
          * Sets the fetch size hint. Default (0) means the hint is ignored.
          */
-        val fetchSize: Int = 0,
+        public val fetchSize: Int = 0,
 
         /**
          * Sets the query timeout in seconds. Default (0) means no limit.
          */
-        val queryTimeout: Int = 0,
+        public val queryTimeout: Int = 0,
 
         /**
          * Sets the maximum number of bytes returned for large field types such a LOBs. Default (0) means no limit.
          */
-        val maxFieldSize: Int = 0,
+        public val maxFieldSize: Int = 0,
 
         /**
          * Sets the maximum number of rows returned. Default (0) means no limit.
          */
-        val maxRows: Long = 0,
+        public val maxRows: Long = 0,
 
         /**
          * Sets hint as to whether the statement is poolable. Defaults to `usePreparedStatement`
          */
-        val poolable: Boolean = usePreparedStatement,
+        public val poolable: Boolean = usePreparedStatement,
 
         /**
-         * Sets the fetch direction. One of given direction is not one of `ResultSet.FETCH_FORWARD`,
-         * `ResultSet.FETCH_REVERSE`, or `ResultSet.FETCH_UNKNOWN`. Default is `ResultSet.FETCH_FORWARD`
+         * Sets the fetch direction. Defaults to Forward
          */
-        val fetchDirection: Int = ResultSet.FETCH_FORWARD,
+        public val fetchDirection: ResultSetFetchDirection = ResultSetFetchDirection.Forward,
 
         /**
          * Invoked before a statement is executed allowing the setting of infrequently used or driver specific settings.
          */
-        val beforeExecution: (Statement) -> Unit = {}
+        public val beforeExecution: (Statement) -> Unit = {}
 )
+
+public enum class ResultSetConcurrency private constructor(val value: Int) {
+        ReadOnly(ResultSet.CONCUR_READ_ONLY),
+        Updatable(ResultSet.CONCUR_UPDATABLE);
+}
+
+public enum class ResultSetType private constructor(val value: Int) {
+        ForwardOnly(ResultSet.TYPE_FORWARD_ONLY),
+        ScrollInsensitive(ResultSet.TYPE_SCROLL_INSENSITIVE),
+        ScrollSensitive(ResultSet.TYPE_SCROLL_SENSITIVE);
+}
+
+public enum class ResultSetHoldability private constructor(val value: Int?) {
+        HoldCursorsOverCommit(ResultSet.HOLD_CURSORS_OVER_COMMIT),
+        CloseCursorsOverCommit(ResultSet.CLOSE_CURSORS_AT_COMMIT),
+        ConnectionDefault(null);
+}
+
+public enum class ResultSetFetchDirection private constructor(val value: Int) {
+        Forward(ResultSet.FETCH_FORWARD),
+        Reverse(ResultSet.FETCH_REVERSE);
+}

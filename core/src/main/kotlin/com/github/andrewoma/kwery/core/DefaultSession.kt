@@ -263,14 +263,14 @@ public class DefaultSession(override val connection: Connection,
             } else {
                 connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
             }
-        } else if (options.resultSetHoldability == null) {
-            connection.prepareStatement(sql, options.resultSetType, options.resultSetConcurrency)
+        } else if (options.resultSetHoldability == ResultSetHoldability.ConnectionDefault) {
+            connection.prepareStatement(sql, options.resultSetType.value, options.resultSetConcurrency.value)
         } else {
-            connection.prepareStatement(sql, options.resultSetType, options.resultSetConcurrency, options.resultSetHoldability)
+            connection.prepareStatement(sql, options.resultSetType.value, options.resultSetConcurrency.value, options.resultSetHoldability.value!!)
         }
 
         statement.setFetchSize(options.fetchSize)
-        statement.setFetchDirection(options.fetchDirection)
+        statement.setFetchDirection(options.fetchDirection.value)
         statement.setPoolable(options.poolable)
         statement.setMaxFieldSize(options.maxFieldSize)
         statement.setQueryTimeout(options.queryTimeout)
