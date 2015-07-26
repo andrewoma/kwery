@@ -28,16 +28,14 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.github.andrewoma.kommon.collection.chunked
+import com.github.andrewoma.kwery.core.DefaultSession
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptorChain
-import com.github.andrewoma.kwery.example.film.dao.ActorDao
-import com.github.andrewoma.kwery.example.film.dao.FilmActorDao
-import com.github.andrewoma.kwery.example.film.dao.FilmDao
-import com.github.andrewoma.kwery.example.film.dao.LanguageDao
+import com.github.andrewoma.kwery.example.film.dao.*
 import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilter
 import com.github.andrewoma.kwery.example.film.jackson.AttributeSetFilterMixIn
 import com.github.andrewoma.kwery.example.film.jackson.withObjectStream
@@ -74,6 +72,8 @@ class FilmApplication : Application<FilmConfiguration>() {
     override fun getName() = "film-app"
 
     override fun run(configuration: FilmConfiguration, environment: Environment) {
+        DefaultSession.namedQueryCache = GuavaCache()
+
         val dataSource = configuration.database.build(environment.metrics(), "db")
         val interceptors = StatementInterceptorChain(listOf(
                 LoggingInterceptor(infoQueryThresholdInMs = 1000),
@@ -129,7 +129,7 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     fun createDb(session: ThreadLocalSession) {
-        for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";".toRegex()).toTypedArray()) {
+        for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";".toRegex())) {
             session.use { session.update(sql) }
         }
     }

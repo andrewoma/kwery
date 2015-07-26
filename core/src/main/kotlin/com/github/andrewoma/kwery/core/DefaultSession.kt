@@ -23,6 +23,7 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kommon.lang.trimMargin
+import com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
@@ -52,7 +53,12 @@ public class DefaultSession(override val connection: Connection,
                             ) : Session {
 
     companion object {
-        private val namedQueryCache = ConcurrentHashMap<StatementCacheKey, BoundQuery>()
+        /**
+         * Shared cache for named queries converted to SQL prepared statements.
+         * By default, an unbounded ConcurrentHashMap is used. If overridden, it should be done during initialisation
+         * before any sessions are used.
+         */
+        public var namedQueryCache: Cache<StatementCacheKey, BoundQuery> = ConcurrentHashMapCache()
     }
 
     override public val currentTransaction: Transaction?

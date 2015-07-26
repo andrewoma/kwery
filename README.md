@@ -186,13 +186,11 @@ To open in IntelliJ, just open the `build.gradle` file and IntelliJ will generat
 Core:
 * Support direct execution (currently everything is via a PreparedStatement)
 * Add more robust named parameter replacement (ignore patterns inside comments, strings, etc)
-* Make statement cache configurable (so a bounded Guava cache can be used)
 
 DAO:
 * Documentation
 * Bulk update by example?
 * Bulk delete by example?
-* Make statement cache configurable (so a bounded Guava cache can be used)
 
 Fetcher:
 * Documentation

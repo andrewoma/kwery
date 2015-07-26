@@ -23,6 +23,8 @@
 package com.github.andrewoma.kwery.mapper
 
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
+import com.github.andrewoma.kwery.core.Cache
+import com.github.andrewoma.kwery.core.ConcurrentHashMapCache
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.mapper.listener.*
@@ -37,11 +39,11 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         val id: (T) -> ID,
         val idSqlType: String? = null,
         override val defaultIdStrategy: IdStrategy = IdStrategy.Auto,
-        val defaultId: ID? = null
+        val defaultId: ID? = null,
+        val sqlCache: Cache<Any, String> = ConcurrentHashMapCache()
 ) : Dao<T, ID> {
 
     protected val nf: (Column<T, *>) -> String = { it.name }
-    protected val sqlCache: MutableMap<Any, String> = ConcurrentHashMap()
 
     override val defaultColumns = table.defaultColumns
 
@@ -292,7 +294,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         }
     }
 
-    protected inline fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, f)
+    protected fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, { f() })
 
     override fun unsafeBatchUpdate(values: List<T>) {
         val name = "unsafeBatchUpdate"
