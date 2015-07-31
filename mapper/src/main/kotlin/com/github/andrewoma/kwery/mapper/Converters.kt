@@ -57,16 +57,7 @@ public val standardConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(dateConverter)
 ).toMap()
 
-public val timeConverters: Map<Class<*>, Converter<*>> = listOf(
-        reifiedConverter(localDateTimeConverter)
-).toMap()
-
 public inline fun <reified T> reifiedConverter(converter: Converter<T>): Pair<Class<T>, Converter<T>> = javaClass<T>() to converter
-
-public object localDateTimeConverter : SimpleConverter<LocalDateTime>(
-        { row, c -> LocalDateTime.ofInstant(row.timestamp(c).toInstant(), ZoneId.systemDefault()) },
-        { Timestamp.from(it.atZone(ZoneId.systemDefault()).toInstant()) }
-)
 
 public inline fun <reified T> ArrayConverter(sqlType: String): Converter<List<T>> {
     return Converter(
@@ -114,25 +105,6 @@ public object blobConverter : Converter<ByteArray>(
 public fun <R : Any> optional(converter: Converter<R>): Converter<R?> = Converter(
         { row, c -> if (row.objectOrNull(c) == null) null else converter.from(row, c) },
         { c, v -> if (v == null) null else converter.to(c, v) }
-)
-
-public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
-        { row, c -> Duration.of(row.long(c), unit) },
-        {
-            when (unit) { // Rooted Java API (again!)
-                ChronoUnit.NANOS -> it.toNanos()
-                ChronoUnit.MICROS -> it.toNanos() / 1000
-                ChronoUnit.MILLIS -> it.toMillis()
-                ChronoUnit.SECONDS -> it.getSeconds()
-                ChronoUnit.MINUTES -> it.toMinutes()
-                ChronoUnit.HOURS -> it.toHours()
-                ChronoUnit.HALF_DAYS -> it.toDays() * 2
-                ChronoUnit.DAYS -> it.toDays()
-                ChronoUnit.WEEKS -> it.toDays() / 7
-
-                else -> throw UnsupportedOperationException()
-            }
-        }
 )
 
 public class EnumByNameConverter<T : Enum<T>>(type: Class<T>) : SimpleConverter<T>(

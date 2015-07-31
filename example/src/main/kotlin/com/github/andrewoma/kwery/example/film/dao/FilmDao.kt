@@ -37,7 +37,7 @@ object filmTable : Table<F, Int>("film", tableConfig), VersionedWithInt {
     val ReleaseYear        by col(F::releaseYear,      notNull = true)
     val LanguageId         by col(F::language,         notNull = true)
     val OriginalLanguageId by col(F::originalLanguage)
-    val Length             by col(F::duration,         converter = optional(DurationConverter(ChronoUnit.MILLIS)))
+    val Length             by col(F::duration,         converter = optional(DurationConverter(ChronoUnit.SECONDS)))
     val Rating             by col(F::rating,           notNull = true)
     val Version            by col(F::version,          version = true)
     val SpecialFeatures    by col(F::specialFeatures,  default = listOf<String>(), converter = ArrayConverter<String>("varchar"))
