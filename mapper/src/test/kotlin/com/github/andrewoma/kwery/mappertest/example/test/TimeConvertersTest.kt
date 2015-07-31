@@ -30,7 +30,7 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import java.time.*
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.*
 import java.time.temporal.TemporalUnit
 import kotlin.test.assertEquals
 import kotlin.test.fail
@@ -74,23 +74,28 @@ class TimeConvertersTest : AbstractSessionTest() {
         fun assertDuration(unit: TemporalUnit) = assertConversion(DurationConverter(unit),
                 Duration.of(3, unit), "bigint_col", { row -> row.long("bigint_col") == 3L})
 
-        assertDuration(ChronoUnit.SECONDS)
-        assertDuration(ChronoUnit.MINUTES)
-        assertDuration(ChronoUnit.HOURS)
-        assertDuration(ChronoUnit.DAYS)
+        assertDuration(NANOS)
+        assertDuration(MICROS)
+        assertDuration(MILLIS)
+        assertDuration(SECONDS)
+        assertDuration(MINUTES)
+        assertDuration(HOURS)
+        assertDuration(HALF_DAYS)
+        assertDuration(DAYS)
     }
 
     Test fun `should convert Duration to BigDecimal`() {
         fun assertDuration(value: Duration) =  assertConversion(durationToBigDecimalConverter, value, "decimal_col")
 
         assertDuration(Duration.ZERO)
-        assertDuration(Duration.of(1, ChronoUnit.NANOS))
-        assertDuration(Duration.of(1, ChronoUnit.MICROS))
-        assertDuration(Duration.of(1, ChronoUnit.MILLIS))
-        assertDuration(Duration.of(1, ChronoUnit.SECONDS))
-        assertDuration(Duration.of(1, ChronoUnit.MINUTES))
-        assertDuration(Duration.of(1, ChronoUnit.HOURS))
-        assertDuration(Duration.of(1, ChronoUnit.DAYS))
+        assertDuration(Duration.of(1, NANOS))
+        assertDuration(Duration.of(1, MICROS))
+        assertDuration(Duration.of(1, MILLIS))
+        assertDuration(Duration.of(1, SECONDS))
+        assertDuration(Duration.of(1, MINUTES))
+        assertDuration(Duration.of(1, HOURS))
+        assertDuration(Duration.of(1, HALF_DAYS))
+        assertDuration(Duration.of(1, DAYS))
         assertDuration(Duration.ofSeconds(Long.MAX_VALUE, 999999999L))
         assertDuration(Duration.ofSeconds(Long.MIN_VALUE, 0L))
 

@@ -27,7 +27,7 @@ import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
 import java.time.*
-import java.time.temporal.ChronoUnit
+import java.time.temporal.ChronoUnit.*
 import java.time.temporal.TemporalUnit
 
 public val timeConverters: Map<Class<*>, Converter<*>> = listOf(
@@ -70,28 +70,33 @@ public object durationToBigDecimalConverter : SimpleConverter<Duration>(
 
 /**
  * Converts a duration to a given unit when storing in the database as an integer.
- * Only SECONDS, MINUTES, HOURS and DAYS are supported.
+ * Only NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS and DAYS are supported.
+ * Ensure that if converting between units for storage that the conversion is a whole number
+ * of the unit specified and does not overflow a Long.
  */
 public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
         { row, c -> Duration.of(row.long(c), unit) },
         { duration ->
             val converted = when (unit) {
-                ChronoUnit.SECONDS -> duration.getSeconds()
-                ChronoUnit.MINUTES -> duration.toMinutes()
-                ChronoUnit.HOURS -> duration.toHours()
-                ChronoUnit.DAYS -> duration.toDays()
+                NANOS -> duration.toNanos()
+                MICROS -> duration.toNanos() / 1000
+                MILLIS -> duration.toMillis()
+                SECONDS -> duration.getSeconds()
+                MINUTES -> duration.toMinutes()
+                HOURS -> duration.toHours()
+                HALF_DAYS -> duration.toHours() / 12
+                DAYS -> duration.toDays()
                 else -> throw UnsupportedOperationException("") // Not possible
             }
-            require(duration == Duration.of(converted, unit), "${duration} must be a whole number of ${unit}")
+            require(duration == Duration.of(converted, unit), "${duration} must be a whole number of ${unit} and not overflow a Long")
             converted
         }
 ) {
     init {
-        require(unit in setOf(ChronoUnit.SECONDS, ChronoUnit.MINUTES, ChronoUnit.HOURS, ChronoUnit.DAYS),
-                "Only SECONDS, MINUTES, HOURS and DAYS are supported")
+        require(unit in setOf(NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS, DAYS),
+                "Only NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS and DAYS are supported")
     }
 }
-
 
 private val nanosInSecond: BigDecimal = BigDecimal.valueOf(1000000000L)
 
