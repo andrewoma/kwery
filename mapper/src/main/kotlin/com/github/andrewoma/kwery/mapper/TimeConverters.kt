@@ -92,9 +92,11 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
             converted
         }
 ) {
+    companion object {
+        val supported = setOf(NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS, DAYS)
+    }
     init {
-        require(unit in setOf(NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS, DAYS),
-                "Only NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS and DAYS are supported")
+        require(unit in supported, "Only ${supported.joinToString(", ")} are supported")
     }
 }
 
