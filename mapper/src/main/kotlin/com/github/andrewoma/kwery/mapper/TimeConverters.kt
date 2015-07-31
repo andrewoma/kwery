@@ -50,7 +50,10 @@ public object localDateConverter : SimpleConverter<LocalDate>(
 
 public object localTimeConverter : SimpleConverter<LocalTime>(
         { row, c -> row.time(c).toLocalTime() },
-        { Time(it.getHour(), it.getMinute(), it.getSecond()) }
+        {
+            @suppress("DEPRECATED_SYMBOL_WITH_MESSAGE") // No sane alternative
+            Time(it.getHour(), it.getMinute(), it.getSecond())
+        }
 )
 
 public object instantConverter : SimpleConverter<Instant>(
@@ -95,6 +98,7 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
     companion object {
         val supported = setOf(NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS, DAYS)
     }
+
     init {
         require(unit in supported, "Only ${supported.joinToString(", ")} are supported")
     }
