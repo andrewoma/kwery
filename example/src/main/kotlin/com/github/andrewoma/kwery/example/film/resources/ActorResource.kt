@@ -41,8 +41,8 @@ transactional public class ActorResource(val actorDao: ActorDao, override val fe
              QueryParam("fetch") root: String?): List<Actor> {
 
         val filter = parameters(
-                actorTable.FirstName + firstName,
-                actorTable.LastName + lastName
+                actorTable.FirstName optional firstName,
+                actorTable.LastName optional lastName
         )
 
         return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)

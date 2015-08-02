@@ -191,6 +191,7 @@ DAO:
 * Documentation
 * Bulk update by example?
 * Bulk delete by example?
+* Review Column.defaultValue. Necessary or move to construction?
 
 Fetcher:
 * Documentation

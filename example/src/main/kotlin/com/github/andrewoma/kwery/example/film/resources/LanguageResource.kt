@@ -39,7 +39,7 @@ transactional public class LanguageResource(val languageDao: LanguageDao, overri
     Timed GET
     fun find(QueryParam("name") name: String?): List<Language> {
 
-        val filter = parameters(languageTable.Name + name)
+        val filter = parameters(languageTable.Name optional name)
 
         return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keySet())
     }

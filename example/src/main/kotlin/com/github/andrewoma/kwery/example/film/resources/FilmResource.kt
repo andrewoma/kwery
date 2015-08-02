@@ -43,9 +43,9 @@ transactional public class FilmResource(val filmDao: FilmDao, override val fetch
              QueryParam("fetch") root: String?): List<Film> {
 
         val filter = parameters(
-                filmTable.Title + title,
-                filmTable.ReleaseYear + releaseYear,
-                filmTable.Rating + rating
+                filmTable.Title optional title,
+                filmTable.ReleaseYear optional releaseYear,
+                filmTable.Rating optional rating
         )
 
         return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet()).fetch(root)

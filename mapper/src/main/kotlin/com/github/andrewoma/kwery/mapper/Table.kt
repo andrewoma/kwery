@@ -30,30 +30,88 @@ import kotlin.properties.Delegates
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KMemberProperty
 
-public data class Column<T, R>(val property: (T) -> R,
-                               val defaultValue: R = null,
-                               val converter: Converter<R>,
-                               val name: String,
-                               val id: Boolean,
-                               val version: Boolean,
-                               val selectByDefault: Boolean,
-                               val isNullable: Boolean
-) {
-    public fun of(value: R): Pair<Column<T, R>, R> = Pair(this, value)
+/**
+ * Column defines a how to map an SQL column to and from an object property of type `T`
+ * within a containing class `C`.
+ *
+ * While columns can be added directly it is more common to use the `col` methods on `Table`
+ * to provide sensible defaults.
+ */
+public data class Column<C, T>(
+        /**
+         * A function to extract the property value from the containing object
+         */
+        val property: (C) -> T,
 
-    suppress("BASE_WITH_NULLABLE_UPPER_BOUND") // TODO ... operator and function for similar things is ugly
-    public fun plus(value: R?): Pair<Column<T, R>, R?> = Pair(this, value)
+        // TODO ... Is this necessary - can it be left to construction?
+        /**
+         * If a value is not `nullable` a default value must be provided to allow construction
+         * of partially selected objects
+         */
+        val defaultValue: T,
+
+        /**
+         * A converter between the SQL type and `T`
+         */
+        val converter: Converter<T>,
+
+        /**
+         * The name of the SQL column
+         */
+        val name: String,
+
+        /**
+         * True if the column is part of the primary key
+         */
+        val id: Boolean,
+
+        /**
+         * True if the column is used for versioning using optimistic locking
+         */
+        val version: Boolean,
+
+        /**
+         * True if the column is selected in queries by default.
+         * Generally true, but is useful to exclude `BLOBs` and `CLOBs` in some cases.
+         */
+        val selectByDefault: Boolean,
+
+        // TODO ... is there any way to detect nullable bound?
+        /**
+         * True if the column is nullable
+         */
+        val isNullable: Boolean
+) {
+    /**
+     * A type-safe variant of `to`
+     */
+    public fun of(value: T): Pair<Column<C, T>, T> = Pair(this, value)
+
+    /**
+     * A type-safe variant of `to` with an optional value
+     */
+    suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
+    public fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
 
     override fun toString(): String {
         return "Column($name id=$id version=$version nullable=$isNullable)" // Prevent NPE in debugger on "property"
     }
 }
 
-public interface Value<T> {
-    fun <R> of(column: Column<T, R>): R
+/**
+ * Value allows extraction of column values by column.
+ */
+public interface Value<C> {
+    fun <T> of(column: Column<C, T>): T
 }
 
-class TableConfiguration(val defaults: Map<Class<*>, *>, val converters: Map<Class<*>, Converter<*>>, val namingConvention: (String) -> String)
+/**
+ * TableConfiguration defines configuration common to a set of tables.
+ */
+public class TableConfiguration(
+        val defaults: Map<Class<*>, *>,
+        val converters: Map<Class<*>, Converter<*>>,
+        val namingConvention: (String) -> String)
 
 public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration, val sequence: String? = null) {
     public val allColumns: Set<Column<T, *>> = LinkedHashSet()

@@ -36,3 +36,7 @@ public interface VersionedWithTimestamp : Versioned<LocalDateTime> {
 public interface VersionedWithInt : Versioned<Int> {
     override fun nextVersion(old: Int) = old + 1
 }
+
+public interface VersionedWithLong : Versioned<Long> {
+    override fun nextVersion(old: Long) = old + 1
+}
