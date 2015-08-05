@@ -128,13 +128,18 @@ public class TableConfiguration(
          */
         val namingConvention: (String) -> String = camelToLowerUnderscore)
 
-public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration, val sequence: String? = null) {
+
+/**
+ * A `Table` maps directly to a single SQL table, with each SQL column defined explicitly.
+ */
+public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration = TableConfiguration(), val sequence: String? = null) {
+
     public val allColumns: Set<Column<T, *>> = LinkedHashSet()
-    public val defaultColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filter { it.selectByDefault }) }
-    public val idColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filter { it.id }) }
-    public val dataColumns: Set<Column<T, *>> by Delegates.lazy { initialise(); LinkedHashSet(allColumns.filterNot { it.id }) }
-    public val versionColumn: Column<T, *>? by Delegates.lazy { initialise(); allColumns.firstOrNull { it.version } }
-    public val type: Class<T> by Delegates.lazy { initialise(); lazyType!! }
+    public val defaultColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.selectByDefault }) }
+    public val idColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.id }) }
+    public val dataColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filterNot { it.id }) }
+    public val versionColumn: Column<T, *>? by lazy { allColumns.firstOrNull { it.version } }
+    public val type: Class<T> by lazy { lazyType!! }
 
     private val columnName: (Column<T, *>) -> String = { it.name }
     private var initialised = false
@@ -148,6 +153,8 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         (allColumns as MutableSet<Any?>).add(column)
         return column
     }
+
+    private fun <T> lazy(f: () -> T) = Delegates.lazy { initialise(); f() }
 
     // Indirectly calls "get" on all delegated columns, which then adds them to the "allColumns"
     private fun initialise() {
