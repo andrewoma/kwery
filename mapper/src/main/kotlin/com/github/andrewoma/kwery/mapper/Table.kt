@@ -25,6 +25,7 @@ package com.github.andrewoma.kwery.mapper
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 import com.github.andrewoma.kwery.core.Row
 import com.github.andrewoma.kwery.core.Session
+import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 import java.util.LinkedHashSet
 import kotlin.properties.Delegates
 import kotlin.properties.ReadOnlyProperty
@@ -109,9 +110,23 @@ public interface Value<C> {
  * TableConfiguration defines configuration common to a set of tables.
  */
 public class TableConfiguration(
-        val defaults: Map<Class<*>, *>,
-        val converters: Map<Class<*>, Converter<*>>,
-        val namingConvention: (String) -> String)
+        /**
+         * Defines default values for types when the column is not null, but is not selected.
+         * Defaults to `standardDefaults`
+         */
+        val defaults: Map<Class<*>, *> = standardDefaults,
+
+        /**
+         * Defines converters from JDBC types to arbitrary Kotlin types.
+         * Defaults to `standardConverters` + `timeConverters`
+         */
+        val converters: Map<Class<*>, Converter<*>> = standardConverters + timeConverters,
+
+        /**
+         * Defines the naming convention for converting `Column` names to SQL column names.
+         * Defaults to `camelToLowerUnderscore`
+         */
+        val namingConvention: (String) -> String = camelToLowerUnderscore)
 
 public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration, val sequence: String? = null) {
     public val allColumns: Set<Column<T, *>> = LinkedHashSet()

@@ -22,20 +22,13 @@
 
 package com.github.andrewoma.kwery.mapper
 
-import java.math.BigDecimal
 import java.time.*
 
-public val standardDefaults: Map<Class<*>, *> = listOf(
-        reifiedValue(true),
-        reifiedValue(0.toByte()),
-        reifiedValue(0.toChar()),
-        reifiedValue(0.toShort()),
-        reifiedValue(0),
-        reifiedValue(0L),
-        reifiedValue(0.toFloat()),
-        reifiedValue(0.toDouble()),
-        reifiedValue(BigDecimal(0)),
-        reifiedValue("")
+public val timeDefaults: Map<Class<*>, *> = listOf(
+        reifiedValue(LocalTime.now()),
+        reifiedValue(LocalDate.now()),
+        reifiedValue(LocalDateTime.now()),
+        reifiedValue(Duration.ZERO),
+        reifiedValue(Instant.now())
 ).toMap()
 
-inline public fun <reified T> reifiedValue(default: T): Pair<Class<T>, T> = javaClass<T>() to default
