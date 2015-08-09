@@ -25,8 +25,7 @@ package com.github.andrewoma.kwery.example.film
 import com.codahale.metrics.health.HealthCheck
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module
 import com.github.andrewoma.kommon.collection.chunked
 import com.github.andrewoma.kwery.core.DefaultSession
 import com.github.andrewoma.kwery.core.Session
@@ -138,8 +137,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         bootstrap.addBundle(AssetsBundle("/static", "/", "index.html", "static"))
 
         val mapper = bootstrap.getObjectMapper()
-        mapper.registerModule(KotlinModule())
-        mapper.registerModule(JavaTimeModule())
+        mapper.registerModule(JSR310Module())
 
         mapper.addMixIn(javaClass<HasAttributeSet>(), javaClass<AttributeSetFilterMixIn>())
         val provider = SimpleFilterProvider().addFilter("Attribute set filter", AttributeSetFilter())

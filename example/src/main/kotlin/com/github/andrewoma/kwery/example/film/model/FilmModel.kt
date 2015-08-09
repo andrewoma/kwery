@@ -24,49 +24,43 @@ package com.github.andrewoma.kwery.example.film.model
 
 import java.time.Duration
 
-data class Name(val first: String, val last: String)
+data class Name(val first: String = "", val last: String = "")
 
 data class Actor(
-        val id: Int,
-        val name: Name,
-        override val version: Int = 1,
+        val id: Int = 0,
+        val name: Name = Name(),
+        override val version: Int = 0,
         val films: Set<Film> = setOf()
 ) : AttributeSetByVersion
 
-fun Actor(id: Int = 0) = Actor(id, Name("", ""), 0)
-
 data class Film (
-        val id: Int,
-        val title: String,
-        val description: String,
-        val releaseYear: Int,
-        val language: Language,
-        val originalLanguage: Language?,
-        val duration: Duration?, // minutes
-        val rating: FilmRating?,
+        val id: Int = 0,
+        val title: String = "",
+        val description: String = "",
+        val releaseYear: Int = 0,
+        val language: Language = Language(0),
+        val originalLanguage: Language? = null,
+        val duration: Duration? = null, // minutes
+        val rating: FilmRating? = null,
         val specialFeatures: List<String> = listOf(),
         val actors: Set<Actor> = setOf(),
-        override val version: Int = 1
+        override val version: Int = 0
 
 ) : AttributeSetByVersion
-
-fun Film(id: Int = 0): Film = Film(id, "", "", 0, Language(-1), null, Duration.ZERO, null, version = 0)
 
 enum class FilmRating {
     G, PG, PG_13, R, NC_17
 }
 
-data class FilmActor(val id: FilmActor.Id) {
-    data class Id(val filmId: Int, val actorId: Int)
+data class FilmActor(val id: FilmActor.Id = FilmActor.Id()) {
+    data class Id(val filmId: Int = 0, val actorId: Int = 0)
 }
 
 data class Language (
-        val id: Int,
-        val name: String,
-        override val version: Int = 1
+        val id: Int = 0,
+        val name: String = "",
+        override val version: Int = 0
 ) : AttributeSetByVersion
-
-fun Language(id: Int = 0): Language = Language(id, "", 0)
 
 interface Version {
     val version: Int

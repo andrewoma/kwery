@@ -10,7 +10,7 @@ buildscript {
         postgresVersion = '9.4-1201-jdbc41'
         jerseyVersion = '2.19'
         dropwizardVersion = '0.9.0-rc3'
-        jacksonVersion = '2.6.0-rc4'
+        jacksonVersion = '2.5.4'
         h2Version = '1.4.187'
         aopVersion = '1.0'
         cglibVersion = '3.1'
@@ -183,7 +183,6 @@ project(':example') {
                 "io.dropwizard:dropwizard-db:$dropwizardVersion",
                 "io.dropwizard:dropwizard-assets:$dropwizardVersion",
                 "org.hsqldb:hsqldb:$hsqlVersion",
-                "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion",
                 "org.postgresql:postgresql:$postgresVersion",
                 "com.github.andrewoma.kommon:kommon:$kommonVersion",
