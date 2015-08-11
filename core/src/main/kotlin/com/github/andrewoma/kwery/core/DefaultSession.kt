@@ -23,7 +23,6 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kommon.lang.trimMargin
-import com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
@@ -34,7 +33,6 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
 import java.util.ArrayList
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.support.AbstractIterator
 
 /**
@@ -50,7 +48,7 @@ public class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
                             override val defaultOptions: StatementOptions = StatementOptions()
-                            ) : Session {
+) : Session {
 
     companion object {
         /**
@@ -151,9 +149,9 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override fun <R> asSequence(sql: String,
-                              parameters: Map<String, Any?>,
-                              options: StatementOptions,
-                              f: (Sequence<Row>) -> R): R {
+                                parameters: Map<String, Any?>,
+                                options: StatementOptions,
+                                f: (Sequence<Row>) -> R): R {
 
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
@@ -225,7 +223,7 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override public fun <R> transaction(f: (Transaction) -> R): R {
-        return DefaultTransaction(this).withTransaction(f)
+        return if (transaction == null) DefaultTransaction(this).withTransaction(f) else f(transaction!!)
     }
 
     override public fun manualTransaction(): ManualTransaction {
@@ -320,7 +318,7 @@ public class DefaultSession(override val connection: Connection,
 
 public class TypedParameter(val value: Any?, val sqlType: Int)
 
-public data class ExecutingStatement (
+public data class ExecutingStatement(
         val session: Session,
         val contexts: MutableMap<String, Any?>,
         val sql: String,
