@@ -23,7 +23,7 @@
 package com.github.andrewoma.kwery.transactional.jersey
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import com.github.andrewoma.kwery.core.util.apply
@@ -91,7 +91,7 @@ class TransactionalTest {
         }
     }
 
-    val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
+    val session = ManagedThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
 
     val resources = ResourceTestRule.builder()
             .addResource(ClassLevelResource(session))

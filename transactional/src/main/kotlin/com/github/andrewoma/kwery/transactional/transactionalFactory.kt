@@ -23,7 +23,7 @@
 package com.github.andrewoma.kwery.transactional
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import net.sf.cglib.proxy.Enhancer
 import net.sf.cglib.proxy.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation

@@ -37,10 +37,10 @@ import kotlin.test.assertTrue
 import org.junit.Before as before
 import org.junit.Test as test
 
-class ThreadLocalSessionTest {
+class ManagedThreadLocalSessionTest {
     companion object {
         var initialised = false
-        val session = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
+        val session = ManagedThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
         val dao = SessionInfoDao(session) // Test shared dao singleton
     }
 
@@ -74,17 +74,17 @@ class ThreadLocalSessionTest {
     }
 
     test fun `An initialised session should successfully insert`() {
-        ThreadLocalSession.initialise()
+        ManagedThreadLocalSession.initialise()
         dao.insertCurrent()
-        ThreadLocalSession.finalise(commitTransaction = true)
+        ManagedThreadLocalSession.finalise(commitTransaction = true)
         val sessions = getInsertedSessions()
         assertEquals(1, sessions.size())
     }
 
     test fun `An initialised session should not insert on rollback`() {
-        ThreadLocalSession.initialise()
+        ManagedThreadLocalSession.initialise()
         dao.insertCurrent()
-        ThreadLocalSession.finalise(commitTransaction = false)
+        ManagedThreadLocalSession.finalise(commitTransaction = false)
         val sessions = getInsertedSessions()
         assertEquals(0, sessions.size())
     }
@@ -98,11 +98,11 @@ class ThreadLocalSessionTest {
 
         repeat(requests) {
             executor.submit {
-                ThreadLocalSession.initialise()
+                ManagedThreadLocalSession.initialise()
                 try {
                     dao.insertCurrent()
                 } finally {
-                    ThreadLocalSession.finalise(commitTransaction = true)
+                    ManagedThreadLocalSession.finalise(commitTransaction = true)
                 }
             }
         }
@@ -139,7 +139,7 @@ class ThreadLocalSessionTest {
     }
 
     test fun `Multiple datasources should be supported on same thread`() {
-        val hsqlSession = ThreadLocalSession(hsqlDataSource, HsqlDialect(), name = "hsql")
+        val hsqlSession = ManagedThreadLocalSession(hsqlDataSource, HsqlDialect(), name = "hsql")
         assertEquals("HSQLDB", hsqlSession.use {
             hsqlSession.select(dbNameSql) { it.string("name") }.single()
         }.trim())

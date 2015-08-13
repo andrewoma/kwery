@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.ExecutingStatement
 import com.github.andrewoma.kwery.core.StatementOptions
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.hsqlDataSource
 import kotlin.test.assertEquals
@@ -33,7 +33,7 @@ import org.junit.Test as test
 
 class StatementInterceptorChainTest {
     val calls = arrayListOf<String>()
-    val statement = ExecutingStatement(ThreadLocalSession(hsqlDataSource, HsqlDialect()), hashMapOf(), "sql", listOf(), StatementOptions())
+    val statement = ExecutingStatement(ManagedThreadLocalSession(hsqlDataSource, HsqlDialect()), hashMapOf(), "sql", listOf(), StatementOptions())
     val chain = StatementInterceptorChain(listOf(Interceptor("1"), Interceptor("2")))
 
     inner class Interceptor(val name: String) : StatementInterceptor {

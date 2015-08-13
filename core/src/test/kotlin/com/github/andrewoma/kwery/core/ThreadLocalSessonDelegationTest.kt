@@ -29,10 +29,10 @@ import kotlin.test.assertNull
 import org.junit.Before as before
 import org.junit.Test as test
 
-class ThreadLocalSessionDelegationTest {
+class ManagedThreadLocalSessionDelegationTest {
     companion object {
         var initialised = false
-        val session = ThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
+        val session = ManagedThreadLocalSession(postgresDataSource, PostgresDialect(), postgresLoggingInterceptor)
     }
 
     val insertSql = "insert into delegate_test(value) values (:value)"

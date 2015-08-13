@@ -23,7 +23,7 @@
 package com.github.andrewoma.kwery.transactional
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import com.github.andrewoma.kwery.core.util.apply
@@ -103,7 +103,7 @@ class TransactionalInterceptorTest {
         }
     }
 
-    val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
+    val session = ManagedThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
 
     val interfaceService: Service = transactionalFactory.fromInterfaces(ServiceWithInterface(session))
     val service: ConcreteService = transactionalFactory.fromClass(ConcreteService(session), ConcreteService::session)

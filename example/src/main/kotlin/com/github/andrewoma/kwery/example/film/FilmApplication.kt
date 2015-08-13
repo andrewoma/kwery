@@ -29,7 +29,7 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module
 import com.github.andrewoma.kommon.collection.chunked
 import com.github.andrewoma.kwery.core.DefaultSession
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor
@@ -78,7 +78,7 @@ class FilmApplication : Application<FilmConfiguration>() {
                 LoggingInterceptor(infoQueryThresholdInMs = 1000),
                 LoggingSummaryInterceptor()))
 
-        val session = ThreadLocalSession(dataSource, HsqlDialect(), interceptors)
+        val session = ManagedThreadLocalSession(dataSource, HsqlDialect(), interceptors)
 
         environment.healthChecks().register("db", object : HealthCheck() {
             override fun check() = session.use {
@@ -111,7 +111,7 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     // Create an populate an in-memory database
-    private fun createAndLoadDb(environment: Environment, session: ThreadLocalSession, daos: Daos) {
+    private fun createAndLoadDb(environment: Environment, session: ManagedThreadLocalSession, daos: Daos) {
         createDb(session)
         load(environment, session, daos.actor, "actors.json")
         load(environment, session, daos.language, "languages.json")
@@ -119,7 +119,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         load(environment, session, daos.filmActor, "film_actors.json")
     }
 
-    inline fun <reified T> load(environment: Environment, session: ThreadLocalSession, dao: Dao<T, *>, resource: String) {
+    inline fun <reified T> load(environment: Environment, session: ManagedThreadLocalSession, dao: Dao<T, *>, resource: String) {
         environment.getObjectMapper().withObjectStream<T>(Resources.getResource(resource)) {
             for (values in it.chunked(50)) {
                 session.use { dao.batchInsert(values) }
@@ -127,7 +127,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         }
     }
 
-    fun createDb(session: ThreadLocalSession) {
+    fun createDb(session: ManagedThreadLocalSession) {
         for (sql in Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8).split(";".toRegex())) {
             session.use { session.update(sql) }
         }

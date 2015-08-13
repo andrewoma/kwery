@@ -22,7 +22,7 @@
 
 package com.github.andrewoma.kwery.transactional
 
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
 import kotlin.reflect.KClass
@@ -33,7 +33,7 @@ class TransactionalInterceptor : MethodInterceptor {
     override fun invoke(invocation: MethodInvocation): Any? {
         val transactional = getTransactional(invocation)
 
-        return if (transactional == null || ThreadLocalSession.isInitialised(transactional.name)) {
+        return if (transactional == null || ManagedThreadLocalSession.isInitialised(transactional.name)) {
             invocation.proceed()
         } else {
             invoke(transactional, invocation)
@@ -43,13 +43,13 @@ class TransactionalInterceptor : MethodInterceptor {
     private fun invoke(transactional: transactional, invocation: MethodInvocation): Any? {
         var commit = true
         try {
-            ThreadLocalSession.initialise(!transactional.manual, transactional.name)
+            ManagedThreadLocalSession.initialise(!transactional.manual, transactional.name)
             return invocation.proceed()
         } catch(e: Exception) {
             commit = !rollbackOnException(transactional, e)
             throw e
         } finally {
-            ThreadLocalSession.finalise(commit, transactional.name)
+            ManagedThreadLocalSession.finalise(commit, transactional.name)
         }
     }
 

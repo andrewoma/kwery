@@ -42,7 +42,7 @@ import javax.sql.DataSource
  */
 public val defaultThreadLocalSessionName: String = "default"
 
-public class ThreadLocalSession(val dataSource: DataSource,
+public class ManagedThreadLocalSession(val dataSource: DataSource,
                                 override val dialect: Dialect,
                                 val interceptor: StatementInterceptor = noOpStatementInterceptor,
                                 val name: String = defaultThreadLocalSessionName,
@@ -160,7 +160,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
     }
 
     public fun <R> use(startTransaction: Boolean = true, f: () -> R): R {
-        ThreadLocalSession.initialise(startTransaction, name)
+        ManagedThreadLocalSession.initialise(startTransaction, name)
         var commit = true
         try {
             return f()
@@ -168,7 +168,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
             commit = false
             throw e
         } finally {
-            ThreadLocalSession.finalise(commit, name)
+            ManagedThreadLocalSession.finalise(commit, name)
         }
     }
 }

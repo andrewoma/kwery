@@ -22,7 +22,7 @@
 
 package com.github.andrewoma.kwery.transactional.jersey
 
-import com.github.andrewoma.kwery.core.ThreadLocalSession
+import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.defaultThreadLocalSessionName
 import org.glassfish.jersey.server.model.Resource
 import org.glassfish.jersey.server.model.ResourceMethod
@@ -93,9 +93,9 @@ public class TransactionListener : ApplicationEventListener {
                     val transactional = transactionals[method]
                     if (transactional != null) {
                         if (type == RequestEvent.Type.REQUEST_MATCHED) {
-                            ThreadLocalSession.initialise(!transactional.manual, transactional.name)
+                            ManagedThreadLocalSession.initialise(!transactional.manual, transactional.name)
                         } else {
-                            ThreadLocalSession.finalise(event.isSuccess())
+                            ManagedThreadLocalSession.finalise(event.isSuccess())
                         }
                     }
                 }
