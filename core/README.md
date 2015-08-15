@@ -33,9 +33,25 @@ factory.use { session ->
 }
 ```
 
-When using `kwery` in traditional services on the server-side it's more appropriate to use 
-[ThreadLocalSession](src/main/kotlin/com/github/andrewoma/kwery/core/ThreadLocalSession.kt) in combination
-with transaction interceptors provided in the `transactional` modules.
+A [`ThreadLocalSession`](src/main/kotlin/com/github/andrewoma/kwery/core/ThreadLocalSession.kt) is the most flexible option to use server-side. 
+A single instance of ThreadLocalSession can be shared globally. By default, it obtains and releases
+connections from a pooled DataSource automatically for each statement. 
+However, when a transaction is started via `Session.transaction` the underlying connection
+will be shared by all session uses on the thread for the duration of the transaction.
+
+```kotlin
+val session = ThreadLocalSession(hsqlDataSource, PostgresDialect(), LoggingInterceptor())
+session.select(...)
+```
+
+Finally, `kwery` supports annotation-based transaction management using
+A [`ManagedThreadLocalSession`](src/main/kotlin/com/github/andrewoma/kwery/core/ManagedThreadLocalSession.kt).
+These require interceptors to automatically manage transactions. They have the advantage of defaulting
+to a sensible strategy, however they often hold connections open longer than necessary. 
+
+See the [transactional-jersey module](../transactional-jersey) and [transactional module](../transactional)
+for more details.
+
 
 ##### Dialects
 

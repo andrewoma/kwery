@@ -134,7 +134,7 @@ transactional open class MyService(val session: Session) {
     open fun foo() {}
 }
 
-val session = ThreadLocalSession(dataSource, HsqlDialect())
+val session = ManagedThreadLocalSession(dataSource, HsqlDialect())
 val service = transactionalFactory.fromClass(MyService(session), MyService::session)
 service.foo() // Now calls to service automatically occur within a transaction
 ```

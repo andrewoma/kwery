@@ -10,14 +10,14 @@ different combinations while implicitly managing transactions at the outer servi
 
 Transactional interceptors are created by the `transactionalFactory` object. 
 `transactionalFactory` supports any object annotated by `transactional` that uses
-`ThreadLocalSessions` internally. e.g.
+`ManagedThreadLocalSessions` internally. e.g.
 
 ```kotlin
 transactional open class MyService(val session: Session) {
     open fun foo() {}
 }
 
-val session = ThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
+val session = ManagedThreadLocalSession(dataSource, HsqlDialect(), LoggingInterceptor())
 val service = transactionalFactory.fromClass(MyService(session), MyService::session)
 
 // Now calls to service automatically occur within a transaction
@@ -59,4 +59,4 @@ open class MyService(val session: Session) {
 }
 ```
 
-Finally, multiple datasources can be supported via the `name` attribute (name underlying `ThreadLocalSessions` to match).
+Finally, multiple datasources can be supported via the `name` attribute (name underlying `ManagedThreadLocalSessions` to match).
