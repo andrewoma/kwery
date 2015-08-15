@@ -29,11 +29,11 @@ import java.sql.Connection
 import javax.sql.DataSource
 
 /**
- * ThreadLocalSession creates sessions on a per thread basis. It allows services
+ * ManagedThreadLocalSession creates sessions on a per thread basis. It allows services
  * using sessions to be defined with static references to sessions without worrying about
  * managing connections (or transactions).
  *
- * Typically, a single instance of ThreadLocalSession per data source would
+ * Typically, a single instance of ManagedThreadLocalSession per data source would
  * be shared amongst services. In a container environment a per thread filter or similar mechanism
  * would then initialise and finalise a session before use.
  *
