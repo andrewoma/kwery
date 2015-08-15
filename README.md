@@ -66,7 +66,7 @@ val inserted = dao.insert(Actor(1, Name("Kate", "Beckinsale"), LocalDateTime.now
 val actors = dao.findAll()
 ```
 
-See [FilmDao.kt](/mapper/src/test/kotlin/com/github/andrewoma/kwery/mappertest/example/FilmDao.kt) for
+See [`FilmDao.kt`](/mapper/src/test/kotlin/com/github/andrewoma/kwery/mappertest/example/FilmDao.kt) for
 a more comprehensive example.
 
 #### Graph Fetcher
@@ -123,7 +123,7 @@ partial selects and joins as required.
 #### Example
 
 The [example module](example) demonstrates using Kwery
-to expose a simple model via RESTful web services via [DropWizard](http://dropwizard.io/).
+to expose a simple model via RESTful web services via [Dropwizard](http://dropwizard.io/).
 
 #### Transactional
 
@@ -145,7 +145,7 @@ See the [readme](transactional) for more information.
 
 The [transactional-jersey module](transactional-jersey) adds transaction annotations for Jersey.
 
-Registering [TransactionListener](transactional-jersey/src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt)
+Registering [`TransactionListener`](transactional-jersey/src/main/kotlin/com/github/andrewoma/kwery/transactional/jersey/transactional.kt)
 as a Jersey provider allows the `transactional` attribute to declare resource classes or methods as transactional.  
 
 ```kotlin
@@ -163,11 +163,11 @@ See the [readme](transactional-jersey) for more information.
 
 Kwery is unstable. It's currently being developed for a side project, so features are added as required.
 
-[0.1](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery) is available
-in Maven Central and is compatible with Kotlin M11.
+Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
-[0.2](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery) is compatible with Kotlin M12,
-adding transactional interceptors.
+`0.1` Compatible with Kotlin M11.
+
+`0.2` Compatible with Kotlin M12, adding transactional interceptors.
 
 #### Building
 
