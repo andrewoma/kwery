@@ -40,13 +40,17 @@ public abstract class DeferredListener(val postCommit: Boolean = true) : Listene
     val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()
 
     override fun onEvent(session: Session, events: List<Event>) {
-        val transaction = session.currentTransaction ?: return
+        val transaction = session.currentTransaction
+        if (transaction == null) {
+            // If there is no transaction, assume auto commit is true
+            onCommit(true, events)
+        } else {
+            if (!eventsByTransaction.containsKey(transaction.id)) {
+                addCommitHook(transaction)
+            }
 
-        if (!eventsByTransaction.containsKey(transaction.id)) {
-            addCommitHook(transaction)
+            eventsByTransaction[transaction.id].addAll(events)
         }
-
-        eventsByTransaction[transaction.id].addAll(events)
     }
 
     private fun addCommitHook(transaction: Transaction) {

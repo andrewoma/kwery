@@ -45,7 +45,7 @@ session.select(...)
 ```
 
 Finally, `kwery` supports annotation-based transaction management using
-A [`ManagedThreadLocalSession`](src/main/kotlin/com/github/andrewoma/kwery/core/ManagedThreadLocalSession.kt).
+a [`ManagedThreadLocalSession`](src/main/kotlin/com/github/andrewoma/kwery/core/ManagedThreadLocalSession.kt).
 These require interceptors to automatically manage transactions. They have the advantage of defaulting
 to a sensible strategy, however they often hold connections open longer than necessary. 
 
