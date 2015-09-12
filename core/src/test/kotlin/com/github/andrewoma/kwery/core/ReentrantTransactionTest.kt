@@ -43,13 +43,13 @@ class ReentrantTransactionTest : AbstractFilmSessionTest() {
         insert(Actor(name, "$name 3"))
     }
 
-    Test fun `should support separate transactions`() {
+    @Test fun `should support separate transactions`() {
         insertMultiple("Bill")
         insertMultiple("Ben")
         assertEquals(4, countActors())
     }
 
-    Test fun `should support reentrant`() {
+    @Test fun `should support reentrant`() {
         session.transaction {
             insertMultiple("Bill")
             insertMultiple("Ben")
@@ -57,7 +57,7 @@ class ReentrantTransactionTest : AbstractFilmSessionTest() {
         assertEquals(4, countActors())
     }
 
-    Test fun `should rollback all if inner transaction fails`() {
+    @Test fun `should rollback all if inner transaction fails`() {
         session.transaction {
             insertMultiple("Bill")
             insertOneThenFail("Ben")
@@ -65,7 +65,7 @@ class ReentrantTransactionTest : AbstractFilmSessionTest() {
         assertEquals(0, countActors())
     }
 
-    Test fun `should rollback only failed transaction`() {
+    @Test fun `should rollback only failed transaction`() {
         insertMultiple("Bill")
         insertOneThenFail("Ben")
         assertEquals(2, countActors())

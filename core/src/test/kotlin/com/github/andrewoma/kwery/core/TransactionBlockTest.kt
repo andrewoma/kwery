@@ -23,12 +23,12 @@
 package com.github.andrewoma.kwery.core
 
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class TransactionBlockTest : AbstractFilmSessionTest() {
     override var startTransactionByDefault: Boolean = false
 
-    test fun `setRollbackOnly should roll back transaction`() {
+    @Test fun `setRollbackOnly should roll back transaction`() {
         var actor: Actor? = null
         session.transaction { t ->
             actor = insert(Actor("Kate", "Beckinsale"))
@@ -38,7 +38,7 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
         assertEquals(0, selectActors(setOf(actor?.id)).size())
     }
 
-    test fun `exception should roll back transaction`() {
+    @Test fun `exception should roll back transaction`() {
         var actor: Actor? = null
         try {
             session.transaction { t ->
@@ -52,7 +52,7 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
         assertEquals(0, selectActors(setOf(actor?.id)).size())
     }
 
-    test fun `block should be implicitly committed`() {
+    @Test fun `block should be implicitly committed`() {
         var actor: Actor? = null
         session.transaction { t ->
             actor = insert(Actor("Kate", "Beckinsale"))

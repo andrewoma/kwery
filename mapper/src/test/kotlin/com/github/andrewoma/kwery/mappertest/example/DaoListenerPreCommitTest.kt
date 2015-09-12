@@ -29,7 +29,7 @@ import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
 import kotlin.properties.Delegates
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 /**
  * Demonstrates a pre commit listener the saves audit records of all changes
@@ -62,7 +62,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
         session.update("delete from audit")
     }
 
-    test fun `Audit rows should be created for each transaction`() {
+    @Test fun `Audit rows should be created for each transaction`() {
         val transactionId = nextTransactionId + 1
 
         val (bruce, brandon) = session.transaction {

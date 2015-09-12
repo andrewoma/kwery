@@ -28,8 +28,8 @@ import com.github.andrewoma.kwery.mapper.OptimisticLockException
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import kotlin.properties.Delegates
 import kotlin.test.*
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : AbstractSessionTest() {
     abstract var dao: D
@@ -50,7 +50,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         dao.session.update("delete from ${dao.table.name} where ${dao.table.idColumns.map { "${it.name} > -1000" }.join(" or ")}")
     }
 
-    test fun `Insert with generated key should return a new key`() {
+    @Test fun `Insert with generated key should return a new key`() {
         if (dataWithoutKeys.isEmpty()) return
 
         val created = dataWithoutKeys.first()
@@ -62,7 +62,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertTrue(id(created) != id(found))
     }
 
-    test fun `Insert with key should preserve given key`() {
+    @Test fun `Insert with key should preserve given key`() {
         if (dataWithKeys.isEmpty()) return
 
         val created = dataWithKeys.first()
@@ -74,7 +74,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertTrue(id(created) == id(found))
     }
 
-    test fun `Find all should include inserted`() {
+    @Test fun `Find all should include inserted`() {
         val existing = dao.findAll().size()
         val inserted = insert()
 
@@ -83,24 +83,24 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertNotNull(found.firstOrNull { id(it) == id(inserted) })
     }
 
-    test fun `Find by ids with empty ids should return empty map`() {
+    @Test fun `Find by ids with empty ids should return empty map`() {
         assertTrue(dao.findByIds(listOf()).isEmpty())
     }
 
-    test fun `Find by ids with single id should return map`() {
+    @Test fun `Find by ids with single id should return map`() {
         val inserted = insert()
         val found = dao.findByIds(listOf(id(inserted)))
         assertContentEquals(mapOf(id(inserted) to inserted), found)
     }
 
-    test fun `Find by ids with single unknown id should return empty map`() {
+    @Test fun `Find by ids with single unknown id should return empty map`() {
         val id = id(insert())
         dao.delete(id)
         val found = dao.findByIds(listOf(id))
         assertTrue(found.isEmpty())
     }
 
-    test fun `Find by ids should return values by id`() {
+    @Test fun `Find by ids should return values by id`() {
         if (dao.table.idColumns.size() > 1) return // Unsupported for now
 
         val inserted = insert(3)
@@ -119,7 +119,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
-    test fun `Insert batch with generated keys should return keys`() {
+    @Test fun `Insert batch with generated keys should return keys`() {
         if (dataWithoutKeys.isEmpty()) return
 
         val inserted = dao.batchInsert(dataWithoutKeys, IdStrategy.Generated)
@@ -131,7 +131,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
-    test fun `Insert batch with ids return ids`() {
+    @Test fun `Insert batch with ids return ids`() {
         if (dataWithKeys.isEmpty()) return
 
         val inserted = dao.batchInsert(dataWithKeys, IdStrategy.Explicit)
@@ -156,7 +156,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         return result
     }
 
-    test fun `Update should overwrite content`() {
+    @Test fun `Update should overwrite content`() {
         val inserted = insert()
         val updated = dao.update(inserted, mutateContents(inserted))
         val found = dao.findById(id(updated))
@@ -165,7 +165,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertEquals(id(inserted), id(found))
     }
 
-    test fun `Update with delta should overwrite content`() {
+    @Test fun `Update with delta should overwrite content`() {
         val inserted = insert()
         Thread.sleep(2)
         val updated = dao.update(inserted, mutateContents(inserted), deltaOnly = true)
@@ -175,13 +175,13 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertEquals(id(inserted), id(found))
     }
 
-    test fun `Versioned update should increment version`() {
+    @Test fun `Versioned update should increment version`() {
         if (dao.table.versionColumn == null) return
 
 
     }
 
-    test fun `Delete should remove a row`() {
+    @Test fun `Delete should remove a row`() {
         val inserted = insert()
         assertNotNull(dao.findById(id(inserted)))
         assertEquals(1, dao.delete(id(inserted)))
@@ -189,7 +189,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     }
 
     //    test(expected = javaClass<OptimisticLockException>()) TODO - breaks incremental compiler
-    test fun `Versioned update of same version should be rejected`() {
+    @Test fun `Versioned update of same version should be rejected`() {
         if (dao.table.versionColumn == null) throw OptimisticLockException("")
 
         val inserted = insert()
@@ -203,7 +203,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
-    test fun `Unsafe update of same version should be accepted`() {
+    @Test fun `Unsafe update of same version should be accepted`() {
         val inserted = insert()
 
         Thread.sleep(2)
@@ -216,7 +216,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertTrue(contentsEqual(updated, found!!))
     }
 
-    test fun `Batch updates should update all values`() {
+    @Test fun `Batch updates should update all values`() {
         if (dao.table.versionColumn == null || dao.table.idColumns.size() > 1) return
 
         val inserted = insert(2)
@@ -232,7 +232,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
-    test fun `Unsafe batch updates should update all values`() {
+    @Test fun `Unsafe batch updates should update all values`() {
         if (dao.table.idColumns.size() > 1) return
 
         val inserted = insert(2)
@@ -247,7 +247,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
-    test fun `Batch updates should reject updates of same version`() {
+    @Test fun `Batch updates should reject updates of same version`() {
         if (dao.table.versionColumn == null) return
 
         val inserted = insert(2)
@@ -265,7 +265,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         }
     }
 
-    test fun `Allocate ids should contain a unique sequence of ids`() {
+    @Test fun `Allocate ids should contain a unique sequence of ids`() {
         if (!dialect.supportsAllocateIds || dao.table.sequence == null) return
 
         val count = 100

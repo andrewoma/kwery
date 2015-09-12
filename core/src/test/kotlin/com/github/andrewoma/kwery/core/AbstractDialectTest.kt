@@ -34,7 +34,7 @@ import java.sql.Timestamp
 import javax.sql.DataSource
 import javax.sql.PooledConnection
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String
@@ -53,7 +53,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
                      val varchar: String, val blob: String, val clob: String, val ints: List<Int>) {
     }
 
-    test fun `Array based select should work inlined`() {
+    @Test fun `Array based select should work inlined`() {
         if (!dialect.supportsArrayBasedIn) return
 
         session.update("delete from test")
@@ -73,7 +73,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEquals(ids, actual.toSet())
     }
 
-    test fun `Bindings to blobs and clobs via streams`() {
+    @Test fun `Bindings to blobs and clobs via streams`() {
         try {
             val now = System.currentTimeMillis()
             val value = Value(Time(now), Date(now), Timestamp(now), "binary",
@@ -104,7 +104,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             values (:id, :time_col, :date_col, :timestamp_col, :binary_col, :varchar_col, :blob_col, :clob_col, :array_col)
         """
 
-    test fun `Bindings to literals should return the same values when fetched`() {
+    @Test fun `Bindings to literals should return the same values when fetched`() {
         val now = System.currentTimeMillis()
         val value = Value(Time(now), Date(now), Timestamp(now), "binary",
                 "var'char", "blob", "clob", listOf(1, 2, 3))
@@ -132,7 +132,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             "array_col" to session.connection.createArrayOf("int", value.ints.toTypedArray())
     )
 
-    test fun `Allocate ids should contain a unique sequence of ids`() {
+    @Test fun `Allocate ids should contain a unique sequence of ids`() {
         if (!dialect.supportsAllocateIds) return
 
         val count = 100

@@ -26,8 +26,8 @@ import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 class ManagedThreadLocalSessionDelegationTest : AbstractSessionDelegationTest() {
     companion object {
@@ -36,7 +36,7 @@ class ManagedThreadLocalSessionDelegationTest : AbstractSessionDelegationTest() 
 
     override fun <R> withSession(f: (Session) -> R) = session.use(false) { f(session) }
 
-    test fun `Manual transaction blocks should be honoured`() {
+    @Test fun `Manual transaction blocks should be honoured`() {
         withSession { session ->
 
             val t1 = session.manualTransaction()

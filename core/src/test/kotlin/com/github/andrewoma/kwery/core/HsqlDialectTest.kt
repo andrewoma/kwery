@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
     //language=SQL
@@ -49,7 +49,7 @@ class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
             create sequence test_seq
         """
 
-    test fun `Limits should be applied to variable parameters`() {
+    @Test fun `Limits should be applied to variable parameters`() {
         assertEquals("'12'", dialect.bind("12345", 2))
         assertEquals("X'3132'", dialect.bind("12345".toByteArray(), 2))
 

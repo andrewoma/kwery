@@ -25,12 +25,12 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class SessionFactoryTest {
     val factory = SessionFactory(hsqlDataSource, HsqlDialect(), LoggingInterceptor())
 
-    test fun `Use should acquire and release a connection`() {
+    @Test fun `Use should acquire and release a connection`() {
         val name = factory.use { session ->
             session.select(dbNameSql) { it.string("name") }.single()
         }

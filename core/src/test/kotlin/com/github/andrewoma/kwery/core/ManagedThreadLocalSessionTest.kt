@@ -34,8 +34,8 @@ import javax.sql.PooledConnection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 class ManagedThreadLocalSessionTest {
     companion object {
@@ -44,7 +44,7 @@ class ManagedThreadLocalSessionTest {
         val dao = SessionInfoDao(session) // Test shared dao singleton
     }
 
-    before fun setUp() {
+    @Before fun setUp() {
         if (!initialised) {
             initialised = true
             val sql = """
@@ -69,11 +69,11 @@ class ManagedThreadLocalSessionTest {
         sessions
     }
 
-    test(expected = IllegalStateException::class) fun `Uninitialised thread should be rejected`() {
+    @Test(expected = IllegalStateException::class) fun `Uninitialised thread should be rejected`() {
         dao.insertCurrent()
     }
 
-    test fun `An initialised session should successfully insert`() {
+    @Test fun `An initialised session should successfully insert`() {
         ManagedThreadLocalSession.initialise()
         dao.insertCurrent()
         ManagedThreadLocalSession.finalise(commitTransaction = true)
@@ -81,7 +81,7 @@ class ManagedThreadLocalSessionTest {
         assertEquals(1, sessions.size())
     }
 
-    test fun `An initialised session should not insert on rollback`() {
+    @Test fun `An initialised session should not insert on rollback`() {
         ManagedThreadLocalSession.initialise()
         dao.insertCurrent()
         ManagedThreadLocalSession.finalise(commitTransaction = false)
@@ -89,7 +89,7 @@ class ManagedThreadLocalSessionTest {
         assertEquals(0, sessions.size())
     }
 
-    test fun `Inserts on different threads should use different connections`() {
+    @Test fun `Inserts on different threads should use different connections`() {
         val threads = 5
         val requests = 100
         postgresLoggingInterceptor.clear()
@@ -126,7 +126,7 @@ class ManagedThreadLocalSessionTest {
         assertTrue(postgresLoggingInterceptor.serverPrepared.toDouble() / postgresLoggingInterceptor.total.toDouble() > .8)
     }
 
-    test fun `Use should allocate a session automatically`() {
+    @Test fun `Use should allocate a session automatically`() {
         var count: Int? = null
         val thread = Thread() {
             count = session.use {
@@ -138,7 +138,7 @@ class ManagedThreadLocalSessionTest {
         assertNotNull(count)
     }
 
-    test fun `Multiple datasources should be supported on same thread`() {
+    @Test fun `Multiple datasources should be supported on same thread`() {
         val hsqlSession = ManagedThreadLocalSession(hsqlDataSource, HsqlDialect(), name = "hsql")
         assertEquals("HSQLDB", hsqlSession.use {
             hsqlSession.select(dbNameSql) { it.string("name") }.single()
@@ -149,7 +149,7 @@ class ManagedThreadLocalSessionTest {
         }.trim())
     }
 
-    test fun `Use should rollback on exception`() {
+    @Test fun `Use should rollback on exception`() {
         try {
             session.use {
                 SessionInfoDao(session).insertCurrent()

@@ -24,11 +24,11 @@ package com.github.andrewoma.kwery.core
 
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import org.junit.Test as test
+import org.junit.Test
 
 class BatchUpdateTest : AbstractFilmSessionTest() {
 
-    test fun `insert rows in a batch`() {
+    @Test fun `insert rows in a batch`() {
         var nextId = 10000
         session.update("delete from actor where actor_id >= $nextId")
 
@@ -47,7 +47,7 @@ class BatchUpdateTest : AbstractFilmSessionTest() {
         assertEquals(actors, found)
     }
 
-    test fun `insert rows in a batch with generated keys`() {
+    @Test fun `insert rows in a batch with generated keys`() {
         val actors = listOf(
                 Actor("Andrew", "O'Malley", 0),
                 Actor("Bill", "Murray", 0),

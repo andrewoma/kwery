@@ -105,31 +105,31 @@ class TransactionalTest {
 
     Rule fun resourcesRule() = resources
 
-    Test fun `should commit with class annotation`() {
+    @Test fun `should commit with class annotation`() {
         val response = resources.client().target("/class/success").request().get()
         assertEquals(response.getStatus(), 204)
         assertEquals(findAll(), listOf("value"))
     }
 
-    Test fun `should rollback on failure with class annotation`() {
+    @Test fun `should rollback on failure with class annotation`() {
         val response = resources.client().target("/class/fail").request().get()
         assertEquals(response.getStatus(), 500)
         assertTrue(findAll().isEmpty())
     }
 
-    Test fun `should commit with method annotation`() {
+    @Test fun `should commit with method annotation`() {
         val response = resources.client().target("/method/success").request().get()
         assertEquals(response.getStatus(), 204)
         assertEquals(findAll(), listOf("value"))
     }
 
-    Test fun `should rollback on failure with method annotation`() {
+    @Test fun `should rollback on failure with method annotation`() {
         val response = resources.client().target("/method/fail").request().get()
         assertEquals(response.getStatus(), 500)
         assertTrue(findAll().isEmpty())
     }
 
-    Test fun `should fail with no annotation`() {
+    @Test fun `should fail with no annotation`() {
         val response = resources.client().target("/method/fail").request().get()
         assertEquals(response.getStatus(), 500)
         assertTrue(findAll().isEmpty())

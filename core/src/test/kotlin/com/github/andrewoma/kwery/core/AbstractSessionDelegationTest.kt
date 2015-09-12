@@ -25,8 +25,8 @@ package com.github.andrewoma.kwery.core
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 abstract class AbstractSessionDelegationTest {
     companion object {
@@ -37,7 +37,7 @@ abstract class AbstractSessionDelegationTest {
 
     abstract fun <R> withSession(f: (Session) -> R): R
 
-    before fun setUp() {
+    @Before fun setUp() {
         if (!initialised) {
             initialised = true
             val sql = """
@@ -53,7 +53,7 @@ abstract class AbstractSessionDelegationTest {
         withSession { session -> session.update("delete from delegate_test") }
     }
 
-    test fun `Insert with generated keys`() {
+    @Test fun `Insert with generated keys`() {
         withSession { session ->
             val (count, key) = session.insert(insertSql, mapOf("value" to "hello")) { row -> row.int("key") }
             assertEquals(1, count)
@@ -61,7 +61,7 @@ abstract class AbstractSessionDelegationTest {
         }
     }
 
-    test fun `Rollback only should rollback transaction`() {
+    @Test fun `Rollback only should rollback transaction`() {
         val key = withSession { session ->
             session.transaction {
                 val sql = "insert into delegate_test(value) values (:value)"
@@ -76,11 +76,11 @@ abstract class AbstractSessionDelegationTest {
         assertNull(withSession { session -> select(session, key) })
     }
 
-    test fun `Bind parameters should bind values`() {
+    @Test fun `Bind parameters should bind values`() {
         assertEquals("select '1'", withSession { session -> session.bindParameters("select ':value'", mapOf("value" to 1)) })
     }
 
-    test fun `forEach and stream should process each row`() {
+    @Test fun `forEach and stream should process each row`() {
         withSession { session ->
             val sql = "insert into delegate_test(value) values (:value)"
             val parameters = listOf(
@@ -101,14 +101,14 @@ abstract class AbstractSessionDelegationTest {
         }
     }
 
-    test fun `Options should be accessible`() {
+    @Test fun `Options should be accessible`() {
         withSession { session ->
             assertNotNull(session.dialect)
             assertNotNull(session.defaultOptions)
         }
     }
 
-    test fun `Insert with keys followed by batch update`() {
+    @Test fun `Insert with keys followed by batch update`() {
         withSession { session ->
             val insert = "insert into delegate_test(key, value) values (:key, :value)"
             var count = session.update(insert, mapOf("key" to 100, "value" to "v1"))
@@ -131,7 +131,7 @@ abstract class AbstractSessionDelegationTest {
         }
     }
 
-    test fun `Transaction blocks should be honoured`() {
+    @Test fun `Transaction blocks should be honoured`() {
         withSession { session ->
             val key1 = session.transaction {
                 session.insert(insertSql, mapOf("value" to "v1")) { it.int("key") }

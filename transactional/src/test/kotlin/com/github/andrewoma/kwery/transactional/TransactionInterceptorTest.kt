@@ -31,8 +31,8 @@ import org.apache.tomcat.jdbc.pool.DataSource
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 interface Service {
     fun insert(value: String): Int
@@ -95,7 +95,7 @@ class TransactionalInterceptorTest {
         }
     }
 
-    before fun initialise() {
+    @Before fun initialise() {
         session.use(true) {
             //language = SQL
             session.update("create table if not exists test(value varchar(200))")
@@ -116,22 +116,22 @@ class TransactionalInterceptorTest {
         session.select("select value from test") { row -> row.string("value")}
     }
 
-    test fun `should intercept concrete classes`() {
+    @Test fun `should intercept concrete classes`() {
         service.insert("value")
         assertEquals(findAll(), listOf("value"))
     }
 
-    test fun `should intercept classes via interfaces`() {
+    @Test fun `should intercept classes via interfaces`() {
         interfaceService.insert("value")
         assertEquals(findAll(), listOf("value"))
     }
 
-    test fun `should support manual transactions`() {
+    @Test fun `should support manual transactions`() {
         service.manualTransactions()
         assertEquals(findAll(), listOf("value1", "value3"))
     }
 
-    test fun `should rollback on exceptions by default`() {
+    @Test fun `should rollback on exceptions by default`() {
         try {
             service.throwsRollbackDefault("value")
             fail()
@@ -141,7 +141,7 @@ class TransactionalInterceptorTest {
         assertTrue(findAll().isEmpty())
     }
 
-    test fun `should commit on ignored exceptions`() {
+    @Test fun `should commit on ignored exceptions`() {
         try {
             service.throwsIgnore("value")
             fail()
@@ -151,12 +151,12 @@ class TransactionalInterceptorTest {
         assertEquals(findAll(), listOf("value"))
     }
 
-    test fun `should support nested services`() {
+    @Test fun `should support nested services`() {
         outer.bothInsert("value1", "value2")
         assertEquals(findAll().toSet(), setOf("value1", "value2"))
     }
 
-    test fun `should roll back both if inner service fails`() {
+    @Test fun `should roll back both if inner service fails`() {
         try {
             outer.innerFails("value1", "value2")
             fail()
@@ -165,7 +165,7 @@ class TransactionalInterceptorTest {
         assertTrue(findAll().isEmpty())
     }
 
-    test fun `should roll back both if outer service fails`() {
+    @Test fun `should roll back both if outer service fails`() {
         try {
             outer.outerFails("value1", "value2")
             fail()

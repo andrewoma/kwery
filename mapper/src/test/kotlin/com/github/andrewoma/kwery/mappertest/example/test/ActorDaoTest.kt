@@ -27,7 +27,7 @@ import kotlin.properties.Delegates
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test as test
+import org.junit.Test
 
 class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
     override var dao: ActorDao by Delegates.notNull()
@@ -50,28 +50,28 @@ class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
             t1.name == t2.name
 
 
-    test fun `findByExample matches example given`() {
+    @Test fun `findByExample matches example given`() {
         insertAll()
         val result = dao.findByExample(Actor().copy(name = Name("", lastName = "Ryan")), setOf(actorTable.LastName))
         assertEquals(1, result.size())
         assertEquals("Meg", result.first().name.firstName)
     }
 
-    test fun `findByLastNames matches multiple names`() {
+    @Test fun `findByLastNames matches multiple names`() {
         insertAll()
         val names = dao.findByLastNames(listOf("Ryan", "Bridges")).map { it.name }
         assertTrue(names.containsAll(setOf(Name("Jeff", "Bridges"), Name("Meg", "Ryan"))))
         assertFalse(names.contains(Name("Yvonne", "Strahovsky")))
     }
 
-    test fun `Insert with default key should result in a generated key`() {
+    @Test fun `Insert with default key should result in a generated key`() {
         val actor = data[0]
         val inserted = dao.insert(actor)
         assertTrue(contentsEqual(actor, inserted))
         assertFalse(actor.id == inserted.id)
     }
 
-    test fun `Insert with non-default key should insert given key`() {
+    @Test fun `Insert with non-default key should insert given key`() {
         val actor = data[3]
         val inserted = dao.insert(actor)
         assertTrue(contentsEqual(actor, inserted))

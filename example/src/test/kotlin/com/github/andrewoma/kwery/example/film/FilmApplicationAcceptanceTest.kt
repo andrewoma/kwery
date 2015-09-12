@@ -29,7 +29,7 @@ import org.junit.ClassRule
 import org.junit.Ignore
 import javax.ws.rs.client.ClientBuilder
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class FilmApplicationAcceptanceTest {
     companion object {
@@ -39,7 +39,7 @@ class FilmApplicationAcceptanceTest {
 
     fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.getLocalPort()}${url}")
 
-    test fun `Actors should find Scarlett`() {
+    @Test fun `Actors should find Scarlett`() {
 
         val response = target("/api/actors")
                 .queryParam("firstName", "Scarlett")
@@ -60,7 +60,7 @@ class FilmApplicationAcceptanceTest {
         assertEquals(expected.trimMargin(), response)
     }
 
-    test fun `Languages should find English`() {
+    @Test fun `Languages should find English`() {
 
         val response = target("/api/languages")
                 .queryParam("name", "English")
@@ -76,7 +76,7 @@ class FilmApplicationAcceptanceTest {
         assertEquals(expected.trimMargin(), response)
     }
 
-    test fun `Films should find Ace Goldfinger`() {
+    @Test fun `Films should find Ace Goldfinger`() {
 
         val response = target("/api/films")
                 .queryParam("title", "Ace Goldfinger")

@@ -24,11 +24,11 @@ package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor.Execution
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class LoggingSummaryInterceptorTest {
 
-    test fun `Summary report should be ranked by closed cost descending`() {
+    @Test fun `Summary report should be ranked by closed cost descending`() {
         val executions = arrayListOf(
                 Execution(name = "ActorDao.findByIds", started = 42778208093556, executed = 42778209432595, closed = 42778209841378, rowCount = 200),
                 Execution(name = "FilmActorDao.findByFilmIds", started = 42778185041832, executed = 42778200743160, closed = 42778206720613, rowCount = 5462),
@@ -47,7 +47,7 @@ Executed 4 statements in 21.923 ms (closed in 52.205 ms) affecting 6,663 rows us
         assertEquals(expected.replace("!".toRegex(), ""), generateReport(requestTime, executions))
     }
 
-    test fun `Summary report should aggregate calls to same statement`() {
+    @Test fun `Summary report should aggregate calls to same statement`() {
         val executions = arrayListOf(
                 Execution(name = "ActorDao.findByIds", started = 42778208093556, executed = 42778209432595, closed = 42778209841378, rowCount = 200),
                 Execution(name = "FilmActorDao.findByFilmIds", started = 42778185041832, executed = 42778200743160, closed = 42778206720613, rowCount = 5462),

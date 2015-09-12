@@ -29,7 +29,7 @@ import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.hsqlDataSource
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test as test
+import org.junit.Test
 
 class StatementInterceptorChainTest {
     val calls = arrayListOf<String>()
@@ -71,27 +71,27 @@ class StatementInterceptorChainTest {
         override fun exception(statement: ExecutingStatement, e: Exception) = MappedException()
     }
 
-    test fun `Each interceptor in chain should handle constructed`() {
+    @Test fun `Each interceptor in chain should handle constructed`() {
         assertChain { chain.construct(statement) }
     }
 
-    test fun `Each interceptor in chain should handle preparing`() {
+    @Test fun `Each interceptor in chain should handle preparing`() {
         assertChain { chain.preparing(statement) }
     }
 
-    test fun `Each interceptor in chain should handle prepared`() {
+    @Test fun `Each interceptor in chain should handle prepared`() {
         assertChain { chain.prepared(statement) }
     }
 
-    test fun `Each interceptor in chain should handle executed`() {
+    @Test fun `Each interceptor in chain should handle executed`() {
         assertChain { chain.executed(statement) }
     }
 
-    test fun `Each interceptor in chain should handle exception`() {
+    @Test fun `Each interceptor in chain should handle exception`() {
         assertChain { chain.exception(statement, Exception()) }
     }
 
-    test fun `Each interceptor in chain should be closed`() {
+    @Test fun `Each interceptor in chain should be closed`() {
         assertChain { chain.closed(statement) }
     }
 
@@ -100,14 +100,14 @@ class StatementInterceptorChainTest {
         assertEquals(listOf("1.executed", "2.executed"), calls)
     }
 
-    test fun `Transformed exceptions should be propagated from inner`() {
+    @Test fun `Transformed exceptions should be propagated from inner`() {
         val chain = StatementInterceptorChain(listOf(ExceptionInterceptor(), Interceptor("2")))
         val result = chain.exception(statement, Exception())
 
         assertTrue(result is MappedException)
     }
 
-    test fun `Transformed exceptions should be propagated from outer`() {
+    @Test fun `Transformed exceptions should be propagated from outer`() {
         val chain = StatementInterceptorChain(listOf(Interceptor("2"), ExceptionInterceptor()))
         val result = chain.exception(statement, Exception())
 

@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDialect()) {
     //language=SQL
@@ -54,7 +54,7 @@ class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDial
             create sequence test_seq;
         """
 
-    test fun `Limits should be applied to variable parameters`() {
+    @Test fun `Limits should be applied to variable parameters`() {
         assertEquals("'12'", dialect.bind("12345", 2))
         assertEquals("decode('MTI=','base64')", dialect.bind("12345".toByteArray(), 2))
 

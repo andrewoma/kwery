@@ -23,10 +23,10 @@
 package com.github.andrewoma.kwery.fetcher
 
 import kotlin.test.assertEquals
-import org.junit.Test as test
+import org.junit.Test
 
 class NodeTest {
-    test fun testNodeParse() {
+    @Test fun testNodeParse() {
         fun assertParse(graph: String) {
             println("Parsing $graph")
             val node = Node.parse(graph)

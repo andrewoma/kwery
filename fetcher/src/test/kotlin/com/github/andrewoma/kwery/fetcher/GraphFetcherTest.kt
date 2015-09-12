@@ -27,8 +27,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 class GraphFetcherTest {
 
@@ -101,7 +101,7 @@ class GraphFetcherTest {
         return objects.map { id.get(it) to it }.toMap()
     }
 
-    before fun setUp() {
+    @Before fun setUp() {
         film.calls.clear()
         actor.calls.clear()
         language.calls.clear()
@@ -109,7 +109,7 @@ class GraphFetcherTest {
         continent.calls.clear()
     }
 
-    test fun testFindMatchingType() {
+    @Test fun testFindMatchingType() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
 
         assertEquals(film.type, fetcher.findMatchingType(films.values().first()))
@@ -117,12 +117,12 @@ class GraphFetcherTest {
         assertEquals(language.type, fetcher.findMatchingType(languages.values().first()))
     }
 
-    test(expected = IllegalArgumentException::class) fun testFindMatchingTypeRejectsUnknown() {
+    @Test(expected = IllegalArgumentException::class) fun testFindMatchingTypeRejectsUnknown() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         assertEquals(film, fetcher.findMatchingType(""))
     }
 
-    test fun testFindMatchingPropertiesAll() {
+    @Test fun testFindMatchingPropertiesAll() {
         val fetcher = GraphFetcher(setOf(film.type))
         val properties = fetcher.findMatchingProperties(film.type, Node(Node.all))
 
@@ -132,7 +132,7 @@ class GraphFetcherTest {
         }
     }
 
-    test fun testFindMatchingPropertiesAllDescendants() {
+    @Test fun testFindMatchingPropertiesAllDescendants() {
         val fetcher = GraphFetcher(setOf(film.type))
         val properties = fetcher.findMatchingProperties(film.type, Node(Node.allDescendants))
 
@@ -142,7 +142,7 @@ class GraphFetcherTest {
         }
     }
 
-    test fun testFindMatchingProperties() {
+    @Test fun testFindMatchingProperties() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         var properties = fetcher.findMatchingProperties(film.type, "language".graph)
         assertEquals(setOf(filmLanguage to Node("language")), properties)
@@ -151,7 +151,7 @@ class GraphFetcherTest {
         assertEquals(setOf(filmLanguage to Node("language"), filmActors to Node("actors")), properties)
     }
 
-    test fun testFetchOptionalProperty() {
+    @Test fun testFetchOptionalProperty() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         val result = fetcher.fetch(setOf(film2), "originalLanguage".graph)
 
@@ -161,7 +161,7 @@ class GraphFetcherTest {
         assertEquals(0, language.calls.size())
     }
 
-    test fun testFetchPropertyCombinesSameType() {
+    @Test fun testFetchPropertyCombinesSameType() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
         val result = fetcher.fetch(setOf(film1), "language, originalLanguage".graph)
 
@@ -172,7 +172,7 @@ class GraphFetcherTest {
         assertEquals(1, language.calls.size())
     }
 
-    test fun testFetchPropertyCombinesMultipleObjects() {
+    @Test fun testFetchPropertyCombinesMultipleObjects() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
 
         val graph = "language, originalLanguage".graph
@@ -187,15 +187,15 @@ class GraphFetcherTest {
         language.assertCalls(1)
     }
 
-    test fun testMultipleLevels() {
+    @Test fun testMultipleLevels() {
         testMultipleLevels("language(country(continent))".graph)
     }
 
-    test fun testMultipleLevelsAllDescendant() {
+    @Test fun testMultipleLevelsAllDescendant() {
         testMultipleLevels("**".graph)
     }
 
-    test fun testSingleLevel() {
+    @Test fun testSingleLevel() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type, continent.type))
 
         // Should fetch language, original language and actors only
@@ -220,7 +220,7 @@ class GraphFetcherTest {
         continent.assertCalls(0)
     }
 
-    test fun testMultiLevelCollection() {
+    @Test fun testMultiLevelCollection() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type, continent.type))
 
         // Should fetch language, original language and actors only
@@ -270,7 +270,7 @@ class GraphFetcherTest {
 
     fun TrackedType<*, *>.assertCalls(expected: Int) = assertEquals(expected, this.calls.size())
 
-    test fun testCollectionProperties() {
+    @Test fun testCollectionProperties() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type, country.type))
         val graph = "actors(language)".graph
         val result = fetcher.fetch(setOf(film1, film2), graph)

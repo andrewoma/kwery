@@ -23,7 +23,7 @@
 package com.github.andrewoma.kwery.fetcher.readme
 
 import com.github.andrewoma.kwery.fetcher.*
-import org.junit.Test as test
+import org.junit.Test
 
 // Given the following domain model
 data class Actor(val id: Int, val firstName: String, val lastName: String)

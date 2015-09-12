@@ -34,8 +34,8 @@ import java.time.temporal.ChronoUnit.*
 import java.time.temporal.TemporalUnit
 import kotlin.test.assertEquals
 import kotlin.test.fail
-import org.junit.Before as before
-import org.junit.Test as test
+import org.junit.Before
+import org.junit.Test
 
 class TimeConvertersTest : AbstractSessionTest() {
     val table = "time_converters"
@@ -54,23 +54,23 @@ class TimeConvertersTest : AbstractSessionTest() {
         }
     }
 
-    Test fun `should convert LocalDateTime`() {
+    @Test fun `should convert LocalDateTime`() {
         assertConversion(localDateTimeConverter, LocalDateTime.now(), "timestamp_col")
     }
 
-    Test fun `should convert LocalDate`() {
+    @Test fun `should convert LocalDate`() {
         assertConversion(localDateConverter, LocalDate.now(), "date_col")
     }
 
-    Test fun `should convert LocalTime`() {
+    @Test fun `should convert LocalTime`() {
         assertConversion(localTimeConverter, LocalTime.now().withNano(0), "time_col")
     }
 
-    Test fun `should convert Instant`() {
+    @Test fun `should convert Instant`() {
         assertConversion(instantConverter, Instant.now(), "timestamp_col")
     }
 
-    Test fun `should convert Duration and store as same unit`() {
+    @Test fun `should convert Duration and store as same unit`() {
         fun assertDuration(unit: TemporalUnit) = assertConversion(DurationConverter(unit),
                 Duration.of(3, unit), "bigint_col", { row -> row.long("bigint_col") == 3L})
 
@@ -84,7 +84,7 @@ class TimeConvertersTest : AbstractSessionTest() {
         assertDuration(DAYS)
     }
 
-    Test fun `should convert Duration to BigDecimal`() {
+    @Test fun `should convert Duration to BigDecimal`() {
         fun assertDuration(value: Duration) =  assertConversion(durationToBigDecimalConverter, value, "decimal_col")
 
         assertDuration(Duration.ZERO)

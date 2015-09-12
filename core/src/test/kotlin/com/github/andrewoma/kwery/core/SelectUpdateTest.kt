@@ -25,11 +25,11 @@ package com.github.andrewoma.kwery.core
 import java.sql.SQLException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test as test
+import org.junit.Test
 
 class SelectUpdateTest : AbstractFilmSessionTest() {
 
-    test fun `insert with generated keys should fetch key`() {
+    @Test fun `insert with generated keys should fetch key`() {
         val max = maxId("actor_id", "actor")
         val actor = Actor("Kate", "Beckinsale")
 
@@ -39,38 +39,38 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
         assertValue(actor, inserted)
     }
 
-    test fun `insert with null values should be supported`() {
+    @Test fun `insert with null values should be supported`() {
         val actor = Actor("Kate", null)
         assertValue(actor, insert(actor))
     }
 
-    test fun `insert with strings requiring escaping should be supported`() {
+    @Test fun `insert with strings requiring escaping should be supported`() {
         val actor = Actor("Andrew", "O'Malley")
         assertValue(actor, insert(actor))
     }
 
-    test fun `insert with explicit id should be supported`() {
+    @Test fun `insert with explicit id should be supported`() {
         val actor = Actor("Kate", "Beckinsale", 100)
         deleteActor(actor.id)
         assertValue(actor, insert(actor))
     }
 
-    test fun `delete should remove existing row`() {
+    @Test fun `delete should remove existing row`() {
         val actor = insert(Actor("Kate", "Beckinsale"))
         assertEquals(1, selectActors(setOf(actor.id)).size())
         deleteActor(actor.id)
         assertEquals(0, selectActors(setOf(actor.id)).size())
     }
 
-    test(expected = IllegalArgumentException::class) fun `missing select parameters should be rejected`() {
+    @Test(expected = IllegalArgumentException::class) fun `missing select parameters should be rejected`() {
         session.select("select * from actor where actor_id = :actor_id") {}
     }
 
-    test(expected = SQLException::class) fun `bad SQL should be rejected`() {
+    @Test(expected = SQLException::class) fun `bad SQL should be rejected`() {
         session.select("select * from junk") {}
     }
 
-    test fun `in clauses should support null values`() {
+    @Test fun `in clauses should support null values`() {
         val actor = insert(Actor("Kate", "Beckinsale"))
         val actor2 = insert(Actor("Kate", "Beckinsale"))
         assertEquals(1, selectActors(setOf(actor.id, null)).size())
@@ -78,7 +78,7 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
         assertEquals(2, selectActors(setOf(null, actor2.id, null, actor.id, null)).size())
     }
 
-    test fun `forEach should call back for each row`() {
+    @Test fun `forEach should call back for each row`() {
         val actors = listOf(
                 insert(Actor("Kate", "Beckinsale")),
                 insert(Actor("Kate", "Winslet")),
@@ -97,7 +97,7 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
         assertEquals(ids, fetched)
     }
 
-    test fun `stream should collect all rows`() {
+    @Test fun `stream should collect all rows`() {
         val actors = listOf(
                 insert(Actor("Kate", "Beckinsale")),
                 insert(Actor("Kate", "Winslet")),

@@ -28,9 +28,9 @@ import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import org.junit.rules.TestName
 import javax.sql.DataSource
 import kotlin.properties.Delegates
-import org.junit.After as after
-import org.junit.Before as before
-import org.junit.Rule as rule
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
 
 abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, val dialect: Dialect = HsqlDialect()) {
     companion object {
@@ -44,9 +44,9 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
     open var rollbackTransactionByDefault: Boolean = false
 
     val name = TestName()
-    rule public fun name(): TestName = name // Annotating val directly doesn't work
+    @Rule public fun name(): TestName = name // Annotating val directly doesn't work
 
-    before public fun setUp() {
+    @Before public fun setUp() {
         session = DefaultSession(dataSource.getConnection(), dialect, LoggingInterceptor())
         if (startTransactionByDefault) {
             transaction = session.manualTransaction()
@@ -65,7 +65,7 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
         f()
     }
 
-    after public fun tearDown() {
+    @After public fun tearDown() {
         try {
             if (startTransactionByDefault) {
                 if (rollbackTransactionByDefault || transaction.rollbackOnly) {

@@ -29,7 +29,7 @@ import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
 import kotlin.properties.Delegates
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test as test
+import org.junit.Test
 
 class DaoListenerPostCommitTest : AbstractSessionTest() {
     var dao: ActorDao by Delegates.notNull()
@@ -47,7 +47,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         session.update("delete from actor where actor_id > -1000")
     }
 
-    test fun `Values should only be visible after commit`() {
+    @Test fun `Values should only be visible after commit`() {
         session.transaction {
             dao.insert(Actor(Name("Bruce", "Lee")))
             assertTrue(cache.isEmpty())
@@ -55,7 +55,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertEquals(1, cache.size())
     }
 
-    test fun `Values should not be visible after roll back`() {
+    @Test fun `Values should not be visible after roll back`() {
         session.transaction {
             dao.insert(Actor(Name("Bruce", "Lee")))
             assertTrue(cache.isEmpty())
@@ -64,7 +64,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertEquals(0, cache.size())
     }
 
-    test fun `Updates should be visible after commit`() {
+    @Test fun `Updates should be visible after commit`() {
         val tommy = Name("Tommy", "Lee")
         session.transaction {
             val inserted = dao.insert(Actor(Name("Bruce", "Lee")))
@@ -75,7 +75,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertEquals(tommy, cache.values().first().name)
     }
 
-    test fun `Multiple transactions should accumulate`() {
+    @Test fun `Multiple transactions should accumulate`() {
         val tommy = Name("Tommy", "Lee")
         val inserted = session.transaction {
             dao.insert(Actor(Name("Bruce", "Lee")))
@@ -95,7 +95,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertTrue(cache.isEmpty())
     }
 
-    test fun `Batch insert should be visible after commit`() {
+    @Test fun `Batch insert should be visible after commit`() {
         val inserted = session.transaction {
             val actors = listOf(
                     Actor(Name("Bruce", "Lee")),
@@ -109,7 +109,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertEquals(inserted.toSet(), cache.values().toSet())
     }
 
-    test fun `Batch update should be visible after commit`() {
+    @Test fun `Batch update should be visible after commit`() {
         val tommy = Name("Tommy", "Lee")
         session.transaction {
             val actors = listOf(

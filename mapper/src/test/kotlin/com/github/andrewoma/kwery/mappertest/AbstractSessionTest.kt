@@ -32,9 +32,9 @@ import com.github.andrewoma.kwery.core.util.apply
 import org.apache.tomcat.jdbc.pool.DataSource
 import org.junit.rules.TestName
 import kotlin.properties.Delegates
-import org.junit.After as after
-import org.junit.Before as before
-import org.junit.Rule as rule
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
 
 private val testDataSource = DataSource().apply {
     setDefaultAutoCommit(true)
@@ -54,9 +54,9 @@ abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDa
     open var rollbackTransactionByDefault: Boolean = false
 
     val name = TestName()
-    rule public fun name(): TestName = name // Annotating val directly doesn't work
+    @Rule public fun name(): TestName = name // Annotating val directly doesn't work
 
-    before public fun setUp() {
+    @Before public fun setUp() {
         session = DefaultSession(dataSource.getConnection(), dialect, LoggingInterceptor())
         if (startTransactionByDefault) {
             transaction = session.manualTransaction()
@@ -74,7 +74,7 @@ abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDa
         return initialised.getOrPut(token) { f(session) } as R
     }
 
-    after public fun tearDown() {
+    @After public fun tearDown() {
         try {
             if (startTransactionByDefault) {
                 if (rollbackTransactionByDefault || transaction.rollbackOnly) {

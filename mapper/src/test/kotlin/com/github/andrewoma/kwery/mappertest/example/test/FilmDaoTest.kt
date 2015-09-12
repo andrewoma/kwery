@@ -33,7 +33,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Test as test
+import org.junit.Test
 
 class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
     var graphFetcher: GraphFetcher by Delegates.notNull()
@@ -71,7 +71,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
             t1.title == t2.title && t1.language.id == t2.language.id && t1.originalLanguage?.id == t2.originalLanguage?.id &&
                     t1.duration == t2.duration && t1.rating == t2.rating
 
-    test fun `findWithActors should fetch actors via a join`() {
+    @Test fun `findWithActors should fetch actors via a join`() {
         val film = insertAll().first()
 
         val actors = listOf(sd.actorKate, sd.actorBrad)
@@ -83,7 +83,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         assertEquals(actors.toSet(), found.actors)
     }
 
-    test fun `findWithLanguages should fetch actors via a join`() {
+    @Test fun `findWithLanguages should fetch actors via a join`() {
         val films = insertAll()
 
         dao.findWithLanguages(films[0].title, films[0].releaseYear)!!.let { film ->
@@ -97,7 +97,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         }
     }
 
-    test fun `findAllTitlesAndReleaseYears should return partial data`() {
+    @Test fun `findAllTitlesAndReleaseYears should return partial data`() {
         insertAll()
         val films = dao.findAllTitlesAndReleaseYears()
         assertTrue(films.map { it.title }.toSet().contains("Underworld"))
@@ -107,7 +107,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
 
     fun <T> Collection<T>.fetch(node: Node) = graphFetcher.fetch(this, node)
 
-    test fun `find by graph fetcher`() {
+    @Test fun `find by graph fetcher`() {
         val films = insertAll()
         val ids = films.map { it.id }
 

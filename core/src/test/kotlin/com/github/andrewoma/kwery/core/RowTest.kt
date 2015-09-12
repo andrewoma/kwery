@@ -30,7 +30,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.Test as test
+import org.junit.Test
 
 open class RowTest : AbstractSessionTest() {
     companion object {
@@ -71,7 +71,7 @@ open class RowTest : AbstractSessionTest() {
         }
     }
 
-    test fun `null values should be null`() {
+    @Test fun `null values should be null`() {
         session.select("select * from row_test where int_col is null") { row ->
             assertNull(row.booleanOrNull("boolean_col"))
             assertNull(row.byteOrNull("int_col"))
@@ -96,7 +96,7 @@ open class RowTest : AbstractSessionTest() {
         }
     }
 
-    test fun `non null values should match inserted`() {
+    @Test fun `non null values should match inserted`() {
         session.select("select * from row_test where int_col is not null") { row ->
             assertEquals(1.toByte(), row.byte("int_col"))
             assertEquals(1.toShort(), row.short("int_col"))
@@ -120,13 +120,13 @@ open class RowTest : AbstractSessionTest() {
         }
     }
 
-    test(expected = SQLException::class) fun `invalid column name should be rejected`() {
+    @Test(expected = SQLException::class) fun `invalid column name should be rejected`() {
         session.select("select * from row_test where int_col is null") { row ->
             row.booleanOrNull("does_not_exist")
         }
     }
 
-    test(expected = IllegalArgumentException::class) fun `null encountered fetching a nonnull column should be rejected`() {
+    @Test(expected = IllegalArgumentException::class) fun `null encountered fetching a nonnull column should be rejected`() {
         session.select("select * from row_test where int_col is null") { row ->
             row.boolean("boolean_col")
         }

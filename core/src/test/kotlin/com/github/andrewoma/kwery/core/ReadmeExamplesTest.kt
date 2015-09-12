@@ -23,10 +23,10 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import org.junit.Test as test
+import org.junit.Test
 
 class ReadmeExamplesTest : AbstractFilmSessionTest() {
-    test fun readmeExamples() {
+    @Test fun readmeExamples() {
         val connection = hsqlDataSource.getConnection()
 
         class Actor(val firstName: String, val lastName: String)
