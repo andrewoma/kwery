@@ -189,9 +189,6 @@ Core:
 
 DAO:
 * Documentation
-* Bulk update by example?
-* Bulk delete by example?
-* Review Column.defaultValue. Necessary or move to construction?
 
 Fetcher:
 * Documentation
@@ -199,7 +196,6 @@ Fetcher:
 
 Modules:
 * Dropwizard metrics integration
-* Separate out JDK 1.8 and build the rest against 1.7+
 
 Robustness/Performance:
 * Soak test - check for leaking connections/resources over extended usage
