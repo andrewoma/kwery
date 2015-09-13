@@ -46,7 +46,7 @@ Consumes(MediaType.APPLICATION_JSON)
 interface Resource
 
 Path("/class")
-transactional class ClassLevelResource(val session: Session) : Resource {
+transactionalx class ClassLevelResource(val session: Session) : Resource {
     GET Path("/success") fun success() {
         insert(session, "value")
     }
@@ -59,11 +59,11 @@ transactional class ClassLevelResource(val session: Session) : Resource {
 
 Path("/method")
 class MethodLevelResource(val session: Session) : Resource {
-    transactional GET Path("/success") fun success() {
+    transactionalx GET Path("/success") fun success() {
         insert(session, "value")
     }
 
-    transactional GET Path("/fail") fun fail(): Response {
+    transactionalx GET Path("/fail") fun fail(): Response {
         insert(session, "value")
         return Response.serverError().build()
     }

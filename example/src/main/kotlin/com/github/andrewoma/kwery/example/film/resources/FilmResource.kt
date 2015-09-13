@@ -28,14 +28,14 @@ import com.github.andrewoma.kwery.example.film.dao.filmTable
 import com.github.andrewoma.kwery.example.film.model.Film
 import com.github.andrewoma.kwery.example.film.model.FilmRating
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
-import com.github.andrewoma.kwery.transactional.jersey.transactional
+import com.github.andrewoma.kwery.transactional.jersey.transactionalx
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
 Path("/films")
 Produces(MediaType.APPLICATION_JSON)
-transactional public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
+transactionalx public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
     Timed GET
     fun find(QueryParam("title") title: String?,
              QueryParam("releaseYear") releaseYear: Int?,

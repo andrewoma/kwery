@@ -27,13 +27,13 @@ import com.github.andrewoma.kwery.example.film.dao.ActorDao
 import com.github.andrewoma.kwery.example.film.dao.actorTable
 import com.github.andrewoma.kwery.example.film.model.Actor
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
-import com.github.andrewoma.kwery.transactional.jersey.transactional
+import com.github.andrewoma.kwery.transactional.jersey.transactionalx
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
-transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+transactionalx public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
     Timed GET
     fun find(QueryParam("firstName") firstName: String?,
