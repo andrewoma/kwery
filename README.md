@@ -130,7 +130,7 @@ to expose a simple model via RESTful web services via [Dropwizard](http://dropwi
 The [transactional module](transactional) adds general purpose transaction interceptors. e.g.
 
 ```kotlin
-transactional open class MyService(val session: Session) {
+@Transactional open class MyService(val session: Session) {
     open fun foo() {}
 }
 
@@ -150,7 +150,7 @@ as a Jersey provider allows the `transactional` attribute to declare resource cl
 
 ```kotlin
 Path("/films")
-transactional public class FilmResource() : Resource {
+@Transactional public class FilmResource() : Resource {
     GET fun find(): List<Film> {
         ...
     }

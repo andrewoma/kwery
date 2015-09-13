@@ -15,7 +15,7 @@ Here's a snippet from [ActorResource](src/main/kotlin/com/github/andrewoma/kwery
 ```kotlin
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
-transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+@Transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
     Timed GET
     fun find(QueryParam("firstName") firstName: String?,
@@ -30,7 +30,7 @@ transactional public class ActorResource(val actorDao: ActorDao, override val fe
         return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)
     }
 
-    Transaction Timed GET Path("/{id}")
+    Timed GET Path("/{id}")
     fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Actor {
         return actorDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }

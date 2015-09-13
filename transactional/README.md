@@ -13,7 +13,7 @@ Transactional interceptors are created by the `transactionalFactory` object.
 `ManagedThreadLocalSessions` internally. e.g.
 
 ```kotlin
-transactional open class MyService(val session: Session) {
+@Transactional open class MyService(val session: Session) {
     open fun foo() {}
 }
 
@@ -38,7 +38,7 @@ However the `rollbackOn` and `ignore` parameters can be used to control the beha
 e.g. The following will only rollback on instances of `RuntimeException` excluding `IllegalArgumentException`.
 
 ```kotlin
-transactional(rollbackOn = arrayOf(RuntimeException::class), ignore = arrayOf(IllegalArgumentException::class)) 
+@Transactional(rollbackOn = arrayOf(RuntimeException::class), ignore = arrayOf(IllegalArgumentException::class)) 
 open class MyService(val session: Session) {
     open fun foo() {}
 }
@@ -51,7 +51,7 @@ Sometimes it's convenient to manually manage transactions. This can be done via 
  
 ```kotlin
 open class MyService(val session: Session) {
-    transactional(manual = true) open fun foo() {
+    @Transactional(manual = true) open fun foo() {
         // Use Session's transaction functions ...
         session.transaction {
         }
