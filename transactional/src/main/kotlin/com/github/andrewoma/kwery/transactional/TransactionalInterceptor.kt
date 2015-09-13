@@ -40,7 +40,7 @@ class TransactionalInterceptor : MethodInterceptor {
         }
     }
 
-    private fun invoke(transactional: transactional, invocation: MethodInvocation): Any? {
+    private fun invoke(transactional: transactionalx, invocation: MethodInvocation): Any? {
         var commit = true
         try {
             ManagedThreadLocalSession.initialise(!transactional.manual, transactional.name)
@@ -63,12 +63,12 @@ class TransactionalInterceptor : MethodInterceptor {
         return false
     }
 
-    private fun rollbackOnException(transactional: transactional, e: Exception): Boolean {
+    private fun rollbackOnException(transactional: transactionalx, e: Exception): Boolean {
         return isInstance(transactional.rollbackOn, e) && !isInstance(transactional.ignore, e)
     }
 
     private fun getTransactional(invocation: MethodInvocation) =
-            invocation.getMethod().getAnnotation(javaClass<transactional>())
-                    ?: invocation.getThis().javaClass.getAnnotation(javaClass<transactional>())
+            invocation.getMethod().getAnnotation(javaClass<transactionalx>())
+                    ?: invocation.getThis().javaClass.getAnnotation(javaClass<transactionalx>())
 }
 

@@ -38,11 +38,11 @@ interface Service {
     fun insert(value: String): Int
 }
 
-transactional class ServiceWithInterface(val session: Session) : Service {
+transactionalx class ServiceWithInterface(val session: Session) : Service {
     override fun insert(value: String) = insert(session, value)
 }
 
-transactional open class ConcreteService(val session: Session) {
+transactionalx open class ConcreteService(val session: Session) {
     open fun insert(value: String) = insert(session, value)
 
     open fun throwsRollbackDefault(value: String) {
@@ -50,20 +50,20 @@ transactional open class ConcreteService(val session: Session) {
         throw Exception("rollback")
     }
 
-    transactional(ignore = arrayOf(IllegalArgumentException::class))
+    transactionalx(ignore = arrayOf(IllegalArgumentException::class))
     open fun throwsIgnore(value: String) {
         insert(session, value)
         throw IllegalArgumentException("ignore")
     }
 
-    transactional(manual = true) open fun manualTransactions() {
+    transactionalx(manual = true) open fun manualTransactions() {
         session.transaction { insert(session, "value1") }
         session.transaction { insert(session, "value2"); session.currentTransaction?.rollbackOnly = true }
         session.transaction { insert(session, "value3") }
     }
 }
 
-transactional open class Outer(val session: Session, val inner: Inner) {
+transactionalx open class Outer(val session: Session, val inner: Inner) {
     open fun bothInsert(innerValue: String, outerValue: String) {
         insert(session, outerValue)
         inner.insert(innerValue)
@@ -79,7 +79,7 @@ transactional open class Outer(val session: Session, val inner: Inner) {
     }
 }
 
-transactional open class Inner(val session: Session) {
+transactionalx open class Inner(val session: Session) {
     open fun insert(value: String) = insert(session, value)
     open fun fail() = throw Exception("inner")
 }
