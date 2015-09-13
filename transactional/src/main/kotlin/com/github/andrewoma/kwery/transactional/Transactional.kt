@@ -29,7 +29,7 @@ import kotlin.reflect.KClass
 Target(ElementType.METHOD, ElementType.TYPE)
 Retention(RetentionPolicy.RUNTIME)
 Inherited
-annotation public class transactionalx(
+annotation public class Transactional(
         /**
          * The name of the data source to use in the transaction
          */
