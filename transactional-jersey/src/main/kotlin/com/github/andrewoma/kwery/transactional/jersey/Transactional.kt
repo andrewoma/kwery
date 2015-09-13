@@ -38,7 +38,7 @@ import javax.ws.rs.ext.Provider
 Target(ElementType.METHOD, ElementType.TYPE)
 Retention(RetentionPolicy.RUNTIME)
 Inherited
-public annotation class transactionalx(
+public annotation class Transactional(
         /**
          * The name of the data source to use in the transaction
          */
@@ -54,7 +54,7 @@ public annotation class transactionalx(
 Provider
 public class TransactionListener : ApplicationEventListener {
     private val log = LoggerFactory.getLogger(javaClass<TransactionListener>())
-    private var transactionals = hashMapOf<Method, transactionalx>()
+    private var transactionals = hashMapOf<Method, Transactional>()
 
     override fun onEvent(event: ApplicationEvent) {
         if (event.getType() == ApplicationEvent.Type.INITIALIZATION_APP_FINISHED) {
@@ -64,7 +64,7 @@ public class TransactionListener : ApplicationEventListener {
 
     private fun registerResources(resources: List<Resource>) {
         for (resource in resources) {
-            val classAnnotation = resource.getAllMethods().firstOrNull()?.getInvocable()?.getDefinitionMethod()?.getDeclaringClass()?.getAnnotation(javaClass<transactionalx>())
+            val classAnnotation = resource.getAllMethods().firstOrNull()?.getInvocable()?.getDefinitionMethod()?.getDeclaringClass()?.getAnnotation(javaClass<Transactional>())
             for (method in resource.getAllMethods()) {
                 register(method, classAnnotation)
             }
@@ -72,9 +72,9 @@ public class TransactionListener : ApplicationEventListener {
         }
     }
 
-    private fun register(method: ResourceMethod, transactional: transactionalx?) {
+    private fun register(method: ResourceMethod, transactional: Transactional?) {
         val definitionMethod = method.getInvocable().getDefinitionMethod()
-        val annotation = definitionMethod.getAnnotation(javaClass<transactionalx>()) ?: transactional
+        val annotation = definitionMethod.getAnnotation(javaClass<Transactional>()) ?: transactional
         if (annotation != null) {
             transactionals[definitionMethod] = annotation
         }

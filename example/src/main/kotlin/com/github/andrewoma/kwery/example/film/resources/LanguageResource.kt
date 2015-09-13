@@ -28,14 +28,14 @@ import com.github.andrewoma.kwery.example.film.dao.languageTable
 import com.github.andrewoma.kwery.example.film.model.Language
 import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.mapper.IdStrategy
-import com.github.andrewoma.kwery.transactional.jersey.transactionalx
+import com.github.andrewoma.kwery.transactional.jersey.Transactional
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
 Path("/languages")
 Produces(MediaType.APPLICATION_JSON)
-transactionalx public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
+Transactional public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
     Timed GET
     fun find(QueryParam("name") name: String?): List<Language> {
 
