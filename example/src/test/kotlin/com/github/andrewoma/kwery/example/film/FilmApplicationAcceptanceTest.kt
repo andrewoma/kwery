@@ -31,7 +31,7 @@ import kotlin.test.assertEquals
 
 class FilmApplicationAcceptanceTest {
     companion object {
-        @ClassRule public val rule: DropwizardAppRule<FilmConfiguration> =
+        @ClassRule val rule: DropwizardAppRule<FilmConfiguration> =
                 DropwizardAppRule(FilmApplication::class.java, ResourceHelpers.resourceFilePath("dev.yml"))
     }
 

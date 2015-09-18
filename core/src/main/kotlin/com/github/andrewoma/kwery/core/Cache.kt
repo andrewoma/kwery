@@ -25,7 +25,7 @@ package com.github.andrewoma.kwery.core
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-public interface Cache<K, V : Any> {
+interface Cache<K, V : Any> {
     fun get(key: K): V?
     fun getOrPut(key: K, ifAbsent: (K) -> V): V
 }

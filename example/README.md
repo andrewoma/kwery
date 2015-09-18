@@ -15,7 +15,7 @@ Here's a snippet from [ActorResource](src/main/kotlin/com/github/andrewoma/kwery
 ```kotlin
 Path("/actors")
 Produces(MediaType.APPLICATION_JSON)
-@Transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+@Transactional class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
     Timed GET
     fun find(QueryParam("firstName") firstName: String?,

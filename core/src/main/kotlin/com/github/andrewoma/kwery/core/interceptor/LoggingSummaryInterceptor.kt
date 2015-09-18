@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit
  *
  * WARNING: The code has been prematurely optimised and is accordingly ugly.
  */
-public class LoggingSummaryInterceptor : StatementInterceptor {
+class LoggingSummaryInterceptor : StatementInterceptor {
 
     class Request(val stopWatch: StopWatch, val executions: MutableList<Execution>)
 
@@ -45,12 +45,12 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
         val nanoToMs = 1000000
         val headings = arrayOf("", "Calls", "Exec", "Close", "Rows", "")
 
-        public fun start() {
+        fun start() {
             check(requests.get() == null) { "LoggingSummaryInterceptor already started" }
             requests.set(Request(StopWatch().start(), arrayListOf()))
         }
 
-        public fun stop(log: Logger = LoggerFactory.getLogger(LoggingSummaryInterceptor::class.java)) {
+        fun stop(log: Logger = LoggerFactory.getLogger(LoggingSummaryInterceptor::class.java)) {
             val request = requests.get()
             if (request == null) {
                 log.warn("LoggingSummaryInterceptor not started")

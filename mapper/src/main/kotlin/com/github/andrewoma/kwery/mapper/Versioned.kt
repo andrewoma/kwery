@@ -25,18 +25,18 @@ package com.github.andrewoma.kwery.mapper
 import java.time.LocalDateTime
 
 
-public interface Versioned<T> {
+interface Versioned<T> {
     fun nextVersion(old: T): T
 }
 
-public interface VersionedWithTimestamp : Versioned<LocalDateTime> {
+interface VersionedWithTimestamp : Versioned<LocalDateTime> {
     override fun nextVersion(old: LocalDateTime) = LocalDateTime.now()
 }
 
-public interface VersionedWithInt : Versioned<Int> {
+interface VersionedWithInt : Versioned<Int> {
     override fun nextVersion(old: Int) = old + 1
 }
 
-public interface VersionedWithLong : Versioned<Long> {
+interface VersionedWithLong : Versioned<Long> {
     override fun nextVersion(old: Long) = old + 1
 }

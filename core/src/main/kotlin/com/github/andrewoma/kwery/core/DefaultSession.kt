@@ -43,7 +43,7 @@ import kotlin.support.AbstractIterator
  * Typically, use a ThreadLocalSession in server environments. Alternatively, use a connection pool
  * and create a new session per transaction using SessionFactory.
  */
-public class DefaultSession(override val connection: Connection,
+class DefaultSession(override val connection: Connection,
                             override val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
                             override val defaultOptions: StatementOptions = StatementOptions()
@@ -55,15 +55,15 @@ public class DefaultSession(override val connection: Connection,
          * By default, an unbounded ConcurrentHashMap is used. If overridden, it should be done during initialisation
          * before any sessions are used.
          */
-        public var namedQueryCache: Cache<StatementCacheKey, BoundQuery> = ConcurrentHashMapCache()
+        var namedQueryCache: Cache<StatementCacheKey, BoundQuery> = ConcurrentHashMapCache()
     }
 
-    override public val currentTransaction: Transaction?
+    override val currentTransaction: Transaction?
         get() = transaction
 
     var transaction: Transaction? = null
 
-    override public fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
+    override fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
 
@@ -122,7 +122,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun update(sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
+    override fun update(sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -131,7 +131,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun <K> insert(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
+    override fun <K> insert(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
         return withPreparedStatement(sql, listOf(parameters), options.copy(useGeneratedKeys = true)) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -183,7 +183,7 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun forEach(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit): Unit {
+    override fun forEach(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit): Unit {
         withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()
@@ -221,11 +221,11 @@ public class DefaultSession(override val connection: Connection,
         }
     }
 
-    override public fun <R> transaction(f: (Transaction) -> R): R {
+    override fun <R> transaction(f: (Transaction) -> R): R {
         return if (transaction == null) DefaultTransaction(this).withTransaction(f) else f(transaction!!)
     }
 
-    override public fun manualTransaction(): ManualTransaction {
+    override fun manualTransaction(): ManualTransaction {
         return DefaultTransaction(this)
     }
 
@@ -315,9 +315,9 @@ public class DefaultSession(override val connection: Connection,
     }
 }
 
-public class TypedParameter(val value: Any?, val sqlType: Int)
+ class TypedParameter(val value: Any?, val sqlType: Int)
 
-public data class ExecutingStatement(
+ data class ExecutingStatement(
         val session: Session,
         val contexts: MutableMap<String, Any?>,
         val sql: String,

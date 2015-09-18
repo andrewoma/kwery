@@ -35,7 +35,7 @@ import javax.ws.rs.core.MediaType
 
 @Path("/languages")
 @Produces(MediaType.APPLICATION_JSON)
-@Transactional public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
+@Transactional class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
     @Timed @GET
     fun find(@QueryParam("name") name: String?): List<Language> {
 

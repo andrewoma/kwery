@@ -29,14 +29,14 @@ import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
 
-public open class Converter<R>(
-        public val from: (Row, String) -> R,
-        public val to: (Connection, R) -> Any?
+open class Converter<R>(
+        val from: (Row, String) -> R,
+        val to: (Connection, R) -> Any?
 )
 
-public abstract class SimpleConverter<R>(from: (Row, String) -> R, to: (R) -> Any? = { it }) : Converter<R>(from, { c, v -> to(v) })
+abstract class SimpleConverter<R>(from: (Row, String) -> R, to: (R) -> Any? = { it }) : Converter<R>(from, { c, v -> to(v) })
 
-public val standardConverters: Map<Class<*>, Converter<*>> = listOf(
+val standardConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(booleanConverter),
         reifiedConverter(byteConverter),
         reifiedConverter(shortConverter),
@@ -59,59 +59,59 @@ public val standardConverters: Map<Class<*>, Converter<*>> = listOf(
         java.lang.Double.TYPE to floatConverter
 )
 
-public inline fun <reified T : Any> reifiedConverter(converter: Converter<T>): Pair<Class<*>, Converter<T>> {
+inline fun <reified T : Any> reifiedConverter(converter: Converter<T>): Pair<Class<*>, Converter<T>> {
         return T::class.java to converter
 }
 
-public inline fun <reified T> ArrayConverter(sqlType: String): Converter<List<T>> {
+inline fun <reified T> ArrayConverter(sqlType: String): Converter<List<T>> {
     return Converter(
             { row, c -> row.array<T>(c).toList() },
             { c, v -> c.createArrayOf(sqlType, v.toTypedArray()) }
     )
 }
 
-public object booleanConverter : SimpleConverter<Boolean>({ row, c -> row.boolean(c) })
+object booleanConverter : SimpleConverter<Boolean>({ row, c -> row.boolean(c) })
 
-public object byteConverter : SimpleConverter<Byte>({ row, c -> row.byte(c) })
+object byteConverter : SimpleConverter<Byte>({ row, c -> row.byte(c) })
 
-public object shortConverter : SimpleConverter<Short>({ row, c -> row.short(c) })
+object shortConverter : SimpleConverter<Short>({ row, c -> row.short(c) })
 
-public object intConverter : SimpleConverter<Int>({ row, c -> row.int(c) })
+object intConverter : SimpleConverter<Int>({ row, c -> row.int(c) })
 
-public object longConverter : SimpleConverter<Long>({ row, c -> row.long(c) })
+object longConverter : SimpleConverter<Long>({ row, c -> row.long(c) })
 
-public object floatConverter : SimpleConverter<Float>({ row, c -> row.float(c) })
+object floatConverter : SimpleConverter<Float>({ row, c -> row.float(c) })
 
-public object doubleConverter : SimpleConverter<Double>({ row, c -> row.double(c) })
+object doubleConverter : SimpleConverter<Double>({ row, c -> row.double(c) })
 
-public object bigDecimalConverter : SimpleConverter<BigDecimal>({ row, c -> row.bigDecimal(c) })
+object bigDecimalConverter : SimpleConverter<BigDecimal>({ row, c -> row.bigDecimal(c) })
 
-public object stringConverter : SimpleConverter<String>({ row, c -> row.string(c) })
+object stringConverter : SimpleConverter<String>({ row, c -> row.string(c) })
 
-public object bytesConverter : SimpleConverter<ByteArray>({ row, c -> row.bytes(c) })
+object bytesConverter : SimpleConverter<ByteArray>({ row, c -> row.bytes(c) })
 
-public object timestampConverter : SimpleConverter<Timestamp>({ row, c -> row.timestamp(c) })
+object timestampConverter : SimpleConverter<Timestamp>({ row, c -> row.timestamp(c) })
 
-public object timeConverter : SimpleConverter<Time>({ row, c -> row.time(c) })
+object timeConverter : SimpleConverter<Time>({ row, c -> row.time(c) })
 
-public object dateConverter : SimpleConverter<Date>({ row, c -> row.date(c) })
+object dateConverter : SimpleConverter<Date>({ row, c -> row.date(c) })
 
-public object clobConverter : Converter<String>(
+object clobConverter : Converter<String>(
         { row, c -> row.clob(c).let { it.getSubString(1, it.length().toInt()) } },
         { c, v -> c.createClob().let { it.setString(1, v); it } }
 )
 
-public object blobConverter : Converter<ByteArray>(
+object blobConverter : Converter<ByteArray>(
         { row, c -> row.blob(c).let { it.getBytes(1, it.length().toInt()) } },
         { c, v -> c.createBlob().let { it.setBytes(1, v); it } }
 )
 
-public fun <R : Any> optional(converter: Converter<R>): Converter<R?> = Converter(
+fun <R : Any> optional(converter: Converter<R>): Converter<R?> = Converter(
         { row, c -> if (row.objectOrNull(c) == null) null else converter.from(row, c) },
         { c, v -> if (v == null) null else converter.to(c, v) }
 )
 
-public class EnumByNameConverter<T : Enum<T>>(type: Class<T>) : SimpleConverter<T>(
+class EnumByNameConverter<T : Enum<T>>(type: Class<T>) : SimpleConverter<T>(
         { row, c -> java.lang.Enum.valueOf(type, row.string(c)) },
         { it.name() }
 )

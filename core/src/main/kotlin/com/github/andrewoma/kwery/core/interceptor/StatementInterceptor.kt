@@ -24,21 +24,21 @@ package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.ExecutingStatement
 
-public interface StatementInterceptor {
-    public fun construct(statement: ExecutingStatement): ExecutingStatement = statement
+interface StatementInterceptor {
+    fun construct(statement: ExecutingStatement): ExecutingStatement = statement
 
-    public fun preparing(statement: ExecutingStatement): ExecutingStatement = statement
+    fun preparing(statement: ExecutingStatement): ExecutingStatement = statement
 
-    public fun prepared(statement: ExecutingStatement): Unit {
+    fun prepared(statement: ExecutingStatement): Unit {
     }
 
-    public fun executed(statement: ExecutingStatement): Unit {
+    fun executed(statement: ExecutingStatement): Unit {
     }
 
-    public fun closed(statement: ExecutingStatement): Unit {
+    fun closed(statement: ExecutingStatement): Unit {
     }
 
-    public fun exception(statement: ExecutingStatement, e: Exception): Exception = e
+    fun exception(statement: ExecutingStatement, e: Exception): Exception = e
 }
 
 object noOpStatementInterceptor : StatementInterceptor

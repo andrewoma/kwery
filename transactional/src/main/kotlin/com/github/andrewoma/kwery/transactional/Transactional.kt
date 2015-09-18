@@ -27,25 +27,25 @@ import java.lang.annotation.Inherited
 import kotlin.reflect.KClass
 
 @Inherited
-annotation public class Transactional(
+annotation class Transactional(
         /**
          * The name of the data source to use in the transaction
          */
-        public val name: String = defaultThreadLocalSessionName,
+        val name: String = defaultThreadLocalSessionName,
 
         /**
          * A list of exceptions to rollback on.
          */
-        public val rollbackOn: Array<KClass<out Exception>> = arrayOf(Exception::class),
+        val rollbackOn: Array<KClass<out Exception>> = arrayOf(Exception::class),
 
         /**
          * A list of exceptions to *not* rollback on. Ignore exceptions take precedence over rollbackOn
          */
-        public val ignore: Array<KClass<out Exception>> = arrayOf(),
+        val ignore: Array<KClass<out Exception>> = arrayOf(),
 
         /**
          * If true, a session will be initialised but a transaction will not be started.
          * Transactions can be manually managed via the Session transaction functions.
          */
-        public val manual: Boolean = false
+        val manual: Boolean = false
 )

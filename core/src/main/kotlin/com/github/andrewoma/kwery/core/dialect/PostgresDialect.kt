@@ -27,7 +27,7 @@ import java.sql.Time
 import java.sql.Timestamp
 import javax.xml.bind.DatatypeConverter
 
-public open class PostgresDialect : Dialect {
+open class PostgresDialect : Dialect {
 
     override fun bind(value: Any, limit: Int) = when (value) {
         is String -> escapeSingleQuotedString(value.truncate(limit))

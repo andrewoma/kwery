@@ -40,9 +40,9 @@ import javax.sql.DataSource
  * Sessions are allocated lazily (on first use of the session). So there is no overhead in terms of
  * allocating connections if the thread doesn't actually use a session.
  */
-public val defaultThreadLocalSessionName: String = "default"
+val defaultThreadLocalSessionName: String = "default"
 
-public class ManagedThreadLocalSession(val dataSource: DataSource,
+class ManagedThreadLocalSession(val dataSource: DataSource,
                                        override val dialect: Dialect,
                                        val interceptor: StatementInterceptor = noOpStatementInterceptor,
                                        val name: String = defaultThreadLocalSessionName,
@@ -57,13 +57,13 @@ public class ManagedThreadLocalSession(val dataSource: DataSource,
             }
         }
 
-        public fun initialise(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName) {
+        fun initialise(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
             check(!configs.containsKey(name)) { "A session is already initialised for this thread" }
             configs.put(name, SessionConfig(startTransaction, null, null))
         }
 
-        public fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
+        fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
             val config = configs.get(name)
             check(config != null) { "A session has not been initialised for this thread" }
@@ -75,7 +75,7 @@ public class ManagedThreadLocalSession(val dataSource: DataSource,
             }
         }
 
-        public fun isInitialised(name: String): Boolean = threadLocalSession.get().containsKey(name)
+        fun isInitialised(name: String): Boolean = threadLocalSession.get().containsKey(name)
 
         private fun closeSession(commitTransaction: Boolean, config: SessionConfig) {
             if (config.session == null) return // A session was never created in this thread
@@ -159,7 +159,7 @@ public class ManagedThreadLocalSession(val dataSource: DataSource,
         return session.manualTransaction()
     }
 
-    public fun <R> use(startTransaction: Boolean = true, f: () -> R): R {
+    fun <R> use(startTransaction: Boolean = true, f: () -> R): R {
         ManagedThreadLocalSession.initialise(startTransaction, name)
         var commit = true
         try {

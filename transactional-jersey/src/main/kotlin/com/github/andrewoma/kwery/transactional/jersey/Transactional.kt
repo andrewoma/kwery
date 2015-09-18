@@ -36,21 +36,21 @@ import java.lang.reflect.Method
 import javax.ws.rs.ext.Provider
 
 @Inherited
-public annotation class Transactional(
+annotation class Transactional(
         /**
          * The name of the data source to use in the transaction
          */
-        public val name: String = defaultThreadLocalSessionName,
+        val name: String = defaultThreadLocalSessionName,
 
         /**
          * If true, a session will be initialised but a transaction will not be started.
          * Transactions can be manually managed via the Session transaction functions.
          */
-        public val manual: Boolean = false
+        val manual: Boolean = false
 )
 
 @Provider
-public class TransactionListener : ApplicationEventListener {
+class TransactionListener : ApplicationEventListener {
     private val log = LoggerFactory.getLogger(TransactionListener::class.java)
     private var transactionals = hashMapOf<Method, Transactional>()
 

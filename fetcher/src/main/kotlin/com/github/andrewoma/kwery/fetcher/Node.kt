@@ -30,12 +30,12 @@ private class AllDescendants : Node("**", setOf()) {
     override fun toString() = name
 }
 
-public open data class Node protected constructor(val name: String, val children: Set<Node>) {
+open data class Node protected constructor(val name: String, val children: Set<Node>) {
     companion object {
-        public val all: Node = Node("*", setOf())
-        public val allDescendants: Node = AllDescendants()
+        val all: Node = Node("*", setOf())
+        val allDescendants: Node = AllDescendants()
 
-        public fun create(name: String = "", children: Set<Node> = setOf()): Node {
+        fun create(name: String = "", children: Set<Node> = setOf()): Node {
             val node = Node(name, children)
             node.initialise()
             return node
@@ -95,7 +95,7 @@ public open data class Node protected constructor(val name: String, val children
     }
 }
 
-public fun Node(vararg children: Node): Node = Node.create("", children.toSet())
-public fun Node(name: String = "", vararg children: Node): Node = Node.create(name, children.toSet())
+fun Node(vararg children: Node): Node = Node.create("", children.toSet())
+fun Node(name: String = "", vararg children: Node): Node = Node.create(name, children.toSet())
 
-public fun KProperty1<*, *>.node(vararg children: Node): Node = Node.create(this.name, children.toSet())
+fun KProperty1<*, *>.node(vararg children: Node): Node = Node.create(this.name, children.toSet())

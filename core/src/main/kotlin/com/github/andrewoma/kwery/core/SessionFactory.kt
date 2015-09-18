@@ -30,14 +30,14 @@ import javax.sql.DataSource
 /**
  * SessionFactory provides sessions from a pooled DataSource
  */
-public class SessionFactory(val dataSource: DataSource,
+class SessionFactory(val dataSource: DataSource,
                             val dialect: Dialect,
                             val interceptor: StatementInterceptor = noOpStatementInterceptor,
                             val defaultOptions: StatementOptions = StatementOptions()
 
 ) {
 
-    public fun <R> use(f: (Session) -> R): R {
+    fun <R> use(f: (Session) -> R): R {
         val connection = dataSource.connection
         try {
             val session = DefaultSession(connection, dialect, interceptor, defaultOptions)

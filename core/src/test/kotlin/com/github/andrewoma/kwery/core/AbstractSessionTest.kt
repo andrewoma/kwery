@@ -44,9 +44,9 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
     open var rollbackTransactionByDefault: Boolean = false
 
     val name = TestName()
-    @Rule public fun name(): TestName = name // Annotating val directly doesn't work
+    @Rule fun name(): TestName = name // Annotating val directly doesn't work
 
-    @Before public fun setUp() {
+    @Before fun setUp() {
         session = DefaultSession(dataSource.connection, dialect, LoggingInterceptor())
         if (startTransactionByDefault) {
             transaction = session.manualTransaction()
@@ -65,7 +65,7 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
         f()
     }
 
-    @After public fun tearDown() {
+    @After fun tearDown() {
         try {
             if (startTransactionByDefault) {
                 if (rollbackTransactionByDefault || transaction.rollbackOnly) {

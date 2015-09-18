@@ -30,7 +30,7 @@ class Value<T>(val get: () -> T, val set: (T) -> Unit) {
     }
 }
 
-public class GraphFetcher(val types: Set<Type<*, *>>) {
+class GraphFetcher(val types: Set<Type<*, *>>) {
     private val typeCache: MutableMap<Class<*>, Type<*, *>> = ConcurrentHashMap()
     private val noType: Type<*, *> = Type<Any?, Any>({ it }, { mapOf() })
     protected val debug: Boolean = false
@@ -39,11 +39,11 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
         if (debug) f()
     }
 
-    public fun <T> fetch(value: T, root: Node): T {
+    fun <T> fetch(value: T, root: Node): T {
         return fetch(listOf(value), root).single()
     }
 
-    public fun <T> fetch(values: Collection<T>, root: Node): List<T> {
+    fun <T> fetch(values: Collection<T>, root: Node): List<T> {
         if (values.isEmpty()) return listOf()
 
         val fetched: MutableMap<Type<Any?, Any?>, MutableMap<Any?, Any?>> = hashMapOf()

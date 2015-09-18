@@ -23,31 +23,31 @@
 package com.github.andrewoma.kwery.mapper
 
 
-public interface Dao<T : Any, ID : Any> {
-    public val defaultColumns: Set<Column<T, *>>
-    public val defaultIdStrategy: IdStrategy
+interface Dao<T : Any, ID : Any> {
+    val defaultColumns: Set<Column<T, *>>
+    val defaultIdStrategy: IdStrategy
 
-    public fun findById(id: ID, columns: Set<Column<T, *>> = defaultColumns): T?
+    fun findById(id: ID, columns: Set<Column<T, *>> = defaultColumns): T?
 
-    public fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>> = defaultColumns): Map<ID, T>
+    fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>> = defaultColumns): Map<ID, T>
 
-    public fun findAll(columns: Set<Column<T, *>> = defaultColumns): List<T>
+    fun findAll(columns: Set<Column<T, *>> = defaultColumns): List<T>
 
-    public fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>> = defaultColumns): List<T>
+    fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>> = defaultColumns): List<T>
 
-    public fun update(oldValue: T, newValue: T, deltaOnly: Boolean = false): T
+    fun update(oldValue: T, newValue: T, deltaOnly: Boolean = false): T
 
-    public fun delete(id: ID): Int
+    fun delete(id: ID): Int
 
-    public fun unsafeUpdate(newValue: T): Int
+    fun unsafeUpdate(newValue: T): Int
 
-    public fun insert(value: T, idStrategy: IdStrategy = defaultIdStrategy): T
+    fun insert(value: T, idStrategy: IdStrategy = defaultIdStrategy): T
 
-    public fun batchInsert(values: List<T>, idStrategy: IdStrategy = defaultIdStrategy): List<T>
+    fun batchInsert(values: List<T>, idStrategy: IdStrategy = defaultIdStrategy): List<T>
 
-    public fun unsafeBatchUpdate(values: List<T>)
+    fun unsafeBatchUpdate(values: List<T>)
 
-    public fun batchUpdate(values: List<Pair<T, T>>): List<T>
+    fun batchUpdate(values: List<Pair<T, T>>): List<T>
 
-    public fun allocateIds(count: Int): List<ID>
+    fun allocateIds(count: Int): List<ID>
 }

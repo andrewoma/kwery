@@ -27,38 +27,38 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * Transaction defines the currently executing transaction
  */
-public interface Transaction {
+interface Transaction {
     /**
      * If set to true, forces the transaction to roll back
      */
-    public var rollbackOnly: Boolean
+    var rollbackOnly: Boolean
 
     /**
      * Adds a call back that is invoked prior to committing.
      * Can be used for adding things like audit logging into the current transaction.
      */
-    public fun preCommitHandler(preCommit: (Session) -> Unit)
+    fun preCommitHandler(preCommit: (Session) -> Unit)
 
     /**
      * Adds a call back that is invoked after committing.
      * The Boolean parameter is true if committed, false if rolled back.
      * Can be used for adding things like invalidating caches after commit.
      */
-    public fun postCommitHandler(postCommit: (Boolean, Session) -> Unit)
+    fun postCommitHandler(postCommit: (Boolean, Session) -> Unit)
 
     /**
      * A unique id associated with this transaction.
      * It has no purpose other than to provide a useful identifier for logging
      */
-    public val id: Long
+    val id: Long
 }
 
 /**
  * ManualTransaction allows explicit control over whether to commit or roll back transactions
  */
-public interface ManualTransaction : Transaction {
-    public fun commit()
-    public fun rollback()
+interface ManualTransaction : Transaction {
+    fun commit()
+    fun rollback()
 }
 
 class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
@@ -85,7 +85,7 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
     private val preCommitHandlers = arrayListOf<(Session) -> Unit>()
     private val postCommitHandlers = arrayListOf<(Boolean, Session) -> Unit>()
 
-    override public var rollbackOnly: Boolean = false // Can only set to true, can never unset
+    override var rollbackOnly: Boolean = false // Can only set to true, can never unset
         set(value) {
             if (value) $rollbackOnly = value
         }

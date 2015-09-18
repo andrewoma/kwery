@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core.dialect
 
 import java.sql.*
 
-public open class HsqlDialect : Dialect {
+open class HsqlDialect : Dialect {
 
     override fun bind(value: Any, limit: Int): String = when (value) {
         is String -> escapeSingleQuotedString(value.truncate(limit))

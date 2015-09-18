@@ -39,7 +39,7 @@ import kotlin.reflect.jvm.javaType
  * While columns can be added directly it is more common to use the `col` methods on `Table`
  * to provide sensible defaults.
  */
-public data class Column<C, T>(
+data class Column<C, T>(
         /**
          * A function to extract the property value from the containing object
          */
@@ -87,13 +87,13 @@ public data class Column<C, T>(
     /**
      * A type-safe variant of `to`
      */
-    public fun of(value: T): Pair<Column<C, T>, T> = Pair(this, value)
+    fun of(value: T): Pair<Column<C, T>, T> = Pair(this, value)
 
     /**
      * A type-safe variant of `to` with an optional value
      */
     @Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
-    public fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
+    fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
 
     override fun toString(): String {
         return "Column($name id=$id version=$version nullable=$isNullable)" // Prevent NPE in debugger on "property"
@@ -103,14 +103,14 @@ public data class Column<C, T>(
 /**
  * Value allows extraction of column values by column.
  */
-public interface Value<C> {
+interface Value<C> {
     fun <T> of(column: Column<C, T>): T
 }
 
 /**
  * TableConfiguration defines configuration common to a set of tables.
  */
-public class TableConfiguration(
+class TableConfiguration(
         /**
          * Defines default values for types when the column is not null, but is not selected.
          * Defaults to `standardDefaults`
@@ -133,23 +133,23 @@ public class TableConfiguration(
 /**
  * A `Table` maps directly to a single SQL table, with each SQL column defined explicitly.
  */
-public abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration = TableConfiguration(), val sequence: String? = null) {
+abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration = TableConfiguration(), val sequence: String? = null) {
 
-    public val allColumns: Set<Column<T, *>> = LinkedHashSet()
-    public val defaultColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.selectByDefault }) }
-    public val idColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.id }) }
-    public val dataColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filterNot { it.id }) }
-    public val versionColumn: Column<T, *>? by lazy { allColumns.firstOrNull { it.version } }
-    public val type: Class<T> by lazy { lazyType!! }
+    val allColumns: Set<Column<T, *>> = LinkedHashSet()
+    val defaultColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.selectByDefault }) }
+    val idColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.id }) }
+    val dataColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filterNot { it.id }) }
+    val versionColumn: Column<T, *>? by lazy { allColumns.firstOrNull { it.version } }
+    val type: Class<T> by lazy { lazyType!! }
 
     private val columnName: (Column<T, *>) -> String = { it.name }
     private var initialised = false
     private var lazyType: Class<T>? = null
 
-    public abstract fun create(value: Value<T>): T
-    public abstract fun idColumns(id: ID): Set<Pair<Column<T, *>, *>>
+    abstract fun create(value: Value<T>): T
+    abstract fun idColumns(id: ID): Set<Pair<Column<T, *>, *>>
 
-    public fun <R> addColumn(column: Column<T, R>): Column<T, R> {
+    fun <R> addColumn(column: Column<T, R>): Column<T, R> {
         @Suppress("UNCHECKED_CAST")
         (allColumns as MutableSet<Any?>).add(column)
         return column
@@ -178,8 +178,8 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     }
 
     // A delegated property that gets the column name from the property name unless it is defined
-    public inner class DelegatedColumn<R>(val template: Column<T, R>, private var value: Column<T, R>? = null) : ReadOnlyProperty<Any?, Column<T, R>> {
-        public override fun get(thisRef: Any?, property: PropertyMetadata): Column<T, R> {
+    inner class DelegatedColumn<R>(val template: Column<T, R>, private var value: Column<T, R>? = null) : ReadOnlyProperty<Any?, Column<T, R>> {
+        override fun get(thisRef: Any?, property: PropertyMetadata): Column<T, R> {
             if (value == null) {
                 value = addColumn(template.copy(name = template.name.let { if (it != "") it else config.namingConvention(property.name) }))
             }
@@ -187,7 +187,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         }
     }
 
-    public fun <R> col(property: KProperty1<T, R>,
+    fun <R> col(property: KProperty1<T, R>,
                        id: Boolean = false,
                        version: Boolean = false,
                        notNull: Boolean = id || version,
@@ -200,7 +200,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         return DelegatedColumn(column)
     }
 
-    public fun <C, R> col(property: KProperty1<C, R>,
+    fun <C, R> col(property: KProperty1<C, R>,
                           path: (T) -> C,
                           id: Boolean = false,
                           version: Boolean = false,
@@ -220,7 +220,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     private enum class DummyEnum
 
     @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_UNIT_OR_ANY", "CAST_NEVER_SUCCEEDS")
-    public fun <T> converter(type: KType): Converter<T> {
+    fun <T> converter(type: KType): Converter<T> {
         // TODO ... converters are currently defined as Java classes as I can't figure out how to
         // convert a nullable KType into its non-nullable equivalent
         val javaClass = type.javaType as Class<T>
@@ -229,7 +229,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         return (if (type.isMarkedNullable) optional(converter!! as Converter<Any>) else converter) as Converter<T>
     }
 
-    public fun <T> default(type: KType): T {
+    fun <T> default(type: KType): T {
         if (type.isMarkedNullable) return null as T
         val value = config.defaults[type]
         checkNotNull(value) { "Default value undefined for type $type" }
@@ -237,7 +237,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         return value as T
     }
 
-    public fun copy(value: T, properties: Map<Column<T, *>, *>): T {
+    fun copy(value: T, properties: Map<Column<T, *>, *>): T {
         return create(object : Value<T> {
             override fun <R> of(column: Column<T, R>): R {
                 @Suppress("UNCHECKED_CAST")
@@ -246,7 +246,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         })
     }
 
-    public fun objectMap(session: Session, value: T, columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
+    fun objectMap(session: Session, value: T, columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
         val map = hashMapOfExpectedSize<String, Any?>(columns.size())
         for (column in columns) {
             @Suppress("UNCHECKED_CAST")
@@ -256,7 +256,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         return map
     }
 
-    public fun idMap(session: Session, id: ID, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
+    fun idMap(session: Session, id: ID, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
         val idCols = idColumns(id)
         val map = hashMapOfExpectedSize<String, Any?>(idCols.size())
         for ((column, value) in idCols) {
@@ -267,7 +267,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         return map
     }
 
-    public fun rowMapper(columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): (Row) -> T {
+    fun rowMapper(columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): (Row) -> T {
         return { row ->
             create(object : Value<T> {
                 override fun <R> of(column: Column<T, R>): R {

@@ -35,7 +35,7 @@ import javax.sql.DataSource
  * duration of the transaction and is used for any further statements during the transaction.
  */
 
-public class ThreadLocalSession(val dataSource: DataSource,
+class ThreadLocalSession(val dataSource: DataSource,
                                 override val dialect: Dialect,
                                 val interceptor: StatementInterceptor = noOpStatementInterceptor,
                                 val name: String = defaultThreadLocalSessionName,

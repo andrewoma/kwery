@@ -27,7 +27,7 @@ import java.sql.Clob
 import java.text.SimpleDateFormat
 
 // TODO ... convert this to pass in a buffer for appending - improve performance in general
-public interface Dialect {
+interface Dialect {
     fun bind(value: Any, limit: Int): String
 
     fun bindArray(value: java.sql.Array, limit: Int, prefix: String = "", postfix: String = "") =

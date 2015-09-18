@@ -10,7 +10,7 @@ be rolled back automatically if the status of the method is not successful.
 val session = ManagedThreadLocalSession(dataSource, HsqlDialect())
 
 Path("/films")
-transactional public class FilmResource(session: Session) : Resource {
+transactional class FilmResource(session: Session) : Resource {
     GET fun find(): List<Film> {
         session.select(...)
     }

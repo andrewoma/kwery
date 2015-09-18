@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.mapper
 
 import com.github.andrewoma.kwery.core.Row
 
-public class PrefixedColumns<T : Any, ID>(val prefix: String, table: Table<T, ID>, columns: Set<Column<T, *>>) {
+class PrefixedColumns<T : Any, ID>(val prefix: String, table: Table<T, ID>, columns: Set<Column<T, *>>) {
     val mapper: (Row) -> T = table.rowMapper(columns, { "${prefix}__${it.name}" })
 
     val optionalMapper: (Row) -> T? = { row ->

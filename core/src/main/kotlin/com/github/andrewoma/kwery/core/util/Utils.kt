@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core.util
 
 
 // TODO ... remove when M13 includes this by default
-public inline fun <T, R> T.apply(f: T.() -> R): T {
+inline fun <T, R> T.apply(f: T.() -> R): T {
     this.f()
     return this
 }

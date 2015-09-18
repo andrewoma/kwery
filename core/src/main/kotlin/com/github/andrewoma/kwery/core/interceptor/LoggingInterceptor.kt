@@ -42,12 +42,12 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  *  e.g. Add "sqlLogging=true" to an http request that sets forceLogging=true in a servlet filter
  */
 // TODO - Add support for SQL Warnings
-open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingInterceptor::class.java),
+open class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingInterceptor::class.java),
                                      val infoQueryThresholdInMs: Long = 1000L,
                                      val parameterLimit: Int = -1
 ) : StatementInterceptor {
     companion object {
-        public val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
+        val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
 
     data class Context(val stopWatch: StopWatch, val executedTiming: String = "", val exception: Exception? = null)

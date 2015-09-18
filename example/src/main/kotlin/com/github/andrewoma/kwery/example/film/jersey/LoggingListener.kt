@@ -33,7 +33,7 @@ import javax.ws.rs.ext.Provider
 
 
 @Provider
-public class LoggingListener : ApplicationEventListener {
+class LoggingListener : ApplicationEventListener {
     private val log = LoggerFactory.getLogger(LoggingListener::class.java)
 
     enum class LogType { none, summary, statements, all }

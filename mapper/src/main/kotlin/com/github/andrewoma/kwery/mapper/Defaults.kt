@@ -26,7 +26,7 @@ import java.math.BigDecimal
 import kotlin.reflect.KType
 import kotlin.reflect.defaultType
 
-public val standardDefaults: Map<KType, *> = listOf(
+val standardDefaults: Map<KType, *> = listOf(
         reifiedValue(true),
         reifiedValue(0.toByte()),
         reifiedValue(0.toChar()),
@@ -39,5 +39,5 @@ public val standardDefaults: Map<KType, *> = listOf(
         reifiedValue("")
 ).toMap()
 
-inline public fun <reified T : Any> reifiedValue(default: T): Pair<KType, T> = T::class.defaultType to default
+inline fun <reified T : Any> reifiedValue(default: T): Pair<KType, T> = T::class.defaultType to default
 

@@ -32,7 +32,7 @@ import javax.ws.rs.core.Response
 import javax.ws.rs.ext.Provider
 
 @Provider
-public class SqlExceptionMapper : LoggingExceptionMapper<SQLException>() {
+class SqlExceptionMapper : LoggingExceptionMapper<SQLException>() {
 
     override fun toResponse(exception: SQLException): Response {
         val response = super.toResponse(exception) // Logs exception

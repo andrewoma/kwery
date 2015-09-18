@@ -30,7 +30,7 @@ import java.time.*
 import java.time.temporal.ChronoUnit.*
 import java.time.temporal.TemporalUnit
 
-public val timeConverters: Map<Class<*>, Converter<*>> = listOf(
+val timeConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(localDateTimeConverter),
         reifiedConverter(localDateConverter),
         reifiedConverter(localTimeConverter),
@@ -38,17 +38,17 @@ public val timeConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(durationToBigDecimalConverter)
 ).toMap()
 
-public object localDateTimeConverter : SimpleConverter<LocalDateTime>(
+object localDateTimeConverter : SimpleConverter<LocalDateTime>(
         { row, c -> LocalDateTime.ofInstant(row.timestamp(c).toInstant(), ZoneId.systemDefault()) },
         { Timestamp.from(it.atZone(ZoneId.systemDefault()).toInstant()) }
 )
 
-public object localDateConverter : SimpleConverter<LocalDate>(
+object localDateConverter : SimpleConverter<LocalDate>(
         { row, c -> row.date(c).toLocalDate() },
         { Date.valueOf(it) }
 )
 
-public object localTimeConverter : SimpleConverter<LocalTime>(
+object localTimeConverter : SimpleConverter<LocalTime>(
         { row, c -> row.time(c).toLocalTime() },
         {
             @Suppress("DEPRECATED_SYMBOL_WITH_MESSAGE") // No sane alternative
@@ -56,7 +56,7 @@ public object localTimeConverter : SimpleConverter<LocalTime>(
         }
 )
 
-public object instantConverter : SimpleConverter<Instant>(
+object instantConverter : SimpleConverter<Instant>(
         { row, c -> row.timestamp(c).toInstant() },
         { Timestamp(it.toEpochMilli()) }
 )
@@ -66,7 +66,7 @@ public object instantConverter : SimpleConverter<Instant>(
  * A duration's max value is 9,223,372,036,854,775,807.999999999 seconds so requires DECIMAL(28,9) to store all
  * durations without overflow or truncation.
  */
-public object durationToBigDecimalConverter : SimpleConverter<Duration>(
+object durationToBigDecimalConverter : SimpleConverter<Duration>(
         { row, c -> row.bigDecimal(c).toDuration() },
         { it.toBigDecimal() }
 )
@@ -77,7 +77,7 @@ public object durationToBigDecimalConverter : SimpleConverter<Duration>(
  * Ensure that if converting between units for storage that the conversion is a whole number
  * of the unit specified and does not overflow a Long.
  */
-public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
+class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
         { row, c -> Duration.of(row.long(c), unit) },
         { duration ->
             val converted = when (unit) {
@@ -106,12 +106,12 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
 
 private val nanosInSecond: BigDecimal = BigDecimal.valueOf(1000000000L)
 
-public fun BigDecimal.toDuration(): Duration {
+fun BigDecimal.toDuration(): Duration {
     val seconds = this.longValue()
     val nanoseconds = this.remainder(BigDecimal.ONE).multiply(nanosInSecond).longValue()
     return Duration.ofSeconds(seconds, nanoseconds);
 }
 
-public fun Duration.toBigDecimal(): BigDecimal {
+fun Duration.toBigDecimal(): BigDecimal {
     return BigDecimal.valueOf(this.seconds).add(BigDecimal.valueOf(this.nano.toLong()).divide(nanosInSecond))
 }

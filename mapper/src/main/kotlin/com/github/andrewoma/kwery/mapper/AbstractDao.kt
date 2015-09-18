@@ -32,7 +32,7 @@ import java.sql.Array
 import java.sql.SQLFeatureNotSupportedException
 import java.util.*
 
-public abstract class AbstractDao<T : Any, ID : Any>(
+abstract class AbstractDao<T : Any, ID : Any>(
         val session: Session,
         val table: Table<T, ID>,
         val id: (T) -> ID,
@@ -50,11 +50,11 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
     private val listeners = linkedSetOf<Listener>()
 
-    public fun addListener(listener: Listener) {
+    fun addListener(listener: Listener) {
         listeners.add(listener)
     }
 
-    public fun removeListener(listener: Listener) {
+    fun removeListener(listener: Listener) {
         listeners.remove(listener)
     }
 
@@ -376,7 +376,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 }
 
-public enum class IdStrategy {
+enum class IdStrategy {
     /**
      * Auto will automatically set the strategy to Generated or Explicit based on whether a
      * non-default id value is provided in the value inserted

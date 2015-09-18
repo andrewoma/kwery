@@ -27,16 +27,16 @@ import com.github.andrewoma.kwery.core.Transaction
 import com.github.andrewoma.kwery.mapper.Table
 import java.util.concurrent.ConcurrentHashMap
 
-public interface Listener {
+interface Listener {
     fun onEvent(session: Session, events: List<Event>)
 }
 
-public open class Event(val table: Table<*, *>, val id: Any)
-public data class InsertEvent(table: Table<*, *>, id: Any, val value: Any) : Event(table, id)
-public data class DeleteEvent(table: Table<*, *>, id: Any, val value: Any?) : Event(table, id)
-public data class UpdateEvent(table: Table<*, *>, id: Any, val new: Any?, val old: Any?) : Event(table, id)
+open class Event(val table: Table<*, *>, val id: Any)
+data class InsertEvent(table: Table<*, *>, id: Any, val value: Any) : Event(table, id)
+data class DeleteEvent(table: Table<*, *>, id: Any, val value: Any?) : Event(table, id)
+data class UpdateEvent(table: Table<*, *>, id: Any, val new: Any?, val old: Any?) : Event(table, id)
 
-public abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
+abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
     val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()
 
     override fun onEvent(session: Session, events: List<Event>) {

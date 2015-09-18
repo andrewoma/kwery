@@ -35,7 +35,7 @@ import javax.ws.rs.core.MediaType
 
 @Path("/films")
 @Produces(MediaType.APPLICATION_JSON)
-@Transactional public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
+@Transactional class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
     @Timed @GET
     fun find(@QueryParam("title") title: String?,
              @QueryParam("releaseYear") releaseYear: Int?,

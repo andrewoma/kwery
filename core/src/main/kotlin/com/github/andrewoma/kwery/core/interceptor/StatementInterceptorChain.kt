@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.ExecutingStatement
 
-public class StatementInterceptorChain(val interceptors: List<StatementInterceptor>) : StatementInterceptor {
+class StatementInterceptorChain(val interceptors: List<StatementInterceptor>) : StatementInterceptor {
     override fun construct(statement: ExecutingStatement) =
             interceptors.fold(statement) { result, interceptor -> interceptor.construct(result) }
 
