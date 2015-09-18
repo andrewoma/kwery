@@ -23,18 +23,18 @@
 package com.github.andrewoma.kwery.mappertest.example.test
 
 import com.github.andrewoma.kwery.mappertest.example.*
+import org.junit.Test
 import kotlin.properties.Delegates
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
     override var dao: ActorDao by Delegates.notNull()
 
     override fun afterSessionSetup() {
         dao = ActorDao(session, FilmActorDao(session))
-        super<AbstractFilmDaoTest>.afterSessionSetup()
+        super.afterSessionSetup()
     }
 
     override val data = listOf(

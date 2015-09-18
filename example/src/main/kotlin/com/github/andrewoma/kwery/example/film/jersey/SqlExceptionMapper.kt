@@ -31,14 +31,14 @@ import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
 import javax.ws.rs.ext.Provider
 
-Provider
+@Provider
 public class SqlExceptionMapper : LoggingExceptionMapper<SQLException>() {
 
     override fun toResponse(exception: SQLException): Response {
         val response = super.toResponse(exception) // Logs exception
 
         val code = when (exception) {
-            is SQLIntegrityConstraintViolationException -> Response.Status.CONFLICT.getStatusCode()
+            is SQLIntegrityConstraintViolationException -> Response.Status.CONFLICT.statusCode
             is OptimisticLockException -> 428 // http://en.wikipedia.org/wiki/List_of_HTTP_status_codes#428
             else -> null
         }

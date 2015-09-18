@@ -31,13 +31,11 @@ import org.glassfish.jersey.server.monitoring.ApplicationEventListener
 import org.glassfish.jersey.server.monitoring.RequestEvent
 import org.glassfish.jersey.server.monitoring.RequestEventListener
 import org.slf4j.LoggerFactory
-import java.lang.annotation.*
+import java.lang.annotation.Inherited
 import java.lang.reflect.Method
 import javax.ws.rs.ext.Provider
 
-Target(ElementType.METHOD, ElementType.TYPE)
-Retention(RetentionPolicy.RUNTIME)
-Inherited
+@Inherited
 public annotation class Transactional(
         /**
          * The name of the data source to use in the transaction
@@ -51,30 +49,30 @@ public annotation class Transactional(
         public val manual: Boolean = false
 )
 
-Provider
+@Provider
 public class TransactionListener : ApplicationEventListener {
-    private val log = LoggerFactory.getLogger(javaClass<TransactionListener>())
+    private val log = LoggerFactory.getLogger(TransactionListener::class.java)
     private var transactionals = hashMapOf<Method, Transactional>()
 
     override fun onEvent(event: ApplicationEvent) {
-        if (event.getType() == ApplicationEvent.Type.INITIALIZATION_APP_FINISHED) {
-            registerResources(event.getResourceModel().getResources())
+        if (event.type == ApplicationEvent.Type.INITIALIZATION_APP_FINISHED) {
+            registerResources(event.resourceModel.resources)
         }
     }
 
     private fun registerResources(resources: List<Resource>) {
         for (resource in resources) {
-            val classAnnotation = resource.getAllMethods().firstOrNull()?.getInvocable()?.getDefinitionMethod()?.getDeclaringClass()?.getAnnotation(javaClass<Transactional>())
-            for (method in resource.getAllMethods()) {
+            val classAnnotation = resource.allMethods.firstOrNull()?.invocable?.definitionMethod?.declaringClass?.getAnnotation(Transactional::class.java)
+            for (method in resource.allMethods) {
                 register(method, classAnnotation)
             }
-            registerResources(resource.getChildResources())
+            registerResources(resource.childResources)
         }
     }
 
     private fun register(method: ResourceMethod, transactional: Transactional?) {
-        val definitionMethod = method.getInvocable().getDefinitionMethod()
-        val annotation = definitionMethod.getAnnotation(javaClass<Transactional>()) ?: transactional
+        val definitionMethod = method.invocable.definitionMethod
+        val annotation = definitionMethod.getAnnotation(Transactional::class.java) ?: transactional
         if (annotation != null) {
             transactionals[definitionMethod] = annotation
         }
@@ -87,15 +85,15 @@ public class TransactionListener : ApplicationEventListener {
     private inner class Listener : RequestEventListener {
         override fun onEvent(event: RequestEvent) {
             try {
-                val type = event.getType()
+                val type = event.type
                 if (type == RequestEvent.Type.REQUEST_MATCHED || type == RequestEvent.Type.FINISHED) {
-                    val method = event.getUriInfo()?.getMatchedResourceMethod()?.getInvocable()?.getDefinitionMethod()
+                    val method = event.uriInfo?.matchedResourceMethod?.invocable?.definitionMethod
                     val transactional = transactionals[method]
                     if (transactional != null) {
                         if (type == RequestEvent.Type.REQUEST_MATCHED) {
                             ManagedThreadLocalSession.initialise(!transactional.manual, transactional.name)
                         } else {
-                            ManagedThreadLocalSession.finalise(event.isSuccess())
+                            ManagedThreadLocalSession.finalise(event.isSuccess)
                         }
                     }
                 }

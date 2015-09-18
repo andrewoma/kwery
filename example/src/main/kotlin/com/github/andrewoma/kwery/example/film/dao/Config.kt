@@ -26,13 +26,14 @@ import com.github.andrewoma.kwery.example.film.model.FilmRating
 import com.github.andrewoma.kwery.example.film.model.Language
 import com.github.andrewoma.kwery.mapper.*
 import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
+import kotlin.reflect.KType
 
-val domainDefaults: Map<Class<*>, *> = listOf(
+val domainDefaults: Map<KType, *> = listOf(
         reifiedValue(FilmRating.G),
         reifiedValue(Language(-1))
 ).toMap()
 
-val defaults: Map<Class<*>, *> = standardDefaults + timeDefaults + domainDefaults
+val defaults: Map<KType, *> = standardDefaults + timeDefaults + domainDefaults
 
 val domainConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(filmRatingConverter),

@@ -23,8 +23,8 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class HsqlDialectTest : AbstractDialectTest(hsqlDataSource, HsqlDialect()) {
     //language=SQL

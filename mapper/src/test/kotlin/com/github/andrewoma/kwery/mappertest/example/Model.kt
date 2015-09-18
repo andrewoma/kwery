@@ -37,7 +37,7 @@ enum class FilmRating {
     G, PG, PG_13, R, NC_17
 }
 
-data class Film (
+data class Film(
         val id: Int,
         val title: String,
         val releaseYear: Int?,
@@ -61,6 +61,6 @@ data class FilmActor(
     data class Id(val filmId: Int, val actorId: Int)
 }
 
-data class Language (val id: Int, val name: String, val lastUpdate: LocalDateTime)
+data class Language(val id: Int, val name: String, val lastUpdate: LocalDateTime)
 
 fun Language(id: Int = -1): Language = Language(id, "", defaultLocalDateTime)

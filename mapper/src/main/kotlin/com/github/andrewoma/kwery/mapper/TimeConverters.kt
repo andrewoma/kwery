@@ -51,8 +51,8 @@ public object localDateConverter : SimpleConverter<LocalDate>(
 public object localTimeConverter : SimpleConverter<LocalTime>(
         { row, c -> row.time(c).toLocalTime() },
         {
-            @suppress("DEPRECATED_SYMBOL_WITH_MESSAGE") // No sane alternative
-            Time(it.getHour(), it.getMinute(), it.getSecond())
+            @Suppress("DEPRECATED_SYMBOL_WITH_MESSAGE") // No sane alternative
+            Time(it.hour, it.minute, it.second)
         }
 )
 
@@ -84,14 +84,14 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
                 NANOS -> duration.toNanos()
                 MICROS -> duration.toNanos() / 1000
                 MILLIS -> duration.toMillis()
-                SECONDS -> duration.getSeconds()
+                SECONDS -> duration.seconds
                 MINUTES -> duration.toMinutes()
                 HOURS -> duration.toHours()
                 HALF_DAYS -> duration.toHours() / 12
                 DAYS -> duration.toDays()
                 else -> throw UnsupportedOperationException("") // Not possible
             }
-            require(duration == Duration.of(converted, unit), "${duration} must be a whole number of ${unit} and not overflow a Long")
+            require(duration == Duration.of(converted, unit)) { "${duration} must be a whole number of ${unit} and not overflow a Long" }
             converted
         }
 ) {
@@ -100,7 +100,7 @@ public class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
     }
 
     init {
-        require(unit in supported, "Only ${supported.joinToString(", ")} are supported")
+        require(unit in supported) { "Only ${supported.joinToString(", ")} are supported" }
     }
 }
 
@@ -113,5 +113,5 @@ public fun BigDecimal.toDuration(): Duration {
 }
 
 public fun Duration.toBigDecimal(): BigDecimal {
-    return BigDecimal.valueOf(this.getSeconds()).add(BigDecimal.valueOf(this.getNano().toLong()).divide(nanosInSecond))
+    return BigDecimal.valueOf(this.seconds).add(BigDecimal.valueOf(this.nano.toLong()).divide(nanosInSecond))
 }

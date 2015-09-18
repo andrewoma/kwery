@@ -31,7 +31,7 @@ import javax.validation.constraints.NotNull
 class FilmConfiguration : Configuration() {
     // TODO ... devise a more elegant solution. Tried Jackson's Kotlin module but
     // DropWizard requires a default constructor
-    Valid NotNull JsonProperty("database")
+    @Valid @NotNull @JsonProperty("database")
     private var _database: DataSourceFactory? = null
     val database: DataSourceFactory
         get() = _database!!

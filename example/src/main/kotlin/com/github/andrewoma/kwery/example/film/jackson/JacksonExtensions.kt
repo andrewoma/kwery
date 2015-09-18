@@ -35,13 +35,13 @@ import com.github.andrewoma.kwery.example.film.model.AttributeSet
 import com.github.andrewoma.kwery.example.film.model.HasAttributeSet
 import java.net.URL
 
-inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Sequence<T>) -> Unit) {
-    val parser = this.getFactory().createParser(url)
-    check(parser.nextToken() == JsonToken.START_ARRAY, "Expected an array")
-    check(parser.nextToken() == JsonToken.START_OBJECT, "Expected an object")
+inline fun <reified T : Any> ObjectMapper.withObjectStream(url: URL, f: (Sequence<T>) -> Unit) {
+    val parser = this.factory.createParser(url)
+    check(parser.nextToken() == JsonToken.START_ARRAY) { "Expected an array" }
+    check(parser.nextToken() == JsonToken.START_OBJECT) { "Expected an object" }
 
     try {
-        val iterator = this.readValues<T>(parser, javaClass<T>())
+        val iterator = this.readValues<T>(parser, T::class.java)
         f(object : Sequence<T> {
             override fun iterator() = iterator
         })
@@ -55,7 +55,7 @@ inline fun <reified T> ObjectMapper.withObjectStream(url: URL, f: (Sequence<T>) 
 class AttributeSetFilter : PropertyFilter {
     override fun serializeAsField(pojo: Any, generator: JsonGenerator, provider: SerializerProvider, writer: PropertyWriter) {
         val partial = pojo as HasAttributeSet
-        if (partial.attributeSet() == AttributeSet.All || writer.getName().equals("id")) {
+        if (partial.attributeSet() == AttributeSet.All || writer.name.equals("id")) {
             writer.serializeAsField(pojo, generator, provider);
         } else {
             writer.serializeAsOmittedField(pojo, generator, provider);
@@ -75,6 +75,6 @@ class AttributeSetFilter : PropertyFilter {
     }
 }
 
-JsonFilter("Attribute set filter")
+@JsonFilter("Attribute set filter")
 class AttributeSetFilterMixIn {
 }

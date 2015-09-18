@@ -22,7 +22,6 @@
 
 package com.github.andrewoma.kwery.core
 
-import com.github.andrewoma.kommon.lang.trimMargin
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
@@ -32,7 +31,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
-import java.util.ArrayList
+import java.util.*
 import kotlin.support.AbstractIterator
 
 /**
@@ -85,7 +84,7 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
-        require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
+        require(!parametersList.isEmpty()) { "Parameters cannot be empty for batchUpdate" }
 
         return withPreparedStatement(sql, parametersList, options) { statement, ps ->
             for (parameters in parametersList) {
@@ -99,7 +98,7 @@ public class DefaultSession(override val connection: Connection,
     }
 
     override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
-        require(!parametersList.isEmpty(), "Parameters cannot be empty for batchUpdate")
+        require(!parametersList.isEmpty()) { "Parameters cannot be empty for batchUpdate" }
 
         return withPreparedStatement(sql, parametersList, options.copy(useGeneratedKeys = true)) { statement, ps ->
             for (parameters in parametersList) {
@@ -109,7 +108,7 @@ public class DefaultSession(override val connection: Connection,
             val rowsAffected = ps.executeBatch().toList()
             interceptor.executed(statement)
 
-            val rs = ps.getGeneratedKeys()
+            val rs = ps.generatedKeys
             try {
                 val keys = ArrayList<K>(parametersList.size())
                 while (rs.next()) {
@@ -137,9 +136,9 @@ public class DefaultSession(override val connection: Connection,
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
             interceptor.executed(statement)
-            val rs = ps.getGeneratedKeys()
+            val rs = ps.generatedKeys
             try {
-                require(rs.next(), "No generated key received")
+                require(rs.next()) { "No generated key received" }
                 val keys = f(Row(rs))
                 statement.copy(rowsCounts = listOf(rowsAffected)) to (rowsAffected to keys)
             } finally {
@@ -238,7 +237,7 @@ public class DefaultSession(override val connection: Connection,
 
             statement = statement.copy(inClauseSizes = inClauseSizes(parameters))
             val namedQuery = namedQueryCache.getOrPut(StatementCacheKey(sql, statement.inClauseSizes, options.name to options.applyNameToQuery)) {
-                statement = statement.copy(sql = sql.trimMargin())
+                statement = statement.copy(sql = sql.trimIndent())
                 BoundQuery(statement.sql, statement.inClauseSizes)
             }
             statement = interceptor.preparing(statement.copy(preparedSql = namedQuery.query, preparedParameters = namedQuery.bindings))
@@ -273,16 +272,16 @@ public class DefaultSession(override val connection: Connection,
             connection.prepareStatement(sql, options.resultSetType.value, options.resultSetConcurrency.value, options.resultSetHoldability.value!!)
         }
 
-        statement.setFetchSize(options.fetchSize)
-        statement.setFetchDirection(options.fetchDirection.value)
-        statement.setPoolable(options.poolable)
-        statement.setMaxFieldSize(options.maxFieldSize)
-        statement.setQueryTimeout(options.queryTimeout)
+        statement.fetchSize = options.fetchSize
+        statement.fetchDirection = options.fetchDirection.value
+        statement.isPoolable = options.poolable
+        statement.maxFieldSize = options.maxFieldSize
+        statement.queryTimeout = options.queryTimeout
 
         if (options.maxRows <= Integer.MAX_VALUE) {
-            statement.setMaxRows(options.maxRows.toInt())
+            statement.maxRows = options.maxRows.toInt()
         } else {
-            statement.setLargeMaxRows(options.maxRows)
+            statement.largeMaxRows = options.maxRows
         }
 
         options.beforeExecution(statement)

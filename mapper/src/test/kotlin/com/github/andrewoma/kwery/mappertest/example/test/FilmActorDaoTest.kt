@@ -36,7 +36,7 @@ class FilmActorDaoTest : AbstractFilmDaoTest<FilmActor, FilmActor.Id, FilmActorD
         dao.session.update("delete from ${dao.table.name}")
     }
 
-    override val data by Delegates.lazy {
+    override val data by lazy(LazyThreadSafetyMode.NONE) {
         listOf(
                 FilmActor(FilmActor.Id(sd.actorKate.id, sd.filmUnderworld.id), LocalDateTime.now()),
                 FilmActor(FilmActor.Id(sd.actorKate.id, sd.filmUnderworld2.id), LocalDateTime.now()),

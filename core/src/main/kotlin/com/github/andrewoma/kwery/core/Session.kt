@@ -90,9 +90,9 @@ interface Session {
      * This is the most flexible method for handling large result sets without loading them into memory.
      */
     public fun <R> asSequence(sql: String,
-                            parameters: Map<String, Any?> = mapOf(),
-                            options: StatementOptions = defaultOptions,
-                            f: (Sequence<Row>) -> R): R
+                              parameters: Map<String, Any?> = mapOf(),
+                              options: StatementOptions = defaultOptions,
+                              f: (Sequence<Row>) -> R): R
 
     /**
      * Executes a query, invoking the supplied function for each row returned.

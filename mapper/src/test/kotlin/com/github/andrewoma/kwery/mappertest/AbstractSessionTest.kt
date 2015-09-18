@@ -28,18 +28,17 @@ import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.github.andrewoma.kwery.core.util.apply
 import org.apache.tomcat.jdbc.pool.DataSource
-import org.junit.rules.TestName
-import kotlin.properties.Delegates
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.TestName
+import kotlin.properties.Delegates
 
 private val testDataSource = DataSource().apply {
-    setDefaultAutoCommit(true)
-    setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
-    setUrl("jdbc:hsqldb:mem:kwerydao")
+    defaultAutoCommit = true
+    driverClassName = "org.hsqldb.jdbc.JDBCDriver"
+    url = "jdbc:hsqldb:mem:kwerydao"
 }
 
 abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDataSource, val dialect: Dialect = HsqlDialect()) {
@@ -57,19 +56,19 @@ abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDa
     @Rule public fun name(): TestName = name // Annotating val directly doesn't work
 
     @Before public fun setUp() {
-        session = DefaultSession(dataSource.getConnection(), dialect, LoggingInterceptor())
+        session = DefaultSession(dataSource.connection, dialect, LoggingInterceptor())
         if (startTransactionByDefault) {
             transaction = session.manualTransaction()
         }
 
         afterSessionSetup()
-        println("==== Starting '${name.getMethodName()}'")
+        println("==== Starting '${name.methodName}'")
     }
 
     open fun afterSessionSetup() {
     }
 
-    @suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST")
     fun <R> initialise(token: String, f: (Session) -> R): R {
         return initialised.getOrPut(token) { f(session) } as R
     }

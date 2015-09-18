@@ -35,7 +35,7 @@ public class PrefixedColumns<T : Any, ID>(val prefix: String, table: Table<T, ID
     val select: String = columns.asSequence().map { "${prefix}.${it.name} ${prefix}__${it.name}" }.joinToString(", ")
 }
 
-fun <T, ID> Table<T, ID>.prefixed(prefix: String, columns: Set<Column<T, *>> = this.defaultColumns) = PrefixedColumns(prefix, this, columns)
+fun <T : Any, ID> Table<T, ID>.prefixed(prefix: String, columns: Set<Column<T, *>> = this.defaultColumns) = PrefixedColumns(prefix, this, columns)
 
 fun <R1, R2> combine(mapper1: (Row) -> R1, mapper2: (Row) -> R2): (Row) -> Pair<R1, R2> {
     return { mapper1(it) to mapper2(it) }

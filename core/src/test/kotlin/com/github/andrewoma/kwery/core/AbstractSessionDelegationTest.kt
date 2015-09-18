@@ -22,11 +22,11 @@
 
 package com.github.andrewoma.kwery.core
 
+import org.junit.Before
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.Before
-import org.junit.Test
 
 abstract class AbstractSessionDelegationTest {
     companion object {

@@ -22,13 +22,13 @@
 
 package com.github.andrewoma.kwery.fetcher
 
-import kotlin.reflect.KMemberProperty
+import org.junit.Before
+import org.junit.Test
+import kotlin.reflect.KProperty1
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Before
-import org.junit.Test
 
 class GraphFetcherTest {
 
@@ -44,13 +44,13 @@ class GraphFetcherTest {
         val type = Type(tracked.javaClass, tracked.id, fetch, tracked.properties)
     }
 
-    val continent = TrackedType(Type(javaClass<Continent>(), { it.id }, { ids -> continents.filter { ids.contains(it.key) } }))
+    val continent = TrackedType(Type(Continent::class.java, { it.id }, { ids -> continents.filter { ids.contains(it.key) } }))
     val continentEurope = Continent("EU", "Europe")
     val continentAsia = Continent("AS", "Asia")
     val continentAustralia = Continent("AU", "Australia")
     val continents = map(Continent::id, continentEurope, continentAsia, continentAustralia)
 
-    val country = TrackedType(Type(javaClass<Country>(), { it.id }, { ids -> countries.filter { ids.contains(it.key) } }, listOf(
+    val country = TrackedType(Type(Country::class.java, { it.id }, { ids -> countries.filter { ids.contains(it.key) } }, listOf(
             Property(Country::continent, continent.type, { it.continent?.id }, { c, con -> c.copy(continent = con) })
     )))
 
@@ -59,7 +59,7 @@ class GraphFetcherTest {
     val countryAustralia = Country("AU", "Germany", Continent("AU"))
     val countries = map(Country::id, countryEngland, countryJapan, countryAustralia)
 
-    val language = TrackedType(Type(javaClass<Language>(), { it.id }, { ids -> languages.filter { ids.contains(it.key) } }, listOf(
+    val language = TrackedType(Type(Language::class.java, { it.id }, { ids -> languages.filter { ids.contains(it.key) } }, listOf(
             Property(Language::country, country.type, { it.country?.id }, { l, c -> l.copy(country = c) }),
             Property(Language::country2, country.type, { it.country2?.id }, { l, c -> l.copy(country2 = c) })
     )))
@@ -69,7 +69,7 @@ class GraphFetcherTest {
     val languageAustralian = Language("A", "Australian", Country("AU"))
     val languages = map(Language::id, languageEnglish, languageJapanese, languageAustralian)
 
-    val actor = TrackedType(Type(javaClass<Actor>(), { it.id }, { ids -> actors.filter { ids.contains(it.key) } }, listOf(
+    val actor = TrackedType(Type(Actor::class.java, { it.id }, { ids -> actors.filter { ids.contains(it.key) } }, listOf(
             Property(Actor::language, language.type, { it.language.id }, { a, l -> a.copy(language = l) })
     )))
 
@@ -93,11 +93,11 @@ class GraphFetcherTest {
         actorsByFilm.filter { ids.contains(it.key) }
     })
 
-    val film = TrackedType(Type(javaClass<Film>(), { it.id }, { ids -> films.filter { ids.contains(it.key) } }, listOf(
+    val film = TrackedType(Type(Film::class.java, { it.id }, { ids -> films.filter { ids.contains(it.key) } }, listOf(
             filmLanguage, filmOriginalLanguage, filmActors
     )))
 
-    fun <T, ID> map(id: KMemberProperty<T, ID>, vararg objects: T): Map<ID, T> {
+    fun <T, ID> map(id: KProperty1<T, ID>, vararg objects: T): Map<ID, T> {
         return objects.map { id.get(it) to it }.toMap()
     }
 
@@ -289,14 +289,14 @@ class GraphFetcherTest {
     }
 }
 
-data class Actor (
+data class Actor(
         val id: Int,
         val firstName: String,
         val lastName: String,
         val language: Language
 )
 
-data class Language (
+data class Language(
         val id: String,
         val name: String = "",
         val country: Country? = null,
@@ -314,7 +314,7 @@ data class Continent(
         val name: String = ""
 )
 
-data class Film (
+data class Film(
         val id: Int,
         val name: String,
         val language: Language,

@@ -31,14 +31,14 @@ import com.github.andrewoma.kwery.transactional.jersey.Transactional
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
-Path("/actors")
-Produces(MediaType.APPLICATION_JSON)
-Transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
+@Path("/actors")
+@Produces(MediaType.APPLICATION_JSON)
+@Transactional public class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
-    Timed GET
-    fun find(QueryParam("firstName") firstName: String?,
-             QueryParam("lastName") lastName: String?,
-             QueryParam("fetch") root: String?): List<Actor> {
+    @Timed @GET
+    fun find(@QueryParam("firstName") firstName: String?,
+             @QueryParam("lastName") lastName: String?,
+             @QueryParam("fetch") root: String?): List<Actor> {
 
         val filter = parameters(
                 actorTable.FirstName optional firstName,
@@ -48,8 +48,8 @@ Transactional public class ActorResource(val actorDao: ActorDao, override val fe
         return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)
     }
 
-    Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Actor {
+    @Timed @GET @Path("/{id}")
+    fun findById(@PathParam("id") id: Int, @QueryParam("fetch") root: String?): Actor {
         return actorDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }
 }

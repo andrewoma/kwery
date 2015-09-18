@@ -22,11 +22,10 @@
 
 package com.github.andrewoma.kwery.transactional.jersey
 
-import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.github.andrewoma.kwery.core.util.apply
 import io.dropwizard.testing.junit.ResourceTestRule
 import org.apache.tomcat.jdbc.pool.DataSource
 import org.junit.Before
@@ -41,34 +40,34 @@ import javax.ws.rs.core.Response
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-Produces(MediaType.APPLICATION_JSON)
-Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 interface Resource
 
-Path("/class")
-Transactional class ClassLevelResource(val session: Session) : Resource {
-    GET Path("/success") fun success() {
+@Path("/class")
+@Transactional class ClassLevelResource(val session: Session) : Resource {
+    @GET @Path("/success") fun success() {
         insert(session, "value")
     }
 
-    GET Path("/fail") fun fail(): Response {
+    @GET @Path("/fail") fun fail(): Response {
         insert(session, "value")
         return Response.serverError().build()
     }
 }
 
-Path("/method")
+@Path("/method")
 class MethodLevelResource(val session: Session) : Resource {
-    Transactional GET Path("/success") fun success() {
+    @Transactional @GET @Path("/success") fun success() {
         insert(session, "value")
     }
 
-    Transactional GET Path("/fail") fun fail(): Response {
+    @Transactional @GET @Path("/fail") fun fail(): Response {
         insert(session, "value")
         return Response.serverError().build()
     }
 
-    GET Path("/no-annotation") fun none() {
+    @GET @Path("/no-annotation") fun none() {
         insert(session, "value")
     }
 }
@@ -78,13 +77,13 @@ fun insert(session: Session, value: String) = session.update("insert into test(v
 class TransactionalTest {
     companion object {
         val dataSource = DataSource().apply {
-            setDefaultAutoCommit(true)
-            setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
-            setUrl("jdbc:hsqldb:mem:transactional_test")
+            defaultAutoCommit = true
+            driverClassName = "org.hsqldb.jdbc.JDBCDriver"
+            url = "jdbc:hsqldb:mem:transactional_test"
         }
     }
 
-    Before fun initialise() {
+    @Before fun initialise() {
         session.use(true) {
             session.update("create table if not exists test(value varchar(200))")
             session.update("delete from test")
@@ -100,38 +99,38 @@ class TransactionalTest {
             .build()
 
     fun findAll() = session.use(true) {
-        session.select("select value from test") { row -> row.string("value")}
+        session.select("select value from test") { row -> row.string("value") }
     }
 
-    Rule fun resourcesRule() = resources
+    @Rule fun resourcesRule() = resources
 
     @Test fun `should commit with class annotation`() {
         val response = resources.client().target("/class/success").request().get()
-        assertEquals(response.getStatus(), 204)
+        assertEquals(response.status, 204)
         assertEquals(findAll(), listOf("value"))
     }
 
     @Test fun `should rollback on failure with class annotation`() {
         val response = resources.client().target("/class/fail").request().get()
-        assertEquals(response.getStatus(), 500)
+        assertEquals(response.status, 500)
         assertTrue(findAll().isEmpty())
     }
 
     @Test fun `should commit with method annotation`() {
         val response = resources.client().target("/method/success").request().get()
-        assertEquals(response.getStatus(), 204)
+        assertEquals(response.status, 204)
         assertEquals(findAll(), listOf("value"))
     }
 
     @Test fun `should rollback on failure with method annotation`() {
         val response = resources.client().target("/method/fail").request().get()
-        assertEquals(response.getStatus(), 500)
+        assertEquals(response.status, 500)
         assertTrue(findAll().isEmpty())
     }
 
     @Test fun `should fail with no annotation`() {
         val response = resources.client().target("/method/fail").request().get()
-        assertEquals(response.getStatus(), 500)
+        assertEquals(response.status, 500)
         assertTrue(findAll().isEmpty())
     }
 }

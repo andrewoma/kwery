@@ -24,24 +24,19 @@ package com.github.andrewoma.kwery.mappertest.example.test
 
 import com.github.andrewoma.kwery.core.Row
 import com.github.andrewoma.kwery.mapper.*
-import com.github.andrewoma.kwery.mapper.DurationConverter
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import java.time.*
 import java.time.temporal.ChronoUnit.*
 import java.time.temporal.TemporalUnit
 import kotlin.test.assertEquals
-import kotlin.test.fail
-import org.junit.Before
-import org.junit.Test
 
 class TimeConvertersTest : AbstractSessionTest() {
     val table = "time_converters"
 
-    Before fun before() {
-        initialise(this.javaClass.getSimpleName()) {
+    @Before fun before() {
+        initialise(this.javaClass.simpleName) {
             session.update("""
                 create table $table(
                      timestamp_col timestamp,
@@ -72,7 +67,7 @@ class TimeConvertersTest : AbstractSessionTest() {
 
     @Test fun `should convert Duration and store as same unit`() {
         fun assertDuration(unit: TemporalUnit) = assertConversion(DurationConverter(unit),
-                Duration.of(3, unit), "bigint_col", { row -> row.long("bigint_col") == 3L})
+                Duration.of(3, unit), "bigint_col", { row -> row.long("bigint_col") == 3L })
 
         assertDuration(NANOS)
         assertDuration(MICROS)
@@ -85,7 +80,7 @@ class TimeConvertersTest : AbstractSessionTest() {
     }
 
     @Test fun `should convert Duration to BigDecimal`() {
-        fun assertDuration(value: Duration) =  assertConversion(durationToBigDecimalConverter, value, "decimal_col")
+        fun assertDuration(value: Duration) = assertConversion(durationToBigDecimalConverter, value, "decimal_col")
 
         assertDuration(Duration.ZERO)
         assertDuration(Duration.of(1, NANOS))

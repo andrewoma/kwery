@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module
 import com.github.andrewoma.kommon.collection.chunked
 import com.github.andrewoma.kwery.core.DefaultSession
-import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
@@ -52,7 +51,10 @@ import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.fetcher.Property
 import com.github.andrewoma.kwery.fetcher.Type
 import com.github.andrewoma.kwery.mapper.Dao
-import com.github.andrewoma.kwery.mapper.listener.*
+import com.github.andrewoma.kwery.mapper.listener.DeferredListener
+import com.github.andrewoma.kwery.mapper.listener.DeleteEvent
+import com.github.andrewoma.kwery.mapper.listener.Event
+import com.github.andrewoma.kwery.mapper.listener.UpdateEvent
 import com.github.andrewoma.kwery.transactional.jersey.TransactionListener
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
@@ -101,7 +103,7 @@ class FilmApplication : Application<FilmConfiguration>() {
         val fetcher = createFetcher(daos, caches)
 
         val jersey = environment.jersey()
-        environment.jersey().setUrlPattern("/api/*");
+        environment.jersey().urlPattern = "/api/*";
         jersey.register(SqlExceptionMapper())
         jersey.register(LoggingListener())
         jersey.register(TransactionListener())
@@ -119,8 +121,8 @@ class FilmApplication : Application<FilmConfiguration>() {
         load(environment, session, daos.filmActor, "film_actors.json")
     }
 
-    inline fun <reified T> load(environment: Environment, session: ManagedThreadLocalSession, dao: Dao<T, *>, resource: String) {
-        environment.getObjectMapper().withObjectStream<T>(Resources.getResource(resource)) {
+    inline fun <reified T : Any> load(environment: Environment, session: ManagedThreadLocalSession, dao: Dao<T, *>, resource: String) {
+        environment.objectMapper.withObjectStream<T>(Resources.getResource(resource)) {
             for (values in it.chunked(50)) {
                 session.use { dao.batchInsert(values) }
             }
@@ -136,12 +138,12 @@ class FilmApplication : Application<FilmConfiguration>() {
     override fun initialize(bootstrap: Bootstrap<FilmConfiguration>) {
         bootstrap.addBundle(AssetsBundle("/static", "/", "index.html", "static"))
 
-        val mapper = bootstrap.getObjectMapper()
+        val mapper = bootstrap.objectMapper
         mapper.registerModule(JSR310Module())
 
-        mapper.addMixIn(javaClass<HasAttributeSet>(), javaClass<AttributeSetFilterMixIn>())
+        mapper.addMixIn(HasAttributeSet::class.java, AttributeSetFilterMixIn::class.java)
         val provider = SimpleFilterProvider().addFilter("Attribute set filter", AttributeSetFilter())
-        mapper.setConfig(mapper.getSerializationConfig().withFilters(provider))
+        mapper.setConfig(mapper.serializationConfig.withFilters(provider))
 
         mapper.enable(SerializationFeature.INDENT_OUTPUT)
     }

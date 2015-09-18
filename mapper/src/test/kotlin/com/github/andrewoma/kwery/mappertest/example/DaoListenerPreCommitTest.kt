@@ -27,9 +27,9 @@ import com.github.andrewoma.kwery.mapper.Table
 import com.github.andrewoma.kwery.mapper.listener.*
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
+import org.junit.Test
 import kotlin.properties.Delegates
 import kotlin.test.assertEquals
-import org.junit.Test
 
 /**
  * Demonstrates a pre commit listener the saves audit records of all changes
@@ -107,9 +107,9 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
 
             val transactionId = ++nextTransactionId
             val audits = events.map { event ->
-                @suppress("UNCHECKED_CAST") // TODO ... grok projections, why is casting needed?
+                @Suppress("UNCHECKED_CAST") // TODO ... grok projections, why is casting needed?
                 val table = event.table as Table<Any, Any>
-                val operation = event.javaClass.getSimpleName().replace("Event$".toRegex(), "")
+                val operation = event.javaClass.simpleName.replace("Event$".toRegex(), "")
                 Audit(transactionId, event.table.name, event.id as Int, operation, calculateChanges(event, session, table))
             }
 

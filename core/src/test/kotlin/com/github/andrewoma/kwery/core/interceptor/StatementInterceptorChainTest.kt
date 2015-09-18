@@ -23,13 +23,13 @@
 package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.ExecutingStatement
-import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
+import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.hsqlDataSource
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class StatementInterceptorChainTest {
     val calls = arrayListOf<String>()

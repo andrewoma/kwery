@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory
 import javax.ws.rs.ext.Provider
 
 
-Provider
+@Provider
 public class LoggingListener : ApplicationEventListener {
-    private val log = LoggerFactory.getLogger(javaClass<LoggingListener>())
+    private val log = LoggerFactory.getLogger(LoggingListener::class.java)
 
     enum class LogType { none, summary, statements, all }
 
@@ -50,7 +50,7 @@ public class LoggingListener : ApplicationEventListener {
 
         override fun onEvent(event: RequestEvent) {
             try {
-                val type = event.getType()
+                val type = event.type
 
                 if (type == RequestEvent.Type.MATCHING_START) {
                     logType = getLogType(event)
@@ -74,7 +74,7 @@ public class LoggingListener : ApplicationEventListener {
         }
 
         private fun getLogType(event: RequestEvent): LogType {
-            val logParam = event.getContainerRequest().getUriInfo().getQueryParameters().getFirst("log")
+            val logParam = event.containerRequest.uriInfo.queryParameters.getFirst("log")
             return if (logParam == null) LogType.summary else {
                 try {
                     LogType.valueOf(logParam)

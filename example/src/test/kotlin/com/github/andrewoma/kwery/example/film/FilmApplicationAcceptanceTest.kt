@@ -22,29 +22,27 @@
 
 package com.github.andrewoma.kwery.example.film
 
-import com.github.andrewoma.kommon.lang.trimMargin
 import io.dropwizard.testing.ResourceHelpers
 import io.dropwizard.testing.junit.DropwizardAppRule
 import org.junit.ClassRule
-import org.junit.Ignore
+import org.junit.Test
 import javax.ws.rs.client.ClientBuilder
 import kotlin.test.assertEquals
-import org.junit.Test
 
 class FilmApplicationAcceptanceTest {
     companion object {
-        ClassRule public val rule: DropwizardAppRule<FilmConfiguration> =
-                DropwizardAppRule(javaClass<FilmApplication>(), ResourceHelpers.resourceFilePath("dev.yml"))
+        @ClassRule public val rule: DropwizardAppRule<FilmConfiguration> =
+                DropwizardAppRule(FilmApplication::class.java, ResourceHelpers.resourceFilePath("dev.yml"))
     }
 
-    fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.getLocalPort()}${url}")
+    fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.localPort}${url}")
 
     @Test fun `Actors should find Scarlett`() {
 
         val response = target("/api/actors")
                 .queryParam("firstName", "Scarlett")
                 .queryParam("lastName", "Damon")
-                .request().get(javaClass<String>())
+                .request().get(String::class.java)
 
         val expected = """
             [ {
@@ -57,14 +55,14 @@ class FilmApplicationAcceptanceTest {
               "films" : [ ]
             } ]
         """
-        assertEquals(expected.trimMargin(), response)
+        assertEquals(expected.trimIndent(), response)
     }
 
     @Test fun `Languages should find English`() {
 
         val response = target("/api/languages")
                 .queryParam("name", "English")
-                .request().get(javaClass<String>())
+                .request().get(String::class.java)
 
         val expected = """
             [ {
@@ -73,14 +71,14 @@ class FilmApplicationAcceptanceTest {
               "version" : 1
             } ]
         """
-        assertEquals(expected.trimMargin(), response)
+        assertEquals(expected.trimIndent(), response)
     }
 
     @Test fun `Films should find Ace Goldfinger`() {
 
         val response = target("/api/films")
                 .queryParam("title", "Ace Goldfinger")
-                .request().get(javaClass<String>())
+                .request().get(String::class.java)
 
         val expected = """
             [ {
@@ -99,6 +97,6 @@ class FilmApplicationAcceptanceTest {
               "version" : 1
             } ]
         """
-        assertEquals(expected.trimMargin(), response)
+        assertEquals(expected.trimIndent(), response)
     }
 }

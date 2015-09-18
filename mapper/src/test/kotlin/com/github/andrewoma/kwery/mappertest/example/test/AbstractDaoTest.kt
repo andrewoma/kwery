@@ -26,10 +26,8 @@ import com.github.andrewoma.kwery.mapper.AbstractDao
 import com.github.andrewoma.kwery.mapper.IdStrategy
 import com.github.andrewoma.kwery.mapper.OptimisticLockException
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
-import kotlin.properties.Delegates
-import kotlin.test.*
-import org.junit.Before
 import org.junit.Test
+import kotlin.test.*
 
 abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : AbstractSessionTest() {
     abstract var dao: D
@@ -40,9 +38,9 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
 
     abstract fun contentsEqual(t1: T, t2: T): Boolean
 
-    val dataWithKeys: List<T> by Delegates.lazy { data.filter { id(it) != dao.defaultId } }
+    val dataWithKeys: List<T> by lazy(LazyThreadSafetyMode.NONE) { data.filter { id(it) != dao.defaultId } }
 
-    val dataWithoutKeys: List<T> by Delegates.lazy { data.filter { id(it) == dao.defaultId } }
+    val dataWithoutKeys: List<T> by lazy(LazyThreadSafetyMode.NONE) { data.filter { id(it) == dao.defaultId } }
 
     fun id(value: T) = dao.id(value)
 
@@ -152,7 +150,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
             if (count != -1 && result.size() == count) return result
         }
 
-        check(result.size() >= count, "Not enough test data")
+        check(result.size() >= count) { "Not enough test data" }
         return result
     }
 

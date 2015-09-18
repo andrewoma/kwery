@@ -22,9 +22,9 @@
 
 package com.github.andrewoma.kwery.example.film.dao
 
-import com.google.common.cache.Cache as GCache
 import com.github.andrewoma.kwery.core.Cache
 import com.google.common.cache.CacheBuilder
+import com.google.common.cache.Cache as GCache
 
 class GuavaCache<K, V : Any>(val underlying: GCache<K, V> = CacheBuilder.newBuilder().build()) : Cache<K, V> {
 

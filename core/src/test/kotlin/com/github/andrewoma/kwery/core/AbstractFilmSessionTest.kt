@@ -29,7 +29,7 @@ data class Actor(val firstName: String, val lastName: String?, val id: Int = 0, 
 
 open class AbstractFilmSessionTest : AbstractSessionTest() {
 
-    override fun afterSessionSetup() = initialise(javaClass<AbstractFilmSessionTest>().getName()) {
+    override fun afterSessionSetup() = initialise(AbstractFilmSessionTest::class.java.name) {
         //language=SQL
         val sql = """
             create table actor (

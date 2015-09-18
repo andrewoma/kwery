@@ -26,6 +26,7 @@ import com.github.andrewoma.kwery.fetcher.GraphFetcher
 import com.github.andrewoma.kwery.fetcher.Node
 import com.github.andrewoma.kwery.fetcher.node
 import com.github.andrewoma.kwery.mappertest.example.*
+import org.junit.Test
 import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.properties.Delegates
@@ -33,7 +34,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
     var graphFetcher: GraphFetcher by Delegates.notNull()
@@ -48,7 +48,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         super<AbstractFilmDaoTest>.afterSessionSetup()
     }
 
-    override val data by Delegates.lazy {
+    override val data by lazy(LazyThreadSafetyMode.NONE) {
         listOf(
                 Film(-1, "Underworld", 2003, sd.languageEnglish, null, Duration.ofMinutes(121), FilmRating.NC_17,
                         LocalDateTime.now(), listOf("Commentaries", "Behind the Scenes")),

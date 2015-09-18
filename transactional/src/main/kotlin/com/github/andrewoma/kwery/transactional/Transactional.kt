@@ -23,12 +23,10 @@
 package com.github.andrewoma.kwery.transactional
 
 import com.github.andrewoma.kwery.core.defaultThreadLocalSessionName
-import java.lang.annotation.*
+import java.lang.annotation.Inherited
 import kotlin.reflect.KClass
 
-Target(ElementType.METHOD, ElementType.TYPE)
-Retention(RetentionPolicy.RUNTIME)
-Inherited
+@Inherited
 annotation public class Transactional(
         /**
          * The name of the data source to use in the transaction

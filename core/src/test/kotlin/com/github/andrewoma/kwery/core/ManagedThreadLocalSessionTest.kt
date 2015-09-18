@@ -26,6 +26,8 @@ import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
 import com.github.andrewoma.kwery.tomcat.pool.StatementCache
+import org.junit.Before
+import org.junit.Test
 import org.postgresql.PGStatement
 import java.lang.reflect.Proxy
 import java.util.concurrent.Executors
@@ -34,8 +36,6 @@ import javax.sql.PooledConnection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.Before
-import org.junit.Test
 
 class ManagedThreadLocalSessionTest {
     companion object {
@@ -166,9 +166,9 @@ data class SessionInfo(val thread: String, val poolConnection: Long, val connect
 class SessionInfoDao(val session: Session) {
     fun insertCurrent() {
         val sql = "insert into sessions_test(thread, pool_connection, connection) values (:thread, :pool_connection, :connection)"
-        val params = mapOf("thread" to Thread.currentThread().getName(),
+        val params = mapOf("thread" to Thread.currentThread().name,
                 "pool_connection" to System.identityHashCode(session.connection),
-                "connection" to System.identityHashCode((session.connection as PooledConnection).getConnection()))
+                "connection" to System.identityHashCode((session.connection as PooledConnection).connection))
         session.update(sql, params)
     }
 }
@@ -184,15 +184,15 @@ object postgresLoggingInterceptor : LoggingInterceptor() {
 
     override fun additionalInfo(statement: ExecutingStatement): String {
         val pgStatement = (Proxy.getInvocationHandler(statement.statement!!) as StatementCache.CachedStatement)
-                .getStatement() as PGStatement
+                .statement as PGStatement
 
         total++
 
-        if (pgStatement.isUseServerPrepare()) {
+        if (pgStatement.isUseServerPrepare) {
             serverPrepared++
         }
 
-        return ". Connection: " + System.identityHashCode((statement.session.connection as PooledConnection).getConnection()) +
-                ". ServerPrepared=" + pgStatement.isUseServerPrepare()
+        return ". Connection: " + System.identityHashCode((statement.session.connection as PooledConnection).connection) +
+                ". ServerPrepared=" + pgStatement.isUseServerPrepare
     }
 }

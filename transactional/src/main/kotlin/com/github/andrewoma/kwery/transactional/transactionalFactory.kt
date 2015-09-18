@@ -22,16 +22,14 @@
 
 package com.github.andrewoma.kwery.transactional
 
-import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import net.sf.cglib.proxy.Enhancer
 import net.sf.cglib.proxy.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
-import kotlin.reflect.KMemberProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
 object transactionalFactory {
-    fun <T> fromInterfaces(obj: T, interfaces: Array<Class<*>> = obj.javaClass.getInterfaces()): T {
+    fun <T : Any> fromInterfaces(obj: T, interfaces: Array<Class<*>> = obj.javaClass.interfaces): T {
         val enhancer = Enhancer()
         enhancer.setInterfaces(interfaces)
         enhancer.setCallback(MethodInterceptor() { dontuse, method, args, proxy ->
@@ -44,15 +42,15 @@ object transactionalFactory {
             })
         })
 
-        @suppress("UNCHECKED_CAST")
+        @Suppress("UNCHECKED_CAST")
         return enhancer.create() as T
     }
 
-    fun <T> fromClass(obj: T, vararg args: KMemberProperty<T, *>): T {
-        return fromClass(obj, args.map { it.javaField!!.getType() }.toTypedArray(), args.map { it.get(obj) }.toTypedArray())
+    fun <T : Any> fromClass(obj: T, vararg args: KProperty1<T, *>): T {
+        return fromClass(obj, args.map { it.javaField!!.type }.toTypedArray(), args.map { it.get(obj) }.toTypedArray())
     }
 
-    fun <T> fromClass(obj: T, argTypes: Array<Class<*>>, args: Array<Any?>): T {
+    fun <T : Any> fromClass(obj: T, argTypes: Array<Class<*>>, args: Array<Any?>): T {
         val enhancer = Enhancer()
         enhancer.setSuperclass(obj.javaClass)
         enhancer.setCallback(MethodInterceptor() { dontuse, method, args, proxy ->
@@ -65,7 +63,7 @@ object transactionalFactory {
             })
         })
 
-        @suppress("UNCHECKED_CAST")
+        @Suppress("UNCHECKED_CAST")
         return enhancer.create(argTypes, args) as T
     }
 }

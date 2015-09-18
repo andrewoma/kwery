@@ -22,17 +22,17 @@
 
 package com.github.andrewoma.kwery.fetcher
 
-import kotlin.reflect.KMemberProperty
+import kotlin.reflect.KProperty1
 
-inline fun <ID, reified T> Type(noinline id: (T) -> ID, noinline fetch: (Collection<ID>) -> Map<ID, T>, properties: List<BaseProperty<*, *, *>> = listOf()): Type<T, ID> {
-    return Type(javaClass<T>(), id, fetch, properties)
+inline fun <ID, reified T : Any> Type(noinline id: (T) -> ID, noinline fetch: (Collection<ID>) -> Map<ID, T>, properties: List<BaseProperty<*, *, *>> = listOf()): Type<T, ID> {
+    return Type(T::class.java, id, fetch, properties)
 }
 
-inline fun <ID, reified T> Type(id: KMemberProperty<T, ID>, noinline fetch: (Collection<ID>) -> Map<ID, T>, properties: List<BaseProperty<*, *, *>> = listOf()): Type<T, ID> {
-    return Type(javaClass<T>(), { id.get(it) }, fetch, properties)
+inline fun <ID, reified T : Any> Type(id: KProperty1<T, ID>, noinline fetch: (Collection<ID>) -> Map<ID, T>, properties: List<BaseProperty<*, *, *>> = listOf()): Type<T, ID> {
+    return Type(T::class.java, { id.get(it) }, fetch, properties)
 }
 
-open class Type<T, ID> (
+open class Type<T, ID>(
         val javaClass: Class<T>,
         val id: (T) -> ID,
         val fetch: (Collection<ID>) -> Map<ID, T>,
@@ -40,17 +40,17 @@ open class Type<T, ID> (
 ) {
     open fun supports(obj: Any?) = obj?.javaClass?.isAssignableFrom(javaClass)!!
 
-    override fun toString() = javaClass.getSimpleName() + "(" + properties.map { it.name }.join(", ") + ")"
+    override fun toString() = javaClass.simpleName + "(" + properties.map { it.name }.join(", ") + ")"
 }
 
-@suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
+@Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
 open class BaseProperty<C, T, ID>(
         val id: (C) -> ID?,
         val type: Type<T, ID>,
         val name: String
 )
 
-@suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
+@Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
 class Property<C, T, ID>(
         val get: (C) -> T?,
         type: Type<T, ID>,
@@ -59,8 +59,8 @@ class Property<C, T, ID>(
         name: String
 ) : BaseProperty<C, T, ID>(id, type, name)
 
-@suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
-fun Property<C, T, ID> (property: KMemberProperty<C, T?>,
+@Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
+fun Property<C, T, ID> (property: KProperty1<C, T?>,
                         type: Type<T, ID>,
                         id: (C) -> ID?,
                         apply: (C, T) -> C
@@ -77,9 +77,9 @@ class CollectionProperty<C, T, ID>(
 }
 
 fun CollectionProperty<C, T, ID>(
-        property: KMemberProperty<C, Collection<T>>,
+        property: KProperty1<C, Collection<T>>,
         type: Type<T, ID>,
         id: (C) -> ID,
         apply: (C, Collection<T>) -> C,
         fetch: (Collection<ID>) -> Map<ID, Collection<T>>
-) : CollectionProperty<C, T, ID> = CollectionProperty(type, id, apply, fetch, property.name)
+): CollectionProperty<C, T, ID> = CollectionProperty(type, id, apply, fetch, property.name)

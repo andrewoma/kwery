@@ -38,7 +38,7 @@ public class SessionFactory(val dataSource: DataSource,
 ) {
 
     public fun <R> use(f: (Session) -> R): R {
-        val connection = dataSource.getConnection()
+        val connection = dataSource.connection
         try {
             val session = DefaultSession(connection, dialect, interceptor, defaultOptions)
             return f(session)

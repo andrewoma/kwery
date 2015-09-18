@@ -22,14 +22,13 @@
 
 package com.github.andrewoma.kwery.mappertest.example
 
-import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.listener.*
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import com.github.andrewoma.kwery.mappertest.example.test.initialiseFilmSchema
+import org.junit.Test
 import kotlin.properties.Delegates
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class DaoListenerPostCommitTest : AbstractSessionTest() {
     var dao: ActorDao by Delegates.notNull()
@@ -132,7 +131,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
             for (event in events) {
                 println(event)
                 // In the real world, the type would probably be used to lookup the cache
-                assertEquals(javaClass<Actor>(), event.table.type)
+                assertEquals(Actor::class.java, event.table.type)
                 when (event) {
                     is InsertEvent -> cache.put(event.id as Int, event.value as Actor)
                     is UpdateEvent -> cache.put(event.id as Int, event.new as Actor)

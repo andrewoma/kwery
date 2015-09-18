@@ -106,23 +106,23 @@ public data class StatementOptions(
 )
 
 public enum class ResultSetConcurrency private constructor(val value: Int) {
-        ReadOnly(ResultSet.CONCUR_READ_ONLY),
-        Updatable(ResultSet.CONCUR_UPDATABLE);
+    ReadOnly(ResultSet.CONCUR_READ_ONLY),
+    Updatable(ResultSet.CONCUR_UPDATABLE);
 }
 
 public enum class ResultSetType private constructor(val value: Int) {
-        ForwardOnly(ResultSet.TYPE_FORWARD_ONLY),
-        ScrollInsensitive(ResultSet.TYPE_SCROLL_INSENSITIVE),
-        ScrollSensitive(ResultSet.TYPE_SCROLL_SENSITIVE);
+    ForwardOnly(ResultSet.TYPE_FORWARD_ONLY),
+    ScrollInsensitive(ResultSet.TYPE_SCROLL_INSENSITIVE),
+    ScrollSensitive(ResultSet.TYPE_SCROLL_SENSITIVE);
 }
 
 public enum class ResultSetHoldability private constructor(val value: Int?) {
-        HoldCursorsOverCommit(ResultSet.HOLD_CURSORS_OVER_COMMIT),
-        CloseCursorsOverCommit(ResultSet.CLOSE_CURSORS_AT_COMMIT),
-        ConnectionDefault(null);
+    HoldCursorsOverCommit(ResultSet.HOLD_CURSORS_OVER_COMMIT),
+    CloseCursorsOverCommit(ResultSet.CLOSE_CURSORS_AT_COMMIT),
+    ConnectionDefault(null);
 }
 
 public enum class ResultSetFetchDirection private constructor(val value: Int) {
-        Forward(ResultSet.FETCH_FORWARD),
-        Reverse(ResultSet.FETCH_REVERSE);
+    Forward(ResultSet.FETCH_FORWARD),
+    Reverse(ResultSet.FETCH_REVERSE);
 }

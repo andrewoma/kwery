@@ -23,8 +23,8 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDialect()) {
     //language=SQL

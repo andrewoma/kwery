@@ -67,8 +67,8 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
     }
 
     init {
-        check(session.transaction == null, "A transaction is already started for this session")
-        session.connection.setAutoCommit(false)
+        check(session.transaction == null) { "A transaction is already started for this session" }
+        session.connection.autoCommit = false
         session.transaction = this
     }
 
@@ -91,7 +91,7 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
         }
 
     override fun commit() {
-        check(!rollbackOnly, "Invalid attempt to call commit after transaction is set to rollback only")
+        check(!rollbackOnly) { "Invalid attempt to call commit after transaction is set to rollback only" }
         preCommitHandlers.forEach { it(session) }
         session.connection.commit()
         postCommitHandlers.forEach { it(true, session) }
@@ -117,7 +117,7 @@ class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
             rollback()
             throw t
         } finally {
-            session.connection.setAutoCommit(true)
+            session.connection.autoCommit = true
         }
     }
 }

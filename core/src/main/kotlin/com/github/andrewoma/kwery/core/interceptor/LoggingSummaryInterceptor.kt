@@ -27,9 +27,7 @@ import com.github.andrewoma.kwery.core.ExecutingStatement
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.lang.Math.max
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Formatter
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 /**
@@ -48,11 +46,11 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
         val headings = arrayOf("", "Calls", "Exec", "Close", "Rows", "")
 
         public fun start() {
-            check(requests.get() == null, "LoggingSummaryInterceptor already started")
+            check(requests.get() == null) { "LoggingSummaryInterceptor already started" }
             requests.set(Request(StopWatch().start(), arrayListOf()))
         }
 
-        public fun stop(log: Logger = LoggerFactory.getLogger(javaClass<LoggingSummaryInterceptor>())) {
+        public fun stop(log: Logger = LoggerFactory.getLogger(LoggingSummaryInterceptor::class.java)) {
             val request = requests.get()
             if (request == null) {
                 log.warn("LoggingSummaryInterceptor not started")
@@ -170,9 +168,9 @@ public class LoggingSummaryInterceptor : StatementInterceptor {
     data class Execution(val name: String, val started: Long, val executed: Long, val closed: Long, val rowCount: Long)
 
     var ExecutingStatement.context: Execution?
-        get() = this.contexts[javaClass<LoggingSummaryInterceptor>().getName()] as Execution?
+        get() = this.contexts[LoggingSummaryInterceptor::class.java.name] as Execution?
         set(value) {
-            this.contexts[javaClass<LoggingSummaryInterceptor>().getName()] = value
+            this.contexts[LoggingSummaryInterceptor::class.java.name] = value
         }
 
     override fun executed(statement: ExecutingStatement) {

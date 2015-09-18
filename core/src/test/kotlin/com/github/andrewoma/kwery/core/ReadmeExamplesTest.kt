@@ -27,7 +27,7 @@ import org.junit.Test
 
 class ReadmeExamplesTest : AbstractFilmSessionTest() {
     @Test fun readmeExamples() {
-        val connection = hsqlDataSource.getConnection()
+        val connection = hsqlDataSource.connection
 
         class Actor(val firstName: String, val lastName: String)
 

@@ -28,11 +28,6 @@ import java.sql.Connection
 import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
-import java.time.Duration
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalUnit
 
 public open class Converter<R>(
         public val from: (Row, String) -> R,
@@ -55,9 +50,18 @@ public val standardConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(timestampConverter),
         reifiedConverter(timeConverter),
         reifiedConverter(dateConverter)
-).toMap()
+).toMap() + mapOf<Class<*>, Converter<*>>(
+        java.lang.Boolean.TYPE to booleanConverter,
+        java.lang.Byte.TYPE to byteConverter,
+        java.lang.Short.TYPE to shortConverter,
+        java.lang.Integer.TYPE to intConverter,
+        java.lang.Float.TYPE to floatConverter,
+        java.lang.Double.TYPE to floatConverter
+)
 
-public inline fun <reified T> reifiedConverter(converter: Converter<T>): Pair<Class<T>, Converter<T>> = javaClass<T>() to converter
+public inline fun <reified T : Any> reifiedConverter(converter: Converter<T>): Pair<Class<*>, Converter<T>> {
+        return T::class.java to converter
+}
 
 public inline fun <reified T> ArrayConverter(sqlType: String): Converter<List<T>> {
     return Converter(

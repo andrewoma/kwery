@@ -22,8 +22,8 @@
 
 package com.github.andrewoma.kwery.fetcher
 
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class NodeTest {
     @Test fun testNodeParse() {

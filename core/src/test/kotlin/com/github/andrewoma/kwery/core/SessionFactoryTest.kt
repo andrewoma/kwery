@@ -24,8 +24,8 @@ package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class SessionFactoryTest {
     val factory = SessionFactory(hsqlDataSource, HsqlDialect(), LoggingInterceptor())

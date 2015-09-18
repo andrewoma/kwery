@@ -115,7 +115,7 @@ public class ThreadLocalSession(val dataSource: DataSource,
     }
 
     private fun <R> use(f: (Session) -> R): R {
-        val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultOptions)
+        val session = DefaultSession(dataSource.connection, dialect, interceptor, defaultOptions)
         try {
             return f(session)
         } finally {

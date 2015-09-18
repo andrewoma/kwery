@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        kotlinVersion = '0.12.1218'
-        kommonVersion = '0.2'
+        kotlinVersion = '0.13.1513'
+        kommonVersion = '0.3'
         junitVersion = '4.12'
         slf4jVersion = '1.7.12'
         tomcatVersion = '8.0.24'
@@ -56,6 +56,10 @@ subprojects {
         testCompile(
                 "junit:junit:$junitVersion",
         )
+    }
+
+    compileKotlin {
+        kotlinOptions.moduleName = "${project.group}.${project.name}"
     }
 
     task coverage(dependsOn: 'jacocoTestReport') << {

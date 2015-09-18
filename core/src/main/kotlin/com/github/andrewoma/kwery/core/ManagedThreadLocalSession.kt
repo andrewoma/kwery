@@ -43,10 +43,10 @@ import javax.sql.DataSource
 public val defaultThreadLocalSessionName: String = "default"
 
 public class ManagedThreadLocalSession(val dataSource: DataSource,
-                                override val dialect: Dialect,
-                                val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                                val name: String = defaultThreadLocalSessionName,
-                                override val defaultOptions: StatementOptions = StatementOptions()) : Session {
+                                       override val dialect: Dialect,
+                                       val interceptor: StatementInterceptor = noOpStatementInterceptor,
+                                       val name: String = defaultThreadLocalSessionName,
+                                       override val defaultOptions: StatementOptions = StatementOptions()) : Session {
 
     class SessionConfig(val startTransaction: Boolean, val session: DefaultSession?, val transaction: ManualTransaction?)
 
@@ -59,14 +59,14 @@ public class ManagedThreadLocalSession(val dataSource: DataSource,
 
         public fun initialise(startTransaction: Boolean = true, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
-            check(!configs.containsKey(name), "A session is already initialised for this thread")
+            check(!configs.containsKey(name)) { "A session is already initialised for this thread" }
             configs.put(name, SessionConfig(startTransaction, null, null))
         }
 
         public fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
             val config = configs.get(name)
-            check(config != null, "A session has not been initialised for this thread")
+            check(config != null) { "A session has not been initialised for this thread" }
 
             try {
                 closeSession(commitTransaction, config!!)
@@ -82,7 +82,7 @@ public class ManagedThreadLocalSession(val dataSource: DataSource,
 
             try {
                 if (config.transaction != null) {
-                    check(config.session.currentTransaction == config.transaction, "Unexpected transaction in session")
+                    check(config.session.currentTransaction == config.transaction) { "Unexpected transaction in session" }
                     if (commitTransaction && !config.transaction.rollbackOnly) {
                         config.transaction.commit()
                     } else {
@@ -106,7 +106,7 @@ public class ManagedThreadLocalSession(val dataSource: DataSource,
             val configs = threadLocalSession.get()
             val config = configs.get(name) ?: error("A session has not been initialised for this thread")
             return if (config.session == null) {
-                val session = DefaultSession(dataSource.getConnection(), dialect, interceptor, defaultOptions)
+                val session = DefaultSession(dataSource.connection, dialect, interceptor, defaultOptions)
                 val transaction = if (!config.startTransaction) null else session.manualTransaction()
                 configs.put(name, SessionConfig(config.startTransaction, session, transaction))
                 session

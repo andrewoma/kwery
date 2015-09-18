@@ -25,12 +25,12 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import org.junit.rules.TestName
-import javax.sql.DataSource
-import kotlin.properties.Delegates
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+import org.junit.rules.TestName
+import javax.sql.DataSource
+import kotlin.properties.Delegates
 
 abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, val dialect: Dialect = HsqlDialect()) {
     companion object {
@@ -47,13 +47,13 @@ abstract class AbstractSessionTest(val dataSource: DataSource = hsqlDataSource, 
     @Rule public fun name(): TestName = name // Annotating val directly doesn't work
 
     @Before public fun setUp() {
-        session = DefaultSession(dataSource.getConnection(), dialect, LoggingInterceptor())
+        session = DefaultSession(dataSource.connection, dialect, LoggingInterceptor())
         if (startTransactionByDefault) {
             transaction = session.manualTransaction()
         }
 
         afterSessionSetup()
-        println("\n==== Starting '${name.getMethodName()}'")
+        println("\n==== Starting '${name.methodName}'")
     }
 
     open fun afterSessionSetup() {

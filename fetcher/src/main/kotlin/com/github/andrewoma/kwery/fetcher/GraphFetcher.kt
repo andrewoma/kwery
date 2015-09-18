@@ -32,7 +32,7 @@ class Value<T>(val get: () -> T, val set: (T) -> Unit) {
 
 public class GraphFetcher(val types: Set<Type<*, *>>) {
     private val typeCache: MutableMap<Class<*>, Type<*, *>> = ConcurrentHashMap()
-    private val noType: Type<*, *> = Type<Any?, Any?>({ it }, { mapOf() })
+    private val noType: Type<*, *> = Type<Any?, Any>({ it }, { mapOf() })
     protected val debug: Boolean = false
 
     inline protected fun debug(f: () -> Unit) {
@@ -67,7 +67,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
 
     )
 
-    suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST")
     private fun <T> fetch(indent: String, values: Iterable<Value<T>>, root: Node, fetched: MutableMap<Type<Any?, Any?>, MutableMap<Any?, Any?>>) {
         debug {
             println("\n$indent ====================================================================================================")
@@ -75,7 +75,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
             println(values.asSequence().map { "$indent     $it" }.joinToString("\n"))
         }
 
-        val type = findMatchingType(values.first().get())
+        val type = findMatchingType(values.first().get() as Any)
         debug { println("$indent Matched to $type") }
         val properties = findMatchingProperties(type, root)
 
@@ -106,7 +106,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
                 debug {
                     println("$indent Required properties:")
                     for ((requiredType, ids) in required) {
-                        println("$indent     ${requiredType.javaClass.getSimpleName()}: $ids")
+                        println("$indent     ${requiredType.javaClass.simpleName}: $ids")
                     }
                 }
 
@@ -116,7 +116,7 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
             fun fetchRequired(required: Map<Type<Any?, Any?>, Set<Any?>>) {
                 for ((requiredType, ids) in required) {
                     debug {
-                        println("$indent Fetching ${requiredType.javaClass.getSimpleName()} with ids: $ids")
+                        println("$indent Fetching ${requiredType.javaClass.simpleName} with ids: $ids")
                     }
                     fetched.getOrPut(requiredType) { hashMapOf() }.putAll(requiredType.fetch(ids))
                 }
@@ -241,14 +241,14 @@ public class GraphFetcher(val types: Set<Type<*, *>>) {
 
         val invalid = node.children.map { it.name }.toSet().subtract(type.properties.map { it.name })
                 .subtract(setOf(Node.all.name, Node.allDescendants.name))
-        require(invalid.isEmpty()) { "Undefined properties of type ${type.javaClass.getSimpleName()}: $invalid" }
+        require(invalid.isEmpty()) { "Undefined properties of type ${type.javaClass.simpleName}: $invalid" }
 
         return matches
     }
 
     fun findMatchingType(obj: Any): Type<*, *> {
         val type = typeCache.getOrPut(obj.javaClass) { types.firstOrNull { it.supports(obj) } ?: noType }
-        require(type != noType, "Unknown type: ${obj.javaClass.getName()}")
+        require(type != noType) { "Unknown type: ${obj.javaClass.getName()}" }
         return type
     }
 }

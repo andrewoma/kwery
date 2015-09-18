@@ -30,8 +30,7 @@ import com.github.andrewoma.kwery.core.StatementOptions
 import com.github.andrewoma.kwery.mapper.listener.*
 import java.sql.Array
 import java.sql.SQLFeatureNotSupportedException
-import java.util.HashMap
-import java.util.concurrent.ConcurrentHashMap
+import java.util.*
 
 public abstract class AbstractDao<T : Any, ID : Any>(
         val session: Session,
@@ -80,7 +79,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun options(name: String): StatementOptions =
-            session.defaultOptions.copy(name = this.javaClass.getSimpleName() + "." + name)
+            session.defaultOptions.copy(name = this.javaClass.simpleName + "." + name)
 
     override fun findById(id: ID, columns: Set<Column<T, *>>): T? {
         val name = "findById"
@@ -112,7 +111,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         IdStrategy.Explicit -> false
         IdStrategy.Generated -> true
         IdStrategy.Auto -> {
-            checkNotNull(value, "Cannot calculate key strategy with null value")
+            checkNotNull(value) { "Cannot calculate key strategy with null value" }
             id(value!!) == defaultId
         }
     }
@@ -123,7 +122,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         require(table is Versioned<*>) { "table must be Versioned to use update. Use unsafeUpdate for unversioned tables" }
 
         val versionColumn = table.versionColumn!!
-        @suppress("UNCHECKED_CAST")
+        @Suppress("UNCHECKED_CAST")
         val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(oldValue))
         val result = table.copy(newValue, mapOf(versionColumn to newVersion))
 
@@ -213,7 +212,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
-            check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
+            check(count == values.size()) { "${name} inserted $count rows, but expected ${values.size()}" }
 
             values.zip(list.map { it.second }).map {
                 val (value, idValue) = it
@@ -222,7 +221,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         } else {
             val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name))
             val count = counts.fold(0) { sum, value -> sum + value }
-            check(count == values.size(), "${name} inserted $count rows, but expected ${values.size()}")
+            check(count == values.size()) { "${name} inserted $count rows, but expected ${values.size()}" }
             values
         }
 
@@ -241,13 +240,13 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
         val (count, inserted) = if (generateKeys) {
             val (count, key) = session.insert(sql, parameters, options(name), { table.rowMapper(table.idColumns, nf)(it) })
-            check(count == 1, "${name} failed to insert any rows")
+            check(count == 1) { "${name} failed to insert any rows" }
             count to table.copy(value, table.idColumns(id(key)).toMap()) // Generated key
         } else {
             val count = session.update(sql, parameters, options(name))
             count to value
         }
-        check(count == 1, "${name} failed to insert any rows")
+        check(count == 1) { "${name} failed to insert any rows" }
 
         fireEvent(listOf(InsertEvent(table, id(inserted), inserted)))
 
@@ -307,7 +306,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
 
         val counts = session.batchUpdate(sql, updates, options(name))
 
-        check(counts.size() == values.size(), "${name} updated ${counts.size()} rows, but expected ${values.size()}")
+        check(counts.size() == values.size()) { "${name} updated ${counts.size()} rows, but expected ${values.size()}" }
 
         for ((i, count) in counts.withIndex()) {
             check(count == 1) { "Batch update failed to update row with id ${id(values[i])}" }
@@ -333,7 +332,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
             val (old, new) = it
             require(id(old) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(old)} ${id(new)}" }
 
-            @suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST")
             val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(old))
 
             val result = table.copy(new, mapOf(versionColumn to newVersion))
@@ -351,7 +350,7 @@ public abstract class AbstractDao<T : Any, ID : Any>(
         }
 
         val counts = session.batchUpdate(sql, updates.map { it.first }, options(name))
-        check(counts.size() == values.size(), "${name} updated ${counts.size()} rows, but expected ${values.size()}")
+        check(counts.size() == values.size()) { "${name} updated ${counts.size()} rows, but expected ${values.size()}" }
         for ((count, value) in counts.zip(values)) {
             if (count == 0) {
                 throw OptimisticLockException("The same version (${version(value.first)}) of ${table.name} with id ${id(value.first)} has been updated by another transaction")
@@ -366,9 +365,9 @@ public abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun allocateIds(count: Int): List<ID> {
-        require(session.dialect.supportsAllocateIds, "Dialect does not support allocate ids")
-        require(table.sequence != null, "Table sequence is not defined")
-        require(table.idColumns.size() == 1, "Compound ids are not supported")
+        require(session.dialect.supportsAllocateIds) { "Dialect does not support allocate ids" }
+        require(table.sequence != null) { "Table sequence is not defined" }
+        require(table.idColumns.size() == 1) { "Compound ids are not supported" }
 
         val sql = session.dialect.allocateIds(count, table.sequence!!, table.idColumns.first().name)
         return session.select(sql, mapOf(), options("allocateIds")) { row ->

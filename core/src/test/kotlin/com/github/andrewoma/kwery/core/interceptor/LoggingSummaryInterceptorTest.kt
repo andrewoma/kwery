@@ -23,8 +23,8 @@
 package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kwery.core.interceptor.LoggingSummaryInterceptor.Execution
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class LoggingSummaryInterceptorTest {
 

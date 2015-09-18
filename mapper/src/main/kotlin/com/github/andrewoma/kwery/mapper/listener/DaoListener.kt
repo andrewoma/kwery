@@ -49,7 +49,7 @@ public abstract class DeferredListener(val postCommit: Boolean = true) : Listene
                 addCommitHook(transaction)
             }
 
-            eventsByTransaction[transaction.id].addAll(events)
+            eventsByTransaction[transaction.id]?.addAll(events)
         }
     }
 
@@ -57,7 +57,7 @@ public abstract class DeferredListener(val postCommit: Boolean = true) : Listene
         eventsByTransaction[transaction.id] = arrayListOf<Event>()
 
         val onComplete: (Boolean, Session) -> Unit = { committed, session ->
-            val events = eventsByTransaction[transaction.id]
+            val events = eventsByTransaction[transaction.id]!!
             eventsByTransaction.remove(transaction.id)
             onCommit(committed, events)
         }

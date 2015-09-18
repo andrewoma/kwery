@@ -23,9 +23,10 @@
 package com.github.andrewoma.kwery.mapper
 
 import java.math.BigDecimal
-import java.time.*
+import kotlin.reflect.KType
+import kotlin.reflect.defaultType
 
-public val standardDefaults: Map<Class<*>, *> = listOf(
+public val standardDefaults: Map<KType, *> = listOf(
         reifiedValue(true),
         reifiedValue(0.toByte()),
         reifiedValue(0.toChar()),
@@ -38,4 +39,5 @@ public val standardDefaults: Map<Class<*>, *> = listOf(
         reifiedValue("")
 ).toMap()
 
-inline public fun <reified T> reifiedValue(default: T): Pair<Class<T>, T> = javaClass<T>() to default
+inline public fun <reified T : Any> reifiedValue(default: T): Pair<KType, T> = T::class.defaultType to default
+

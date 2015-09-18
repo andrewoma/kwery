@@ -33,7 +33,7 @@ data class Actor(
         val films: Set<Film> = setOf()
 ) : AttributeSetByVersion
 
-data class Film (
+data class Film(
         val id: Int = 0,
         val title: String = "",
         val description: String = "",
@@ -56,7 +56,7 @@ data class FilmActor(val id: FilmActor.Id = FilmActor.Id()) {
     data class Id(val filmId: Int = 0, val actorId: Int = 0)
 }
 
-data class Language (
+data class Language(
         val id: Int = 0,
         val name: String = "",
         override val version: Int = 0

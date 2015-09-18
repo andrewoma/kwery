@@ -22,10 +22,8 @@
 
 package com.github.andrewoma.kwery.fetcher
 
-import java.util.LinkedHashSet
-import java.util.Stack
-import java.util.StringTokenizer
-import kotlin.reflect.KMemberProperty
+import java.util.*
+import kotlin.reflect.KProperty1
 
 private class AllDescendants : Node("**", setOf()) {
     override fun get(name: String) = this
@@ -100,4 +98,4 @@ public open data class Node protected constructor(val name: String, val children
 public fun Node(vararg children: Node): Node = Node.create("", children.toSet())
 public fun Node(name: String = "", vararg children: Node): Node = Node.create(name, children.toSet())
 
-public fun KMemberProperty<*, *>.node(vararg children: Node): Node = Node.create(this.name, children.toSet())
+public fun KProperty1<*, *>.node(vararg children: Node): Node = Node.create(this.name, children.toSet())

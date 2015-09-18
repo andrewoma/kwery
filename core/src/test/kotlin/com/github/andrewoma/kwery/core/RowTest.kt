@@ -23,6 +23,7 @@
 package com.github.andrewoma.kwery.core
 
 import org.junit.Assert.assertEquals
+import org.junit.Test
 import java.math.BigDecimal
 import java.sql.SQLException
 import java.sql.Time
@@ -30,7 +31,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.Test
 
 open class RowTest : AbstractSessionTest() {
     companion object {
@@ -111,10 +111,10 @@ open class RowTest : AbstractSessionTest() {
             assertEquals(LocalDate.of(2014, 12, 1), (row.obj("date_col") as java.sql.Date).toLocalDate())
             assertEquals(LocalDateTime.of(2013, 11, 2, 12, 0, 2, 330000000), row.timestamp("timestamp_col").toLocalDateTime())
             assertEquals("varchar", row.string("varchar_col"))
-            assertEquals("clob", row.clob("clob_col").getCharacterStream().readText())
+            assertEquals("clob", row.clob("clob_col").characterStream.readText())
             assertEquals("clob", row.characterStream("clob_col").readText())
             assertEquals("AB", String(row.bytes("binary_col"), Charsets.US_ASCII).trim { it.toInt() == 0 })
-            assertEquals("BC", String(row.blob("blob_col").getBinaryStream().readBytes(), Charsets.US_ASCII))
+            assertEquals("BC", String(row.blob("blob_col").binaryStream.readBytes(), Charsets.US_ASCII))
             assertEquals("BC", String(row.binaryStream("blob_col").readBytes(), Charsets.US_ASCII))
             assertEquals(listOf(1, 2), row.array<Int>("array_col"))
         }

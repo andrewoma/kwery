@@ -86,16 +86,16 @@ public class Row(val resultSet: ResultSet) {
     public fun binaryStream(name: String): InputStream = resultSet.getBinaryStream(name)
     public fun binaryStreamOrNull(name: String): InputStream? = resultSet.getBinaryStream(name)
 
-    suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST")
     public fun <T> array(name: String): List<T> {
         val value = resultSet.getArray(name)
-        return if (resultSet.wasNull()) listOf() else (value.getArray() as Array<Any>).toList() as List<T>
+        return if (resultSet.wasNull()) listOf() else (value.array as Array<Any>).toList() as List<T>
     }
 
     private fun <T : Any> valueOrNull(value: T): T? = if (resultSet.wasNull()) null else value
 
     private fun <T : Any> requireNotNull(value: T?, name: String): T {
-        require(!resultSet.wasNull(), "Unexpected null for column '$name'")
+        require(!resultSet.wasNull()) { "Unexpected null for column '$name'" }
         return value!!
     }
 }

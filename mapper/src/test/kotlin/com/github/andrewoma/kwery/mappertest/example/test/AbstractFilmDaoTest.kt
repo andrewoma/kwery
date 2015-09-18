@@ -29,7 +29,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.properties.Delegates
 
-abstract class AbstractFilmDaoTest<T, ID, D : AbstractDao<T, ID>> : AbstractDaoTest<T, ID, D>() {
+abstract class AbstractFilmDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>> : AbstractDaoTest<T, ID, D>() {
 
     var sd: FilmData by Delegates.notNull()
     var staticId = -500
@@ -77,7 +77,7 @@ val filmSchema = """
         """
 
 class FilmData {
-    fun <T> notNull() = Delegates.notNull<T>()
+    fun <T : Any> notNull() = Delegates.notNull<T>()
 
     var actorBrad: Actor by notNull()
     var actorKate: Actor by notNull()

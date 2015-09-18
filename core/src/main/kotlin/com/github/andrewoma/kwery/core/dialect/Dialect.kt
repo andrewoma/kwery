@@ -31,7 +31,7 @@ public interface Dialect {
     fun bind(value: Any, limit: Int): String
 
     fun bindArray(value: java.sql.Array, limit: Int, prefix: String = "", postfix: String = "") =
-            (value.getArray() as Array<*>).asSequence().map {
+            (value.array as Array<*>).asSequence().map {
                 if (it == null) "null" else bind(it, limit)
             }.joinToString(",", prefix, postfix)
 
@@ -82,7 +82,7 @@ fun escapeSingleQuotedString(value: String): String {
         if (char == '\'') {
             sb.append('\'')
         }
-        check(char != '\u0000', "Null characters are not permitted")
+        check(char != '\u0000') { "Null characters are not permitted" }
         sb.append(char)
     }
     sb.append("'")

@@ -23,7 +23,6 @@
 package com.github.andrewoma.kwery.fetcher.readme
 
 import com.github.andrewoma.kwery.fetcher.*
-import org.junit.Test
 
 // Given the following domain model
 data class Actor(val id: Int, val firstName: String, val lastName: String)
@@ -33,7 +32,7 @@ data class Language(val id: Int, val name: String)
 data class Film(val id: Int, val language: Language, val actors: Set<Actor>,
                 val title: String, val releaseYear: Int)
 
-@suppress("UNUSED_PARAMETER")
+@Suppress("UNUSED_PARAMETER")
 class Dao<ID, T> {
     fun findByIds(id: Collection<ID>): Map<ID, T> = mapOf()
     fun findByFilmIds(id: Collection<ID>): Map<ID, Collection<T>> = mapOf()

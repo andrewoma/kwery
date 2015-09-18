@@ -67,7 +67,7 @@ public class StatementCounterInterceptor extends StatementDecoratorInterceptor {
         Object result;
         StatementProxy statementProxy = new StatementProxy(
                 (Statement) statement, sql);
-        result = constructor.newInstance(new Object[]{statementProxy});
+        result = constructor.newInstance(statementProxy);
         statementProxy.setActualProxy(result);
         statementProxy.setConnection(proxy);
         statementProxy.setConstructor(constructor);

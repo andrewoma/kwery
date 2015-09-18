@@ -26,10 +26,11 @@ import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 import com.github.andrewoma.kwery.core.Row
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
-import java.util.LinkedHashSet
-import kotlin.properties.Delegates
+import java.util.*
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KMemberProperty
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.jvm.javaType
 
 /**
  * Column defines a how to map an SQL column to and from an object property of type `T`
@@ -91,7 +92,7 @@ public data class Column<C, T>(
     /**
      * A type-safe variant of `to` with an optional value
      */
-    suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
+    @Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
     public fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
 
     override fun toString(): String {
@@ -114,7 +115,7 @@ public class TableConfiguration(
          * Defines default values for types when the column is not null, but is not selected.
          * Defaults to `standardDefaults`
          */
-        val defaults: Map<Class<*>, *> = standardDefaults,
+        val defaults: Map<KType, *> = standardDefaults,
 
         /**
          * Defines converters from JDBC types to arbitrary Kotlin types.
@@ -149,12 +150,12 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     public abstract fun idColumns(id: ID): Set<Pair<Column<T, *>, *>>
 
     public fun <R> addColumn(column: Column<T, R>): Column<T, R> {
-        @suppress("UNCHECKED_CAST")
+        @Suppress("UNCHECKED_CAST")
         (allColumns as MutableSet<Any?>).add(column)
         return column
     }
 
-    private fun <T> lazy(f: () -> T) = Delegates.lazy { initialise(); f() }
+    private fun <T> lazy(f: () -> T) = kotlin.lazy(LazyThreadSafetyMode.NONE) { initialise(); f() }
 
     // Indirectly calls "get" on all delegated columns, which then adds them to the "allColumns"
     private fun initialise() {
@@ -178,38 +179,39 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
 
     // A delegated property that gets the column name from the property name unless it is defined
     public inner class DelegatedColumn<R>(val template: Column<T, R>, private var value: Column<T, R>? = null) : ReadOnlyProperty<Any?, Column<T, R>> {
-        public override fun get(thisRef: Any?, desc: PropertyMetadata): Column<T, R> {
+        public override fun get(thisRef: Any?, property: PropertyMetadata): Column<T, R> {
             if (value == null) {
-                value = addColumn(template.copy(name = template.name.let { if (it != "") it else config.namingConvention(desc.name) }))
+                value = addColumn(template.copy(name = template.name.let { if (it != "") it else config.namingConvention(property.name) }))
             }
             return value!!
         }
     }
 
-    public inline fun <reified R> col(property: KMemberProperty<T, R>,
-                                      id: Boolean = false,
-                                      version: Boolean = false,
-                                      notNull: Boolean = id || version,
-                                      default: R = default(!notNull, javaClass<R>()),
-                                      converter: Converter<R> = converter(!notNull, javaClass<R>()),
-                                      name: String? = null,
-                                      selectByDefault: Boolean = true): DelegatedColumn<R> {
+    public fun <R> col(property: KProperty1<T, R>,
+                       id: Boolean = false,
+                       version: Boolean = false,
+                       notNull: Boolean = id || version,
+                       default: R = default(property.returnType),
+                       converter: Converter<R> = converter(property.returnType),
+                       name: String? = null,
+                       selectByDefault: Boolean = true): DelegatedColumn<R> {
 
         val column = Column<T, R>({ property.get(it) }, default, converter, name ?: "", id, version, selectByDefault, !notNull)
         return DelegatedColumn(column)
     }
 
-    public inline fun <C, reified R> col(property: KMemberProperty<C, R>,
-                                         noinline path: (T) -> C,
-                                         id: Boolean = false,
-                                         version: Boolean = false,
-                                         notNull: Boolean = id || version,
-                                         default: R = default(!notNull, javaClass<R>()),
-                                         converter: Converter<R> = converter(!notNull, javaClass<R>()),
-                                         name: String? = null,
-                                         selectByDefault: Boolean = true
+    public fun <C, R> col(property: KProperty1<C, R>,
+                          path: (T) -> C,
+                          id: Boolean = false,
+                          version: Boolean = false,
+                          notNull: Boolean = !property.returnType.isMarkedNullable,
+                          default: R = default<R>(property.returnType),
+                          converter: Converter<R> = converter(property.returnType),
+                          name: String? = null,
+                          selectByDefault: Boolean = true
 
     ): DelegatedColumn<R> {
+
         val column = Column<T, R>({ property.get(path(it)) }, default, converter, name ?: "", id, version, selectByDefault, !notNull)
         return DelegatedColumn(column)
     }
@@ -217,25 +219,28 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     // Can't cast T to Enum<T> due to recursive type, so cast to any enum to satisfy compiler
     private enum class DummyEnum
 
-    suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_UNIT_OR_ANY", "CAST_NEVER_SUCCEEDS")
-    public fun <T> converter(nullable: Boolean, type: Class<T>): Converter<T> {
-        val converter = config.converters[type] ?: if (type.isEnum()) EnumByNameConverter(type as Class<DummyEnum>) as T else null
-        checkNotNull(converter, "Converter undefined for type: ${type.getName()}")
-        return (if (nullable) optional(converter!! as Converter<T>) else converter) as Converter<T>
+    @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_UNIT_OR_ANY", "CAST_NEVER_SUCCEEDS")
+    public fun <T> converter(type: KType): Converter<T> {
+        // TODO ... converters are currently defined as Java classes as I can't figure out how to
+        // convert a nullable KType into its non-nullable equivalent
+        val javaClass = type.javaType as Class<T>
+        val converter = config.converters[javaClass] ?: if (javaClass.isEnum) EnumByNameConverter(javaClass as Class<DummyEnum>) as T else null
+        checkNotNull(converter) { "Converter undefined for type $type as $javaClass" }
+        return (if (type.isMarkedNullable) optional(converter!! as Converter<Any>) else converter) as Converter<T>
     }
 
-    public fun <T> default(nullable: Boolean, type: Class<T>): T {
-        if (nullable) return null
+    public fun <T> default(type: KType): T {
+        if (type.isMarkedNullable) return null as T
         val value = config.defaults[type]
-        checkNotNull(value, "Default value undefined for type: ${type.getName()}")
-        @suppress("UNCHECKED_CAST")
+        checkNotNull(value) { "Default value undefined for type $type" }
+        @Suppress("UNCHECKED_CAST")
         return value as T
     }
 
     public fun copy(value: T, properties: Map<Column<T, *>, *>): T {
         return create(object : Value<T> {
             override fun <R> of(column: Column<T, R>): R {
-                @suppress("UNCHECKED_CAST")
+                @Suppress("UNCHECKED_CAST")
                 return if (properties.contains(column)) properties[column] as R else column.property(value)
             }
         })
@@ -244,7 +249,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
     public fun objectMap(session: Session, value: T, columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
         val map = hashMapOfExpectedSize<String, Any?>(columns.size())
         for (column in columns) {
-            @suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST")
             val col = column as Column<T, Any?>
             map[nf(column)] = col.converter.to(session.connection, column.property(value))
         }
@@ -255,7 +260,7 @@ public abstract class Table<T : Any, ID>(val name: String, val config: TableConf
         val idCols = idColumns(id)
         val map = hashMapOfExpectedSize<String, Any?>(idCols.size())
         for ((column, value) in idCols) {
-            @suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST")
             val col = column as Column<T, Any?>
             map[nf(column)] = col.converter.to(session.connection, value)
         }

@@ -24,6 +24,7 @@ package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
+import org.junit.Test
 import org.postgresql.largeobject.LargeObjectManager
 import java.io.ByteArrayInputStream
 import java.io.StringReader
@@ -34,13 +35,12 @@ import java.sql.Timestamp
 import javax.sql.DataSource
 import javax.sql.PooledConnection
 import kotlin.test.assertEquals
-import org.junit.Test
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String
 
     override fun afterSessionSetup() {
-        initialise(dialect.javaClass.getName()) {
+        initialise(dialect.javaClass.name) {
 
             for (statement in sql.split(";".toRegex())) {
                 session.update(statement)
@@ -167,7 +167,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
     private fun toBlob(data: String): Any = when (session.dialect) {
         is PostgresDialect -> {
-            val manager = ((session.connection as PooledConnection).getConnection() as org.postgresql.PGConnection).getLargeObjectAPI()
+            val manager = ((session.connection as PooledConnection).connection as org.postgresql.PGConnection).largeObjectAPI
             val oid = manager.createLO(LargeObjectManager.READ + LargeObjectManager.WRITE)
             val obj = manager.open(oid, LargeObjectManager.WRITE)
             obj.write(data.toByteArray(Charsets.UTF_8))

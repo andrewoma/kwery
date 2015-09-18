@@ -23,11 +23,9 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
-import kotlin.test.assertEquals
+import org.junit.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import org.junit.Before
-import org.junit.Test
 
 class ManagedThreadLocalSessionDelegationTest : AbstractSessionDelegationTest() {
     companion object {

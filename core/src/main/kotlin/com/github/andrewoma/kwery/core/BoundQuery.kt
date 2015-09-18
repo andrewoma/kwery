@@ -49,7 +49,7 @@ inline fun replaceBindings(query: String, onBinding: (String) -> String): String
     return result.toString()
 }
 
-private fun inClauseSizes(parametersList: List<Map<String, Any?>>): Map<String, Int> {
+internal fun inClauseSizes(parametersList: List<Map<String, Any?>>): Map<String, Int> {
     val sizes: MutableMap<String, Int> = hashMapOf()
 
     for (parameters in parametersList) {

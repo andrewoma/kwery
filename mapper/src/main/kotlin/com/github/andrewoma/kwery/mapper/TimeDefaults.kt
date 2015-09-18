@@ -23,8 +23,9 @@
 package com.github.andrewoma.kwery.mapper
 
 import java.time.*
+import kotlin.reflect.KType
 
-public val timeDefaults: Map<Class<*>, *> = listOf(
+public val timeDefaults: Map<KType, *> = listOf(
         reifiedValue(LocalTime.now()),
         reifiedValue(LocalDate.now()),
         reifiedValue(LocalDateTime.now()),

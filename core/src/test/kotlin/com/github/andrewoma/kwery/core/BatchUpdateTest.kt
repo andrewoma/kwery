@@ -22,9 +22,9 @@
 
 package com.github.andrewoma.kwery.core
 
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import org.junit.Test
 
 class BatchUpdateTest : AbstractFilmSessionTest() {
 

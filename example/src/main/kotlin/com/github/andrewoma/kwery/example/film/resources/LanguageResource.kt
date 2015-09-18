@@ -33,34 +33,34 @@ import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
-Path("/languages")
-Produces(MediaType.APPLICATION_JSON)
-Transactional public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
-    Timed GET
-    fun find(QueryParam("name") name: String?): List<Language> {
+@Path("/languages")
+@Produces(MediaType.APPLICATION_JSON)
+@Transactional public class LanguageResource(val languageDao: LanguageDao, override val fetcher: GraphFetcher) : Resource {
+    @Timed @GET
+    fun find(@QueryParam("name") name: String?): List<Language> {
 
         val filter = parameters(languageTable.Name optional name)
 
         return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keySet())
     }
 
-    Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int): Language {
+    @Timed @GET @Path("/{id}")
+    fun findById(@PathParam("id") id: Int): Language {
         return languageDao.findById(id) ?: throw NotFoundException("$id not found")
     }
 
-    Timed POST
+    @Timed @POST
     fun create(language: Language): Int {
         return languageDao.insert(language.copy(version = 1), IdStrategy.Generated).id
     }
 
-    Timed PUT Path("/{id}")
-    fun update(PathParam("id") id: Int, language: Language): Int {
+    @Timed @PUT @Path("/{id}")
+    fun update(@PathParam("id") id: Int, language: Language): Int {
         return languageDao.update(Language(id).copy(version = language.version), language).version
     }
 
-    Timed DELETE Path("/{id}")
-    fun delete(PathParam("id") id: Int) {
+    @Timed @DELETE @Path("/{id}")
+    fun delete(@PathParam("id") id: Int) {
         if (languageDao.delete(id) == 0) throw NotFoundException("$id not found")
     }
 }

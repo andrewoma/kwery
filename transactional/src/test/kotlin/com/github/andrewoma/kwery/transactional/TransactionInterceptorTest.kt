@@ -22,27 +22,26 @@
 
 package com.github.andrewoma.kwery.transactional
 
-import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
+import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.github.andrewoma.kwery.core.util.apply
 import org.apache.tomcat.jdbc.pool.DataSource
+import org.junit.Before
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import org.junit.Before
-import org.junit.Test
 
 interface Service {
     fun insert(value: String): Int
 }
 
-Transactional class ServiceWithInterface(val session: Session) : Service {
+@Transactional class ServiceWithInterface(val session: Session) : Service {
     override fun insert(value: String) = insert(session, value)
 }
 
-Transactional open class ConcreteService(val session: Session) {
+@Transactional open class ConcreteService(val session: Session) {
     open fun insert(value: String) = insert(session, value)
 
     open fun throwsRollbackDefault(value: String) {
@@ -50,36 +49,38 @@ Transactional open class ConcreteService(val session: Session) {
         throw Exception("rollback")
     }
 
-    Transactional(ignore = arrayOf(IllegalArgumentException::class))
+    @Transactional(ignore = arrayOf(IllegalArgumentException::class))
     open fun throwsIgnore(value: String) {
         insert(session, value)
         throw IllegalArgumentException("ignore")
     }
 
-    Transactional(manual = true) open fun manualTransactions() {
+    @Transactional(manual = true) open fun manualTransactions() {
         session.transaction { insert(session, "value1") }
         session.transaction { insert(session, "value2"); session.currentTransaction?.rollbackOnly = true }
         session.transaction { insert(session, "value3") }
     }
 }
 
-Transactional open class Outer(val session: Session, val inner: Inner) {
+@Transactional open class Outer(val session: Session, val inner: Inner) {
     open fun bothInsert(innerValue: String, outerValue: String) {
         insert(session, outerValue)
         inner.insert(innerValue)
     }
+
     open fun outerFails(innerValue: String, outerValue: String) {
         inner.insert(outerValue)
         throw Exception("outer")
 
     }
+
     open fun innerFails(innerValue: String, outerValue: String) {
         insert(session, outerValue)
         inner.fail()
     }
 }
 
-Transactional open class Inner(val session: Session) {
+@Transactional open class Inner(val session: Session) {
     open fun insert(value: String) = insert(session, value)
     open fun fail() = throw Exception("inner")
 }
@@ -89,9 +90,9 @@ fun insert(session: Session, value: String) = session.update("insert into test(v
 class TransactionalInterceptorTest {
     companion object {
         val dataSource = DataSource().apply {
-            setDefaultAutoCommit(true)
-            setDriverClassName("org.hsqldb.jdbc.JDBCDriver")
-            setUrl("jdbc:hsqldb:mem:transactional_test")
+            defaultAutoCommit = true
+            driverClassName = "org.hsqldb.jdbc.JDBCDriver"
+            url = "jdbc:hsqldb:mem:transactional_test"
         }
     }
 
@@ -113,7 +114,7 @@ class TransactionalInterceptorTest {
 
 
     fun findAll() = session.use(true) {
-        session.select("select value from test") { row -> row.string("value")}
+        session.select("select value from test") { row -> row.string("value") }
     }
 
     @Test fun `should intercept concrete classes`() {

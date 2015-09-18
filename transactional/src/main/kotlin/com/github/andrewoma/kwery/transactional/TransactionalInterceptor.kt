@@ -26,7 +26,6 @@ import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import org.aopalliance.intercept.MethodInterceptor
 import org.aopalliance.intercept.MethodInvocation
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.java
 
 class TransactionalInterceptor : MethodInterceptor {
 
@@ -68,7 +67,7 @@ class TransactionalInterceptor : MethodInterceptor {
     }
 
     private fun getTransactional(invocation: MethodInvocation) =
-            invocation.getMethod().getAnnotation(javaClass<Transactional>())
-                    ?: invocation.getThis().javaClass.getAnnotation(javaClass<Transactional>())
+            invocation.method.getAnnotation(Transactional::class.java)
+                    ?: invocation.`this`.javaClass.getAnnotation(Transactional::class.java)
 }
 

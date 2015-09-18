@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  *  e.g. Add "sqlLogging=true" to an http request that sets forceLogging=true in a servlet filter
  */
 // TODO - Add support for SQL Warnings
-open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(javaClass<LoggingInterceptor>()),
+open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingInterceptor::class.java),
                                      val infoQueryThresholdInMs: Long = 1000L,
                                      val parameterLimit: Int = -1
 ) : StatementInterceptor {
@@ -53,9 +53,9 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
     data class Context(val stopWatch: StopWatch, val executedTiming: String = "", val exception: Exception? = null)
 
     var ExecutingStatement.context: Context
-        get() = this.contexts[javaClass<LoggingInterceptor>().getName()] as Context
+        get() = this.contexts[LoggingInterceptor::class.java.name] as Context
         set(value) {
-            this.contexts[javaClass<LoggingInterceptor>().getName()] = value
+            this.contexts[LoggingInterceptor::class.java.name] = value
         }
 
     override fun executed(statement: ExecutingStatement) {
@@ -71,9 +71,9 @@ open public class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(j
         val context = statement.context
         when {
             forceLogging.get() ?: false -> log.info(createMessage(statement))
-            log.isErrorEnabled() && context.exception != null -> log.error(createMessage(statement))
-            log.isInfoEnabled() && context.stopWatch.elapsed(MILLISECONDS) >= infoQueryThresholdInMs -> log.info(createMessage(statement))
-            log.isDebugEnabled() -> log.debug(createMessage(statement))
+            log.isErrorEnabled && context.exception != null -> log.error(createMessage(statement))
+            log.isInfoEnabled && context.stopWatch.elapsed(MILLISECONDS) >= infoQueryThresholdInMs -> log.info(createMessage(statement))
+            log.isDebugEnabled -> log.debug(createMessage(statement))
         }
     }
 

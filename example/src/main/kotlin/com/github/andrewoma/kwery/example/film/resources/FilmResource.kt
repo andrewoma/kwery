@@ -33,14 +33,14 @@ import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 
-Path("/films")
-Produces(MediaType.APPLICATION_JSON)
-Transactional public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
-    Timed GET
-    fun find(QueryParam("title") title: String?,
-             QueryParam("releaseYear") releaseYear: Int?,
-             QueryParam("rating") rating: FilmRating?,
-             QueryParam("fetch") root: String?): List<Film> {
+@Path("/films")
+@Produces(MediaType.APPLICATION_JSON)
+@Transactional public class FilmResource(val filmDao: FilmDao, override val fetcher: GraphFetcher) : Resource {
+    @Timed @GET
+    fun find(@QueryParam("title") title: String?,
+             @QueryParam("releaseYear") releaseYear: Int?,
+             @QueryParam("rating") rating: FilmRating?,
+             @QueryParam("fetch") root: String?): List<Film> {
 
         val filter = parameters(
                 filmTable.Title optional title,
@@ -51,8 +51,8 @@ Transactional public class FilmResource(val filmDao: FilmDao, override val fetch
         return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet()).fetch(root)
     }
 
-    Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Film {
+    @Timed @GET @Path("/{id}")
+    fun findById(@PathParam("id") id: Int, @QueryParam("fetch") root: String?): Film {
         return filmDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }
 }
