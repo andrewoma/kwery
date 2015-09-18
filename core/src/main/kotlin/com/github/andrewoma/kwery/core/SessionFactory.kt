@@ -31,9 +31,9 @@ import javax.sql.DataSource
  * SessionFactory provides sessions from a pooled DataSource
  */
 class SessionFactory(val dataSource: DataSource,
-                            val dialect: Dialect,
-                            val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                            val defaultOptions: StatementOptions = StatementOptions()
+                     val dialect: Dialect,
+                     val interceptor: StatementInterceptor = noOpStatementInterceptor,
+                     val defaultOptions: StatementOptions = StatementOptions()
 
 ) {
 

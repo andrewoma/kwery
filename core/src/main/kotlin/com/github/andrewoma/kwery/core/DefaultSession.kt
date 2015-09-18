@@ -44,9 +44,9 @@ import kotlin.support.AbstractIterator
  * and create a new session per transaction using SessionFactory.
  */
 class DefaultSession(override val connection: Connection,
-                            override val dialect: Dialect,
-                            val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                            override val defaultOptions: StatementOptions = StatementOptions()
+                     override val dialect: Dialect,
+                     val interceptor: StatementInterceptor = noOpStatementInterceptor,
+                     override val defaultOptions: StatementOptions = StatementOptions()
 ) : Session {
 
     companion object {
@@ -61,7 +61,7 @@ class DefaultSession(override val connection: Connection,
     override val currentTransaction: Transaction?
         get() = transaction
 
-    var transaction: Transaction? = null
+    internal var transaction: Transaction? = null
 
     override fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
@@ -315,9 +315,9 @@ class DefaultSession(override val connection: Connection,
     }
 }
 
- class TypedParameter(val value: Any?, val sqlType: Int)
+class TypedParameter(val value: Any?, val sqlType: Int)
 
- data class ExecutingStatement(
+data class ExecutingStatement(
         val session: Session,
         val contexts: MutableMap<String, Any?>,
         val sql: String,

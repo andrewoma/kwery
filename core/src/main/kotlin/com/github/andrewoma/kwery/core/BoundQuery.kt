@@ -24,9 +24,9 @@ package com.github.andrewoma.kwery.core
 
 import java.util.regex.Pattern
 
-data class BoundQuery(val query: String, val bindings: List<String>)
+internal data class BoundQuery(val query: String, val bindings: List<String>)
 
-fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQuery {
+internal fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQuery {
     val bindings = arrayListOf<String>()
     val bound = replaceBindings(query) { key ->
         bindings.add(key)
@@ -36,7 +36,7 @@ fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQuery {
     return BoundQuery(bound, bindings)
 }
 
-inline fun replaceBindings(query: String, onBinding: (String) -> String): String {
+internal inline fun replaceBindings(query: String, onBinding: (String) -> String): String {
     val pattern = Pattern.compile("""\:([a-zA-Z_]+)""")
     val matcher = pattern.matcher(query)
 

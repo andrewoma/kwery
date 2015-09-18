@@ -38,9 +38,9 @@ import java.util.concurrent.TimeUnit
  */
 class LoggingSummaryInterceptor : StatementInterceptor {
 
-    class Request(val stopWatch: StopWatch, val executions: MutableList<Execution>)
+    private class Request(val stopWatch: StopWatch, val executions: MutableList<Execution>)
 
-    companion object {
+    internal companion object {
         val requests: ThreadLocal<Request> = ThreadLocal()
         val nanoToMs = 1000000
         val headings = arrayOf("", "Calls", "Exec", "Close", "Rows", "")
@@ -164,10 +164,10 @@ class LoggingSummaryInterceptor : StatementInterceptor {
         }
     }
 
-    data class ExecutionSummary(val name: String, var executionTime: Long, var closedTime: Long, var executionCount: Long, var rowCounts: Long)
-    data class Execution(val name: String, val started: Long, val executed: Long, val closed: Long, val rowCount: Long)
+    internal data class ExecutionSummary(val name: String, var executionTime: Long, var closedTime: Long, var executionCount: Long, var rowCounts: Long)
+    internal data class Execution(val name: String, val started: Long, val executed: Long, val closed: Long, val rowCount: Long)
 
-    var ExecutingStatement.context: Execution?
+    private var ExecutingStatement.context: Execution?
         get() = this.contexts[LoggingSummaryInterceptor::class.java.name] as Execution?
         set(value) {
             this.contexts[LoggingSummaryInterceptor::class.java.name] = value

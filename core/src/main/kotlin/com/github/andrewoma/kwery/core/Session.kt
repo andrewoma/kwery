@@ -52,56 +52,56 @@ interface Session {
      * Executes a query returning the results as `List`
      */
     fun <R> select(sql: String,
-                          parameters: Map<String, Any?> = mapOf(),
-                          options: StatementOptions = defaultOptions,
-                          mapper: (Row) -> R): List<R>
+                   parameters: Map<String, Any?> = mapOf(),
+                   options: StatementOptions = defaultOptions,
+                   mapper: (Row) -> R): List<R>
 
     /**
      * Executes an update returning the count of rows affected by the statement
      */
     fun update(sql: String,
-                      parameters: Map<String, Any?> = mapOf(),
-                      options: StatementOptions = defaultOptions): Int
+               parameters: Map<String, Any?> = mapOf(),
+               options: StatementOptions = defaultOptions): Int
 
     /**
      * Executes an insert statement with generated keys, returning the keys
      */
     fun <K> insert(sql: String,
-                          parameters: Map<String, Any?> = mapOf(),
-                          options: StatementOptions = defaultOptions, f: (Row) -> K): Pair<Int, K>
+                   parameters: Map<String, Any?> = mapOf(),
+                   options: StatementOptions = defaultOptions, f: (Row) -> K): Pair<Int, K>
 
     /**
      * Executes a batch of update statements returning the counts of each statement executed
      */
     fun batchUpdate(sql: String,
-                           parametersList: List<Map<String, Any?>>,
-                           options: StatementOptions = defaultOptions): List<Int>
+                    parametersList: List<Map<String, Any?>>,
+                    options: StatementOptions = defaultOptions): List<Int>
 
     /**
      * Executes a batch of insert statements with generated keys, returning the list of keys
      */
     fun <K> batchInsert(sql: String,
-                               parametersList: List<Map<String, Any?>>,
-                               options: StatementOptions = defaultOptions,
-                               f: (Row) -> K): List<Pair<Int, K>>
+                        parametersList: List<Map<String, Any?>>,
+                        options: StatementOptions = defaultOptions,
+                        f: (Row) -> K): List<Pair<Int, K>>
 
     /**
      * Executes a query, providing the results as a sequence for streaming.
      * This is the most flexible method for handling large result sets without loading them into memory.
      */
     fun <R> asSequence(sql: String,
-                              parameters: Map<String, Any?> = mapOf(),
-                              options: StatementOptions = defaultOptions,
-                              f: (Sequence<Row>) -> R): R
+                       parameters: Map<String, Any?> = mapOf(),
+                       options: StatementOptions = defaultOptions,
+                       f: (Sequence<Row>) -> R): R
 
     /**
      * Executes a query, invoking the supplied function for each row returned.
      * This is suitable for handling large result sets without loading them into memory.
      */
     fun forEach(sql: String,
-                       parameters: Map<String, Any?> = mapOf(),
-                       options: StatementOptions = defaultOptions,
-                       f: (Row) -> Unit): Unit
+                parameters: Map<String, Any?> = mapOf(),
+                options: StatementOptions = defaultOptions,
+                f: (Row) -> Unit): Unit
 
     /**
      * Binds parameters into a static SQL string.
@@ -112,10 +112,10 @@ interface Session {
      * strings so they are safe, but it is probably not reliable for untrusted strings.
      */
     fun bindParameters(sql: String,
-                              parameters: Map<String, Any?>,
-                              closeParameters: Boolean = true,
-                              limit: Int = -1,
-                              consumeStreams: Boolean = true): String
+                       parameters: Map<String, Any?>,
+                       closeParameters: Boolean = true,
+                       limit: Int = -1,
+                       consumeStreams: Boolean = true): String
 
     /**
      * Starts a transaction for the lifetime of the supplied function.

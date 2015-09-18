@@ -61,7 +61,7 @@ interface ManualTransaction : Transaction {
     fun rollback()
 }
 
-class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
+internal class DefaultTransaction(val session: DefaultSession) : ManualTransaction {
     companion object {
         val transactionId = AtomicLong()
     }

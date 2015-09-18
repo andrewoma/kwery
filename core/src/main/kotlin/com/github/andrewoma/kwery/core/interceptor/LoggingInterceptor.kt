@@ -43,16 +43,16 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  */
 // TODO - Add support for SQL Warnings
 open class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingInterceptor::class.java),
-                                     val infoQueryThresholdInMs: Long = 1000L,
-                                     val parameterLimit: Int = -1
+                              val infoQueryThresholdInMs: Long = 1000L,
+                              val parameterLimit: Int = -1
 ) : StatementInterceptor {
     companion object {
         val forceLogging: ThreadLocal<Boolean> = ThreadLocal()
     }
 
-    data class Context(val stopWatch: StopWatch, val executedTiming: String = "", val exception: Exception? = null)
+    private data class Context(val stopWatch: StopWatch, val executedTiming: String = "", val exception: Exception? = null)
 
-    var ExecutingStatement.context: Context
+    private var ExecutingStatement.context: Context
         get() = this.contexts[LoggingInterceptor::class.java.name] as Context
         set(value) {
             this.contexts[LoggingInterceptor::class.java.name] = value

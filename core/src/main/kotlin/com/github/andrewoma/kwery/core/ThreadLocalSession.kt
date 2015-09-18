@@ -36,10 +36,10 @@ import javax.sql.DataSource
  */
 
 class ThreadLocalSession(val dataSource: DataSource,
-                                override val dialect: Dialect,
-                                val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                                val name: String = defaultThreadLocalSessionName,
-                                override val defaultOptions: StatementOptions = StatementOptions()) : Session {
+                         override val dialect: Dialect,
+                         val interceptor: StatementInterceptor = noOpStatementInterceptor,
+                         val name: String = defaultThreadLocalSessionName,
+                         override val defaultOptions: StatementOptions = StatementOptions()) : Session {
 
     companion object {
         private val threadLocalSession = ThreadLocal<Session>()

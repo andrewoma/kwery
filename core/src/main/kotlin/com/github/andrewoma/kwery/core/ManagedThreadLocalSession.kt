@@ -43,10 +43,10 @@ import javax.sql.DataSource
 val defaultThreadLocalSessionName: String = "default"
 
 class ManagedThreadLocalSession(val dataSource: DataSource,
-                                       override val dialect: Dialect,
-                                       val interceptor: StatementInterceptor = noOpStatementInterceptor,
-                                       val name: String = defaultThreadLocalSessionName,
-                                       override val defaultOptions: StatementOptions = StatementOptions()) : Session {
+                                override val dialect: Dialect,
+                                val interceptor: StatementInterceptor = noOpStatementInterceptor,
+                                val name: String = defaultThreadLocalSessionName,
+                                override val defaultOptions: StatementOptions = StatementOptions()) : Session {
 
     class SessionConfig(val startTransaction: Boolean, val session: DefaultSession?, val transaction: ManualTransaction?)
 
