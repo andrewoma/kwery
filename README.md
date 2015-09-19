@@ -39,13 +39,9 @@ it uses a ``Table`` object to define the mapping between rows and objects.
 class Name(val firstName: String, val lastName: String)
 class Actor(val id: Int, val name: Name, val lastUpdate: LocalDateTime)
 
-// Table configuration defines defaults, converters and naming conventions
-// In this case, it includes converters for LocalDateTime <-> java.sql.Timestamp
-val tableConfig = TableConfiguration(defaults, converters, camelToLowerUnderscore)
-
 // A table object defines the mapping between columns and models
 // Conversions default to those defined in the configuration but may be overridden
-object actorTable : Table<Actor, Int>("actor", tableConfig), VersionedWithTimestamp {
+object actorTable : Table<Actor, Int>("actor"), VersionedWithTimestamp {
     val ActorId    by col(Actor::id,                     id = true)
     val FirstName  by col(Name::firstName, { it.name },  notNull = true)
     val LastName   by col(Name::lastName,  { it.name },  notNull = true)
@@ -168,6 +164,13 @@ Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7
 `0.1` Compatible with Kotlin M11.
 
 `0.2` Compatible with Kotlin M12, adding transactional interceptors.
+
+`0.3` Compatible with Kotlin M13:
+* Improved docs
+* Simplified transaction listeners
+* Made transactions re-entrant
+* Renamed ThreadLocalSession to ManagedThreadLocalSession and introduced a new ThreadLocalSession for
+  use without interceptors and annotations.
 
 #### Building
 
