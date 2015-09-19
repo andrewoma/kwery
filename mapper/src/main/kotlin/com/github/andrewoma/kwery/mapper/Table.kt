@@ -188,27 +188,27 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
     }
 
     fun <R> col(property: KProperty1<T, R>,
-                       id: Boolean = false,
-                       version: Boolean = false,
-                       notNull: Boolean = id || version,
-                       default: R = default(property.returnType),
-                       converter: Converter<R> = converter(property.returnType),
-                       name: String? = null,
-                       selectByDefault: Boolean = true): DelegatedColumn<R> {
+                id: Boolean = false,
+                version: Boolean = false,
+                notNull: Boolean = id || version,
+                default: R = default(property.returnType),
+                converter: Converter<R> = converter(property.returnType),
+                name: String? = null,
+                selectByDefault: Boolean = true): DelegatedColumn<R> {
 
         val column = Column<T, R>({ property.get(it) }, default, converter, name ?: "", id, version, selectByDefault, !notNull)
         return DelegatedColumn(column)
     }
 
     fun <C, R> col(property: KProperty1<C, R>,
-                          path: (T) -> C,
-                          id: Boolean = false,
-                          version: Boolean = false,
-                          notNull: Boolean = !property.returnType.isMarkedNullable,
-                          default: R = default<R>(property.returnType),
-                          converter: Converter<R> = converter(property.returnType),
-                          name: String? = null,
-                          selectByDefault: Boolean = true
+                   path: (T) -> C,
+                   id: Boolean = false,
+                   version: Boolean = false,
+                   notNull: Boolean = !property.returnType.isMarkedNullable,
+                   default: R = default<R>(property.returnType),
+                   converter: Converter<R> = converter(property.returnType),
+                   name: String? = null,
+                   selectByDefault: Boolean = true
 
     ): DelegatedColumn<R> {
 
@@ -220,7 +220,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
     private enum class DummyEnum
 
     @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_UNIT_OR_ANY", "CAST_NEVER_SUCCEEDS")
-    fun <T> converter(type: KType): Converter<T> {
+    protected fun <T> converter(type: KType): Converter<T> {
         // TODO ... converters are currently defined as Java classes as I can't figure out how to
         // convert a nullable KType into its non-nullable equivalent
         val javaClass = type.javaType as Class<T>
@@ -229,7 +229,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
         return (if (type.isMarkedNullable) optional(converter!! as Converter<Any>) else converter) as Converter<T>
     }
 
-    fun <T> default(type: KType): T {
+    protected fun <T> default(type: KType): T {
         if (type.isMarkedNullable) return null as T
         val value = config.defaults[type]
         checkNotNull(value) { "Default value undefined for type $type" }

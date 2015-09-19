@@ -46,7 +46,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
     override val defaultColumns = table.defaultColumns
 
-    val columns = table.defaultColumns.join()
+    protected val columns = table.defaultColumns.join()
 
     private val listeners = linkedSetOf<Listener>()
 

@@ -37,7 +37,7 @@ data class DeleteEvent(table: Table<*, *>, id: Any, val value: Any?) : Event(tab
 data class UpdateEvent(table: Table<*, *>, id: Any, val new: Any?, val old: Any?) : Event(table, id)
 
 abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
-    val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()
+    private val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()
 
     override fun onEvent(session: Session, events: List<Event>) {
         val transaction = session.currentTransaction

@@ -96,7 +96,7 @@ class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
         }
 ) {
     companion object {
-        val supported = setOf(NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS, DAYS)
+        private val supported = setOf(NANOS, MICROS, MILLIS, SECONDS, MINUTES, HOURS, HALF_DAYS, DAYS)
     }
 
     init {

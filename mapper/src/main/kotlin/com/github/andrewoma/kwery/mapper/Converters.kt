@@ -60,7 +60,7 @@ val standardConverters: Map<Class<*>, Converter<*>> = listOf(
 )
 
 inline fun <reified T : Any> reifiedConverter(converter: Converter<T>): Pair<Class<*>, Converter<T>> {
-        return T::class.java to converter
+    return T::class.java to converter
 }
 
 inline fun <reified T> ArrayConverter(sqlType: String): Converter<List<T>> {

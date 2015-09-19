@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.fetcher
 
 import java.util.concurrent.ConcurrentHashMap
 
-class Value<T>(val get: () -> T, val set: (T) -> Unit) {
+internal class Value<T>(val get: () -> T, val set: (T) -> Unit) {
     override fun toString(): String {
         return get().toString()
     }
