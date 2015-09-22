@@ -11,6 +11,8 @@ Kwery's manifesto:
 * **No magic.** No proxies, interceptors, reflection or implicit saves. Explicit functions with sensible defaults control everything.
 * **Useful logging.** Logged statements are valid SQL with inline parameters for your dialect.
 
+[![Build Status](https://travis-ci.org/andrewoma/kwery.svg?branch=master)](https://travis-ci.org/andrewoma/kwery.svg?branch=master)
+
 #### Core
 
 The [core module](core) is a fairly thin wrapper over JDBC, providing support for named parameters, logging

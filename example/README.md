@@ -13,14 +13,14 @@ Features:
 
 Here's a snippet from [ActorResource](src/main/kotlin/com/github/andrewoma/kwery/example/film/resources/ActorResource.kt) showing a typical resource:
 ```kotlin
-Path("/actors")
-Produces(MediaType.APPLICATION_JSON)
+@Path("/actors")
+@Produces(MediaType.APPLICATION_JSON)
 @Transactional class ActorResource(val actorDao: ActorDao, override val fetcher: GraphFetcher) : Resource {
 
-    Timed GET
-    fun find(QueryParam("firstName") firstName: String?,
-             QueryParam("lastName") lastName: String?,
-             QueryParam("fetch") root: String?): List<Actor> {
+    @Timed @GET
+    fun find(@QueryParam("firstName") firstName: String?,
+             @QueryParam("lastName") lastName: String?,
+             @QueryParam("fetch") root: String?): List<Actor> {
 
         val filter = parameters(
                 actorTable.FirstName optional firstName,
@@ -30,8 +30,8 @@ Produces(MediaType.APPLICATION_JSON)
         return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)
     }
 
-    Timed GET Path("/{id}")
-    fun findById(PathParam("id") id: Int, QueryParam("fetch") root: String?): Actor {
+    @Timed @GET Path("/{id}")
+    fun findById(@PathParam("id") id: Int, @QueryParam("fetch") root: String?): Actor {
         return actorDao.findById(id).fetch(root) ?: throw NotFoundException("$id not found")
     }
 }
