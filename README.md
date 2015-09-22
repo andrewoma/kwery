@@ -212,5 +212,3 @@ Misc:
 
 #### License
 This project is licensed under a MIT license.
-
-[![Build Status](https://travis-ci.org/andrewoma/kwery.svg?branch=master)](https://travis-ci.org/andrewoma/kwery)
