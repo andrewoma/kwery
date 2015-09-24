@@ -30,12 +30,17 @@ import java.time.*
 import java.time.temporal.ChronoUnit.*
 import java.time.temporal.TemporalUnit
 
+val offsetDateTimeConverter = OffsetDateTimeConverter()
+val zonedDateTimeConverter = ZonedDateTimeConverter()
+
 val timeConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(localDateTimeConverter),
         reifiedConverter(localDateConverter),
         reifiedConverter(localTimeConverter),
         reifiedConverter(instantConverter),
-        reifiedConverter(durationToBigDecimalConverter)
+        reifiedConverter(durationToBigDecimalConverter),
+        reifiedConverter(offsetDateTimeConverter),
+        reifiedConverter(zonedDateTimeConverter)
 ).toMap()
 
 object localDateTimeConverter : SimpleConverter<LocalDateTime>(
@@ -59,6 +64,24 @@ object localTimeConverter : SimpleConverter<LocalTime>(
 object instantConverter : SimpleConverter<Instant>(
         { row, c -> row.timestamp(c).toInstant() },
         { Timestamp(it.toEpochMilli()) }
+)
+
+/**
+ * Note: the offset is not stored in the database and will be lost. When reading the offset will
+ * be set based on the zone id given to the converter on construction.
+ */
+class OffsetDateTimeConverter(val zone: ZoneId = ZoneId.systemDefault()) : SimpleConverter<OffsetDateTime>(
+        { row, c -> OffsetDateTime.ofInstant(row.timestamp(c).toInstant(), zone)},
+        { Timestamp(it.toInstant().toEpochMilli()) }
+)
+
+/**
+ * Note: the zone is not stored in the database and will be lost. When reading the offset will
+ * be set based on the zone id given to the converter on construction.
+ */
+class ZonedDateTimeConverter(val zone: ZoneId = ZoneId.systemDefault()) : SimpleConverter<ZonedDateTime>(
+        { row, c -> ZonedDateTime.ofInstant(row.timestamp(c).toInstant(), zone)},
+        { Timestamp(it.toInstant().toEpochMilli()) }
 )
 
 /**

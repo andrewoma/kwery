@@ -41,17 +41,21 @@ data class TimeTypes(
         val localDate: LocalDate,
         val localTime: LocalTime,
         val instant: Instant,
-        val duration: Duration
+        val duration: Duration,
+        val offsetDateTime: OffsetDateTime,
+        val zonedDateTime: ZonedDateTime
 )
 
 object timeTypesTable : Table<TimeTypes, Int>(timeTableName) {
     // @formatter:off
-    val Id               by col(TimeTypes::id, id = true)
-    val LocalDateTimeCol by col(TimeTypes::localDateTime)
-    val LocalDateCol     by col(TimeTypes::localDate)
-    val LocalTimeCol     by col(TimeTypes::localTime)
-    val InstantCol       by col(TimeTypes::instant)
-    val DurationCol      by col(TimeTypes::duration)
+    val Id                by col(TimeTypes::id, id = true)
+    val LocalDateTimeCol  by col(TimeTypes::localDateTime)
+    val LocalDateCol      by col(TimeTypes::localDate)
+    val LocalTimeCol      by col(TimeTypes::localTime)
+    val InstantCol        by col(TimeTypes::instant)
+    val DurationCol       by col(TimeTypes::duration)
+    val OffsetDateTimeCol by col(TimeTypes::offsetDateTime)
+    val ZonedDateTimeCol  by col(TimeTypes::zonedDateTime)
     // @formatter:on
 
     override fun idColumns(id: Int) = setOf(Id of id)
@@ -62,7 +66,9 @@ object timeTypesTable : Table<TimeTypes, Int>(timeTableName) {
             value of LocalDateCol,
             value of LocalTimeCol,
             value of InstantCol,
-            value of DurationCol
+            value of DurationCol,
+            value of OffsetDateTimeCol,
+            value of ZonedDateTimeCol
     )
 }
 
@@ -74,12 +80,14 @@ class TimeConvertersMappingTest : AbstractSessionTest() {
         initialise(this.javaClass.simpleName) {
             session.update("""
                 create table $timeTableName(
-                     id                  int,
-                     local_date_time_col timestamp,
-                     local_date_col      date,
-                     local_time_col      time,
-                     instant_col         timestamp,
-                     duration_col        decimal(28,9) not null
+                     id                   int,
+                     local_date_time_col  timestamp,
+                     local_date_col       date,
+                     local_time_col       time,
+                     instant_col          timestamp,
+                     duration_col         decimal(28,9),
+                     offset_date_time_col timestamp,
+                     zoned_date_time_col  timestamp
                 )
             """)
         }
@@ -93,7 +101,9 @@ class TimeConvertersMappingTest : AbstractSessionTest() {
                 LocalDate.now(),
                 LocalTime.now().withNano(0),
                 Instant.now(),
-                Duration.ofDays(22)
+                Duration.ofDays(22),
+                OffsetDateTime.now(),
+                ZonedDateTime.now()
         ))
         val fetched = dao.findById(1)
         assertEquals(inserted, fetched)

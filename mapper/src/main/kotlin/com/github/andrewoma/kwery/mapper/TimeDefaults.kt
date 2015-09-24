@@ -30,6 +30,8 @@ val timeDefaults: Map<KType, *> = listOf(
         reifiedValue(LocalDate.now()),
         reifiedValue(LocalDateTime.now()),
         reifiedValue(Duration.ZERO),
-        reifiedValue(Instant.now())
+        reifiedValue(Instant.now()),
+        reifiedValue(OffsetDateTime.now()),
+        reifiedValue(ZonedDateTime.now())
 ).toMap()
 
