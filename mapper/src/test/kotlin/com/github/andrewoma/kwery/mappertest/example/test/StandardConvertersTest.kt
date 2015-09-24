@@ -23,10 +23,7 @@
 package com.github.andrewoma.kwery.mappertest.example.test
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.mapper.AbstractDao
-import com.github.andrewoma.kwery.mapper.IdStrategy
-import com.github.andrewoma.kwery.mapper.Table
-import com.github.andrewoma.kwery.mapper.Value
+import com.github.andrewoma.kwery.mapper.*
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import com.github.andrewoma.kwery.mappertest.example.tableConfig
 import org.junit.Before
@@ -66,7 +63,10 @@ data class Standard(
         val optTimestamp: Timestamp?,
         val optDate: Date?,
         val optTime: Time?,
-        val optBytes: ByteArray?
+        val optBytes: ByteArray?,
+        val blob: ByteArray,
+        val clob: String,
+        val intArray: List<Int>
 )
 
 object standardTable : Table<Standard, Int>(table, tableConfig) {
@@ -97,6 +97,9 @@ object standardTable : Table<Standard, Int>(table, tableConfig) {
     val OptDateCol         by col(Standard::optDate)
     val OptTimeCol         by col(Standard::optTime)
     val OptBytesCol        by col(Standard::optBytes)
+    val BlobCol            by col(Standard::blob, converter = blobConverter)
+    val ClobCol            by col(Standard::clob, converter = clobConverter)
+    val IntArrayCol        by col(Standard::intArray, converter = ArrayConverter<Int>("int"))
     // @formatter:on
 
     override fun idColumns(id: Int) = setOf(IntCol of id)
@@ -127,7 +130,10 @@ object standardTable : Table<Standard, Int>(table, tableConfig) {
             value of OptTimestampCol,
             value of OptDateCol,
             value of OptTimeCol,
-            value of OptBytesCol
+            value of OptBytesCol,
+            value of BlobCol,
+            value of ClobCol,
+            value of IntArrayCol
     )
 }
 
@@ -165,6 +171,9 @@ class StandardConvertersTest : AbstractSessionTest() {
                      opt_date_col      date,
                      opt_time_col      time,
                      opt_bytes_col     blob,
+                     blob_col          blob,
+                     clob_col          clob,
+                     int_array_col     int array,
                 )
             """)
         }
@@ -177,7 +186,8 @@ class StandardConvertersTest : AbstractSessionTest() {
                 true, 1, 2, 3, 4, 5.0f, 6.0, BigDecimal("23.450000000"), "string", Timestamp.from(now),
                 Date.valueOf("2015-2-3"), Time.valueOf("13:01:02"), "ab".toByteArray(Charsets.US_ASCII),
                 true, 1, 2, 3, 4, 5.0f, 6.0, BigDecimal("23.450000000"), "string", Timestamp.from(now),
-                Date.valueOf("2015-2-3"), Time.valueOf("13:01:02"), "ab".toByteArray(Charsets.US_ASCII)
+                Date.valueOf("2015-2-3"), Time.valueOf("13:01:02"), "ab".toByteArray(Charsets.US_ASCII),
+                "blob".toByteArray(Charsets.US_ASCII), "clob", listOf(1, 2, 3)
         ))
         val fetched = dao.findById(3)
         assertEquals(inserted, fetched)

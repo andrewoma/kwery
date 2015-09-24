@@ -229,11 +229,16 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
         return (if (type.isMarkedNullable) optional(converter!! as Converter<Any>) else converter) as Converter<T>
     }
 
+    @Suppress("UNCHECKED_CAST")
     protected fun <T> default(type: KType): T {
         if (type.isMarkedNullable) return null as T
         val value = config.defaults[type]
+
+        // TODO ... find a more elegant solution for defaulting lists for array types
+        if (value == null && type.toString().startsWith("kotlin.List<")) {
+            return emptyList<Any?>() as T
+        }
         checkNotNull(value) { "Default value undefined for type $type" }
-        @Suppress("UNCHECKED_CAST")
         return value as T
     }
 
