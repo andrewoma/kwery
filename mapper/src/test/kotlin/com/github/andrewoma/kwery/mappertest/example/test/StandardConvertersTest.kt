@@ -31,6 +31,11 @@ import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import com.github.andrewoma.kwery.mappertest.example.tableConfig
 import org.junit.Before
 import org.junit.Test
+import java.math.BigDecimal
+import java.sql.Date
+import java.sql.Time
+import java.sql.Timestamp
+import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
 private val table = "standard_converters"
@@ -42,7 +47,26 @@ data class Standard(
         val int: Int,
         val long: Long,
         val float: Float,
-        val double: Double
+        val double: Double,
+        val decimal: BigDecimal,
+        val string: String,
+        val timestamp: Timestamp,
+        val date: Date,
+        val time: Time,
+        val bytes: ByteArray,
+        val optBoolean: Boolean?,
+        val optByte: Byte?,
+        val optShort: Short?,
+        val optInt: Int?,
+        val optLong: Long?,
+        val optFloat: Float?,
+        val optDouble: Double?,
+        val optDecimal: BigDecimal?,
+        val optString: String?,
+        val optTimestamp: Timestamp?,
+        val optDate: Date?,
+        val optTime: Time?,
+        val optBytes: ByteArray?
 )
 
 object standardTable : Table<Standard, Int>(table, tableConfig) {
@@ -54,18 +78,60 @@ object standardTable : Table<Standard, Int>(table, tableConfig) {
     val LongCol            by col(Standard::long)
     val FloatCol           by col(Standard::float)
     val DoubleCol          by col(Standard::double)
+    val DecimalCol         by col(Standard::decimal)
+    val StringCol          by col(Standard::string)
+    val TimestampCol       by col(Standard::timestamp)
+    val DateCol            by col(Standard::date)
+    val TimeCol            by col(Standard::time)
+    val BytesCol           by col(Standard::bytes)
+    val OptBooleanCol      by col(Standard::optBoolean)
+    val OptByteCol         by col(Standard::optByte)
+    val OptShortCol        by col(Standard::optShort)
+    val OptIntCol          by col(Standard::optInt)
+    val OptLongCol         by col(Standard::optLong)
+    val OptFloatCol        by col(Standard::optFloat)
+    val OptDoubleCol       by col(Standard::optDouble)
+    val OptDecimalCol      by col(Standard::optDecimal)
+    val OptStringCol       by col(Standard::optString)
+    val OptTimestampCol    by col(Standard::optTimestamp)
+    val OptDateCol         by col(Standard::optDate)
+    val OptTimeCol         by col(Standard::optTime)
+    val OptBytesCol        by col(Standard::optBytes)
     // @formatter:on
 
     override fun idColumns(id: Int) = setOf(IntCol of id)
 
-    override fun create(value: Value<Standard>): Standard = Standard(value of BooleanCol, value of ByteCol,
-            value of ShortCol, value of IntCol, value of LongCol,
-            value of FloatCol, value of DoubleCol)
+    override fun create(value: Value<Standard>): Standard = Standard(
+            value of BooleanCol,
+            value of ByteCol,
+            value of ShortCol,
+            value of IntCol,
+            value of LongCol,
+            value of FloatCol,
+            value of DoubleCol,
+            value of DecimalCol,
+            value of StringCol,
+            value of TimestampCol,
+            value of DateCol,
+            value of TimeCol,
+            value of BytesCol,
+            value of OptBooleanCol,
+            value of OptByteCol,
+            value of OptShortCol,
+            value of OptIntCol,
+            value of OptLongCol,
+            value of OptFloatCol,
+            value of OptDoubleCol,
+            value of OptDecimalCol,
+            value of OptStringCol,
+            value of OptTimestampCol,
+            value of OptDateCol,
+            value of OptTimeCol,
+            value of OptBytesCol
+    )
 }
 
-
-class StandardDao(session: Session) : AbstractDao<Standard, Int>(session, standardTable, { it.int }, null, IdStrategy.Explicit) {
-}
+class StandardDao(session: Session) : AbstractDao<Standard, Int>(session, standardTable, { it.int }, null, IdStrategy.Explicit)
 
 class StandardConvertersTest : AbstractSessionTest() {
 
@@ -73,13 +139,32 @@ class StandardConvertersTest : AbstractSessionTest() {
         initialise(this.javaClass.simpleName) {
             session.update("""
                 create table $table(
-                     boolean_col boolean,
-                     byte_col    int,
-                     short_col   int,
-                     int_col     int,
-                     long_col    bigint,
-                     float_col   float,
-                     double_col  double,
+                     boolean_col   boolean not null,
+                     byte_col      int not null,
+                     short_col     int not null,
+                     int_col       int not null,
+                     long_col      bigint not null,
+                     float_col     float not null,
+                     double_col    double not null,
+                     decimal_col   decimal(28,9) not null,
+                     string_col    varchar(256) not null,
+                     timestamp_col timestamp not null,
+                     date_col      date not null,
+                     time_col      time not null,
+                     bytes_col     blob not null,
+                     opt_boolean_col   boolean,
+                     opt_byte_col      int,
+                     opt_short_col     int,
+                     opt_int_col       int,
+                     opt_long_col      bigint,
+                     opt_float_col     float,
+                     opt_double_col    double,
+                     opt_decimal_col   decimal(28,9),
+                     opt_string_col    varchar(256),
+                     opt_timestamp_col timestamp,
+                     opt_date_col      date,
+                     opt_time_col      time,
+                     opt_bytes_col     blob,
                 )
             """)
         }
@@ -87,7 +172,13 @@ class StandardConvertersTest : AbstractSessionTest() {
 
     @Test fun `should map standard values`() {
         val dao = StandardDao(session)
-        val inserted = dao.insert(Standard(true, 1, 2, 3, 4, 5.0f, 6.0))
+        val now = ZonedDateTime.now().withNano(0).toInstant()
+        val inserted = dao.insert(Standard(
+                true, 1, 2, 3, 4, 5.0f, 6.0, BigDecimal("23.450000000"), "string", Timestamp.from(now),
+                Date.valueOf("2015-2-3"), Time.valueOf("13:01:02"), "ab".toByteArray(Charsets.US_ASCII),
+                true, 1, 2, 3, 4, 5.0f, 6.0, BigDecimal("23.450000000"), "string", Timestamp.from(now),
+                Date.valueOf("2015-2-3"), Time.valueOf("13:01:02"), "ab".toByteArray(Charsets.US_ASCII)
+        ))
         val fetched = dao.findById(3)
         assertEquals(inserted, fetched)
     }

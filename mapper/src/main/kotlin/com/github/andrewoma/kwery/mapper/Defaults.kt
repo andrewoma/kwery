@@ -23,6 +23,9 @@
 package com.github.andrewoma.kwery.mapper
 
 import java.math.BigDecimal
+import java.sql.Date
+import java.sql.Time
+import java.sql.Timestamp
 import kotlin.reflect.KType
 import kotlin.reflect.defaultType
 
@@ -36,7 +39,11 @@ val standardDefaults: Map<KType, *> = listOf(
         reifiedValue(0.toFloat()),
         reifiedValue(0.toDouble()),
         reifiedValue(BigDecimal(0)),
-        reifiedValue("")
+        reifiedValue(""),
+        reifiedValue(Timestamp(0)),
+        reifiedValue(Date(0)),
+        reifiedValue(Time(0)),
+        reifiedValue(ByteArray(0))
 ).toMap()
 
 inline fun <reified T : Any> reifiedValue(default: T): Pair<KType, T> = T::class.defaultType to default
