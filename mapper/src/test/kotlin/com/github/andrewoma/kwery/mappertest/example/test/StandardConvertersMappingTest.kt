@@ -25,7 +25,6 @@ package com.github.andrewoma.kwery.mappertest.example.test
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.*
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
-import com.github.andrewoma.kwery.mappertest.example.tableConfig
 import org.junit.Before
 import org.junit.Test
 import java.math.BigDecimal
@@ -35,7 +34,7 @@ import java.sql.Timestamp
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
 
-private val table = "standard_converters"
+private val table = "standard_mapping"
 
 data class Standard(
         val boolean: Boolean,
@@ -69,7 +68,7 @@ data class Standard(
         val intArray: List<Int>
 )
 
-object standardTable : Table<Standard, Int>(table, tableConfig) {
+object standardTable : Table<Standard, Int>(table) {
     // @formatter:off
     val BooleanCol         by col(Standard::boolean)
     val ByteCol            by col(Standard::byte)
@@ -139,7 +138,7 @@ object standardTable : Table<Standard, Int>(table, tableConfig) {
 
 class StandardDao(session: Session) : AbstractDao<Standard, Int>(session, standardTable, { it.int }, null, IdStrategy.Explicit)
 
-class StandardConvertersTest : AbstractSessionTest() {
+class StandardConvertersMappingTest : AbstractSessionTest() {
 
     @Before fun before() {
         initialise(this.javaClass.simpleName) {

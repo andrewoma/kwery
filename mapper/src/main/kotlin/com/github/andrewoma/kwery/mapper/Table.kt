@@ -115,7 +115,7 @@ class TableConfiguration(
          * Defines default values for types when the column is not null, but is not selected.
          * Defaults to `standardDefaults`
          */
-        val defaults: Map<KType, *> = standardDefaults,
+        val defaults: Map<KType, *> = standardDefaults + timeDefaults,
 
         /**
          * Defines converters from JDBC types to arbitrary Kotlin types.
