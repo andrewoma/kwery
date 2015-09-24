@@ -55,8 +55,9 @@ val standardConverters: Map<Class<*>, Converter<*>> = listOf(
         java.lang.Byte.TYPE to byteConverter,
         java.lang.Short.TYPE to shortConverter,
         java.lang.Integer.TYPE to intConverter,
+        java.lang.Long.TYPE to longConverter,
         java.lang.Float.TYPE to floatConverter,
-        java.lang.Double.TYPE to floatConverter
+        java.lang.Double.TYPE to doubleConverter
 )
 
 inline fun <reified T : Any> reifiedConverter(converter: Converter<T>): Pair<Class<*>, Converter<T>> {
