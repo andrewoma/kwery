@@ -37,13 +37,13 @@ private val timeTableName = "time_mapping"
 
 data class TimeTypes(
         val id: Int,
-        val localDateTime: LocalDateTime,
-        val localDate: LocalDate,
-        val localTime: LocalTime,
-        val instant: Instant,
-        val duration: Duration,
-        val offsetDateTime: OffsetDateTime,
-        val zonedDateTime: ZonedDateTime
+        val localDateTime: LocalDateTime = LocalDateTime.now(),
+        val localDate: LocalDate = LocalDate.now(),
+        val localTime: LocalTime = LocalTime.now().withNano(0),
+        val instant: Instant = Instant.now(),
+        val duration: Duration = Duration.ofDays(22),
+        val offsetDateTime: OffsetDateTime = OffsetDateTime.now(),
+        val zonedDateTime: ZonedDateTime = ZonedDateTime.now()
 )
 
 object timeTypesTable : Table<TimeTypes, Int>(timeTableName) {
@@ -75,8 +75,10 @@ object timeTypesTable : Table<TimeTypes, Int>(timeTableName) {
 class TimeTypesDao(session: Session) : AbstractDao<TimeTypes, Int>(session, timeTypesTable, { it.id }, null, IdStrategy.Explicit)
 
 class TimeConvertersMappingTest : AbstractSessionTest() {
+    lateinit var dao: TimeTypesDao
 
     @Before fun before() {
+        dao = TimeTypesDao(session)
         initialise(this.javaClass.simpleName) {
             session.update("""
                 create table $timeTableName(
@@ -91,21 +93,36 @@ class TimeConvertersMappingTest : AbstractSessionTest() {
                 )
             """)
         }
+        session.update("delete from $timeTableName")
     }
 
     @Test fun `should map time values`() {
-        val dao = TimeTypesDao(session)
-        val inserted = dao.insert(TimeTypes(
-                1,
-                LocalDateTime.now(),
-                LocalDate.now(),
-                LocalTime.now().withNano(0),
-                Instant.now(),
-                Duration.ofDays(22),
-                OffsetDateTime.now(),
-                ZonedDateTime.now()
-        ))
+        val inserted = dao.insert(TimeTypes(id = 1))
         val fetched = dao.findById(1)
         assertEquals(inserted, fetched)
+    }
+
+    @Test fun `should preserve instant for OffsetDataTime`() {
+        val now = OffsetDateTime.now(ZoneId.systemDefault())
+        dao.insert(TimeTypes(id = 1, offsetDateTime = now.withOffsetSameInstant(ZoneOffset.UTC)))
+        dao.insert(TimeTypes(id = 2, offsetDateTime = now.withOffsetSameInstant(ZoneOffset.MAX)))
+
+        val fetched = dao.findAll()
+        assertEquals(2, fetched.size())
+        for (time in fetched) {
+            assertEquals(now, time.offsetDateTime)
+        }
+    }
+
+    @Test fun `should preserve instant for ZonedDataTime`() {
+        val now = ZonedDateTime.now(ZoneId.systemDefault())
+        dao.insert(TimeTypes(id = 1, zonedDateTime = now.withZoneSameInstant(ZoneOffset.UTC)))
+        dao.insert(TimeTypes(id = 2, zonedDateTime = now.withZoneSameInstant(ZoneOffset.MAX)))
+
+        val fetched = dao.findAll()
+        assertEquals(2, fetched.size())
+        for (time in fetched) {
+            assertEquals(now, time.zonedDateTime)
+        }
     }
 }
