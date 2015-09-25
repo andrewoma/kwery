@@ -32,7 +32,7 @@ import com.github.andrewoma.kwery.example.film.model.Language as L
 object languageTable : Table<L, Int>("language", tableConfig), VersionedWithInt {
     // @formatter:off
     val Id      by col(L::id,      id = true)
-    val Name    by col(L::name,    notNull = true)
+    val Name    by col(L::name)
     val Version by col(L::version, version = true)
     // @formatter:on
 

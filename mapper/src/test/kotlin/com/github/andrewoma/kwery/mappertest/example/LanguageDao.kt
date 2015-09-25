@@ -32,7 +32,7 @@ import com.github.andrewoma.kwery.mappertest.example.Language as L
 object languageTable : Table<L, Int>("language", tableConfig), VersionedWithTimestamp {
     // @formatter:off
     val LanguageId by col(L::id,         id = true)
-    val Name       by col(L::name,       notNull = true)
+    val Name       by col(L::name)
     val LastUpdate by col(L::lastUpdate, version = true)
     // @formatter:on
 

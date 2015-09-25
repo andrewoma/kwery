@@ -31,12 +31,12 @@ import com.github.andrewoma.kwery.mappertest.example.Film as F
 object filmTable : Table<F, Int>("film", tableConfig), VersionedWithTimestamp {
     // @formatter:off
     val FilmId             by col(F::id,               id = true)
-    val Title              by col(F::title,            notNull = true)
+    val Title              by col(F::title)
     val ReleaseYear        by col(F::releaseYear)
-    val LanguageId         by col(F::language,         notNull = true)
+    val LanguageId         by col(F::language)
     val OriginalLanguageId by col(F::originalLanguage)
     val Length             by col(F::duration,         converter = optional(DurationConverter(ChronoUnit.SECONDS)))
-    val Rating             by col(F::rating,           notNull = true)
+    val Rating             by col(F::rating)
     val LastUpdate         by col(F::lastUpdate,       version = true)
     val SpecialFeatures    by col(F::specialFeatures,  default = listOf<String>(), converter = ArrayConverter<String>("varchar"))
     // @formatter:on

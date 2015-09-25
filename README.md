@@ -45,8 +45,8 @@ class Actor(val id: Int, val name: Name, val lastUpdate: LocalDateTime)
 // Conversions default to those defined in the configuration but may be overridden
 object actorTable : Table<Actor, Int>("actor"), VersionedWithTimestamp {
     val ActorId    by col(Actor::id,                     id = true)
-    val FirstName  by col(Name::firstName, { it.name },  notNull = true)
-    val LastName   by col(Name::lastName,  { it.name },  notNull = true)
+    val FirstName  by col(Name::firstName, { it.name })
+    val LastName   by col(Name::lastName,  { it.name })
     val LastUpdate by col(Actor::lastUpdate,             version = true)
 
     override fun idColumns(id: Int) = setOf(ActorId of id)

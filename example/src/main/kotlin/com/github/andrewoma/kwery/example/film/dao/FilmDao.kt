@@ -32,13 +32,13 @@ import com.github.andrewoma.kwery.example.film.model.Film as F
 object filmTable : Table<F, Int>("film", tableConfig), VersionedWithInt {
     // @formatter:off
     val Id                 by col(F::id,               id = true)
-    val Title              by col(F::title,            notNull = true)
-    val Description        by col(F::description,      notNull = true)
-    val ReleaseYear        by col(F::releaseYear,      notNull = true)
-    val LanguageId         by col(F::language,         notNull = true)
+    val Title              by col(F::title)
+    val Description        by col(F::description)
+    val ReleaseYear        by col(F::releaseYear)
+    val LanguageId         by col(F::language)
     val OriginalLanguageId by col(F::originalLanguage)
     val Length             by col(F::duration,         converter = optional(DurationConverter(ChronoUnit.SECONDS)))
-    val Rating             by col(F::rating,           notNull = true)
+    val Rating             by col(F::rating)
     val Version            by col(F::version,          version = true)
     val SpecialFeatures    by col(F::specialFeatures,  default = listOf<String>(), converter = ArrayConverter<String>("varchar"))
     // @formatter:on

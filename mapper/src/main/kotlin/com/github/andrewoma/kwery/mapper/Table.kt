@@ -190,7 +190,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
     fun <R> col(property: KProperty1<T, R>,
                 id: Boolean = false,
                 version: Boolean = false,
-                notNull: Boolean = id || version,
+                notNull: Boolean = !property.returnType.isMarkedNullable,
                 default: R = default(property.returnType),
                 converter: Converter<R> = converter(property.returnType),
                 name: String? = null,
