@@ -45,7 +45,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         dao = FilmDao(session)
         filmActorDao = FilmActorDao(session)
         graphFetcher = createFilmFetcher(session)
-        super<AbstractFilmDaoTest>.afterSessionSetup()
+        super.afterSessionSetup()
     }
 
     override val data by lazy(LazyThreadSafetyMode.NONE) {

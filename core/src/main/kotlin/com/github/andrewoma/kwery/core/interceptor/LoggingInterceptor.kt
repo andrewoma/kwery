@@ -94,7 +94,7 @@ open class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingI
             else -> ". Rows affected: ${count.reduce { sum, i -> sum + i }} (${count.joinToString(", ")})"
         }
 
-        val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.executedTiming} ($closedTiming)${rowCount}"
+        val timing = "${statement.options.name ?: "statement"} ${batch}in ${context.executedTiming} ($closedTiming)$rowCount"
         val message = if (context.exception == null) {
             "\nSuccessfully executed $timing"
         } else {

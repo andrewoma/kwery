@@ -35,7 +35,7 @@ class FilmApplicationAcceptanceTest {
                 DropwizardAppRule(FilmApplication::class.java, ResourceHelpers.resourceFilePath("dev.yml"))
     }
 
-    fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.localPort}${url}")
+    fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.localPort}$url")
 
     @Test fun `Actors should find Scarlett`() {
 

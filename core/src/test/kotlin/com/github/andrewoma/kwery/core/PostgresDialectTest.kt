@@ -27,7 +27,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class PostgresDialectTest : AbstractDialectTest(postgresDataSource, PostgresDialect()) {
-    //language=SQL
+    //language=PostgreSQL
     override val sql = """
             drop table if exists dialect_test;
 

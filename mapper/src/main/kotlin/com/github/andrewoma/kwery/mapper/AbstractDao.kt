@@ -130,13 +130,13 @@ abstract class AbstractDao<T : Any, ID : Any>(
         val newMap = table.objectMap(session, result, table.dataColumns)
 
         val versionCol = versionColumn.name
-        val oldVersionParam = "old__${versionCol}"
+        val oldVersionParam = "old__$versionCol"
 
         fun delta(): Pair<String, Map<String, Any?>> {
             val differences = difference(oldMap, newMap)
             val sql = sql(name to differences) {
-                val columns = differences.keySet().map { "${it} = :${it}" }.joinToString(", ")
-                "update ${table.name}\nset $columns \nwhere ${table.idColumns.equate(" and ")} and ${versionCol} = :$oldVersionParam"
+                val columns = differences.keySet().map { "$it = :$it" }.joinToString(", ")
+                "update ${table.name}\nset $columns \nwhere ${table.idColumns.equate(" and ")} and $versionCol = :$oldVersionParam"
             }
             val parameters = hashMapOfExpectedSize<String, Any?>(differences.size() + table.idColumns.size() + 1)
             parameters.putAll(differences)
@@ -147,7 +147,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         fun full(): Pair<String, HashMap<String, Any?>> {
             val sql = sql(name) {
-                "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and ${versionCol} = :$oldVersionParam"
+                "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and $versionCol = :$oldVersionParam"
             }
             val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size() + table.idColumns.size() + 1)
             parameters.putAll(newMap)
@@ -212,7 +212,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
-            check(count == values.size()) { "${name} inserted $count rows, but expected ${values.size()}" }
+            check(count == values.size()) { "$name inserted $count rows, but expected ${values.size()}" }
 
             values.zip(list.map { it.second }).map {
                 val (value, idValue) = it
@@ -221,7 +221,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
         } else {
             val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name))
             val count = counts.fold(0) { sum, value -> sum + value }
-            check(count == values.size()) { "${name} inserted $count rows, but expected ${values.size()}" }
+            check(count == values.size()) { "$name inserted $count rows, but expected ${values.size()}" }
             values
         }
 
@@ -240,13 +240,13 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         val (count, inserted) = if (generateKeys) {
             val (count, key) = session.insert(sql, parameters, options(name), { table.rowMapper(table.idColumns, nf)(it) })
-            check(count == 1) { "${name} failed to insert any rows" }
+            check(count == 1) { "$name failed to insert any rows" }
             count to table.copy(value, table.idColumns(id(key)).toMap()) // Generated key
         } else {
             val count = session.update(sql, parameters, options(name))
             count to value
         }
-        check(count == 1) { "${name} failed to insert any rows" }
+        check(count == 1) { "$name failed to insert any rows" }
 
         fireEvent(listOf(InsertEvent(table, id(inserted), inserted)))
 
@@ -306,7 +306,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         val counts = session.batchUpdate(sql, updates, options(name))
 
-        check(counts.size() == values.size()) { "${name} updated ${counts.size()} rows, but expected ${values.size()}" }
+        check(counts.size() == values.size()) { "$name updated ${counts.size()} rows, but expected ${values.size()}" }
 
         for ((i, count) in counts.withIndex()) {
             check(count == 1) { "Batch update failed to update row with id ${id(values[i])}" }
@@ -326,7 +326,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
         require(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
         val versionColumn = table.versionColumn!!
         val versionCol = versionColumn.name
-        val oldVersionParam = "old__${versionCol}"
+        val oldVersionParam = "old__$versionCol"
 
         val updates = values.map {
             val (old, new) = it
@@ -346,11 +346,11 @@ abstract class AbstractDao<T : Any, ID : Any>(
         }
 
         val sql = sql(name) {
-            "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and ${versionCol} = :$oldVersionParam"
+            "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and $versionCol = :$oldVersionParam"
         }
 
         val counts = session.batchUpdate(sql, updates.map { it.first }, options(name))
-        check(counts.size() == values.size()) { "${name} updated ${counts.size()} rows, but expected ${values.size()}" }
+        check(counts.size() == values.size()) { "$name updated ${counts.size()} rows, but expected ${values.size()}" }
         for ((count, value) in counts.zip(values)) {
             if (count == 0) {
                 throw OptimisticLockException("The same version (${version(value.first)}) of ${table.name} with id ${id(value.first)} has been updated by another transaction")

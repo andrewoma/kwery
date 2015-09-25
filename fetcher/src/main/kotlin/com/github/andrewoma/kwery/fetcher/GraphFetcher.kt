@@ -130,8 +130,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
                 for (value in values) {
                     for ((property, node) in properties) {
                         val id = property.id(value.get())
-                        val existing = fetched[property.type]?.get(id)
-                        if (existing == null) continue // May happen if the object was deleted.
+                        val existing = fetched[property.type]?.get(id) ?: continue // Continue if the object was deleted.
 
                         // Apply the fetched object to it's containing object
                         debug { println("$indent Applying value: $existing") }

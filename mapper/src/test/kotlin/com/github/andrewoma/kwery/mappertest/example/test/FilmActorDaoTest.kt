@@ -32,7 +32,7 @@ class FilmActorDaoTest : AbstractFilmDaoTest<FilmActor, FilmActor.Id, FilmActorD
 
     override fun afterSessionSetup() {
         dao = FilmActorDao(session)
-        super<AbstractFilmDaoTest>.afterSessionSetup()
+        super.afterSessionSetup()
         dao.session.update("delete from ${dao.table.name}")
     }
 

@@ -38,6 +38,7 @@ open class RowTest : AbstractSessionTest() {
     }
 
     override fun afterSessionSetup() {
+        //language=SQL
         val sql = """
             create table row_test (
                 int_col int,
@@ -61,7 +62,7 @@ open class RowTest : AbstractSessionTest() {
             insert into row_test(int_col, boolean_col, decimal_col, double_col, time_col, date_col, timestamp_col,
                     binary_col, varchar_col, blob_col, clob_col, array_col)
                 values(1, true, 2.1, 3.1, '13:01:02', '2014-12-01', '2013-11-02 12:00:02.33', X'4142',
-                    'varchar', X'4243', 'clob', ARRAY[1, 2])
+                    'varchar', X'4243', 'clob', array[1, 2])
         """
         if (!initialised) {
             for (statement in sql.split(";".toRegex())) {

@@ -32,7 +32,7 @@ class LanguageDaoTest : AbstractFilmDaoTest<Language, Int, LanguageDao>() {
 
     override fun afterSessionSetup() {
         dao = LanguageDao(session)
-        super<AbstractFilmDaoTest>.afterSessionSetup()
+        super.afterSessionSetup()
     }
 
     override val data = listOf(

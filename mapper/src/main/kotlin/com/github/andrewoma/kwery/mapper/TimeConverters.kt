@@ -114,7 +114,7 @@ class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
                 DAYS -> duration.toDays()
                 else -> throw UnsupportedOperationException("") // Not possible
             }
-            require(duration == Duration.of(converted, unit)) { "${duration} must be a whole number of ${unit} and not overflow a Long" }
+            require(duration == Duration.of(converted, unit)) { "$duration must be a whole number of $unit and not overflow a Long" }
             converted
         }
 ) {
