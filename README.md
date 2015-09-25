@@ -174,6 +174,10 @@ Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7
 * Renamed ThreadLocalSession to ManagedThreadLocalSession and introduced a new ThreadLocalSession for
   use without interceptors and annotations.
 
+`0.4` Compatible with Kotlin M13:
+* Provide a consistent set of defaults and converters for mapping standard types
+* Add defaults and converters for OffsetDateTime and ZonedDateTime
+
 #### Building
 
 ```bash
