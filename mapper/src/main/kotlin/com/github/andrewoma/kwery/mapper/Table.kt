@@ -26,10 +26,13 @@ import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 import com.github.andrewoma.kwery.core.Row
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
+import java.lang.reflect.ParameterizedType
 import java.util.*
 import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
+import kotlin.reflect.defaultType
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -234,13 +237,16 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
         if (type.isMarkedNullable) return null as T
         val value = config.defaults[type]
 
-        // TODO ... find a more elegant solution for defaulting lists for array types
-        if (value == null && type.toString().startsWith("kotlin.List<")) {
+        if (value == null && type.isErasedType(List::class)) {
             return emptyList<Any?>() as T
         }
+
         checkNotNull(value) { "Default value undefined for type $type" }
         return value as T
     }
+
+    private fun KType.isErasedType(clazz: KClass<*>)
+            = this.javaType is ParameterizedType && (this.javaType as ParameterizedType).rawType == clazz.defaultType.javaType
 
     fun copy(value: T, properties: Map<Column<T, *>, *>): T {
         return create(object : Value<T> {
