@@ -44,10 +44,10 @@ class Actor(val id: Int, val name: Name, val lastUpdate: LocalDateTime)
 // A table object defines the mapping between columns and models
 // Conversions default to those defined in the configuration but may be overridden
 object actorTable : Table<Actor, Int>("actor"), VersionedWithTimestamp {
-    val ActorId    by col(Actor::id,                     id = true)
+    val ActorId    by col(Actor::id, id = true)
     val FirstName  by col(Name::firstName, { it.name })
-    val LastName   by col(Name::lastName,  { it.name })
-    val LastUpdate by col(Actor::lastUpdate,             version = true)
+    val LastName   by col(Name::lastName, { it.name })
+    val LastUpdate by col(Actor::lastUpdate, version = true)
 
     override fun idColumns(id: Int) = setOf(ActorId of id)
 
