@@ -178,6 +178,8 @@ Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7
 * Provide a consistent set of defaults and converters for mapping standard types
 * Add defaults and converters for OffsetDateTime and ZonedDateTime
 
+`0.5` Compatible with Kotlin M14.
+
 #### Building
 
 ```bash
