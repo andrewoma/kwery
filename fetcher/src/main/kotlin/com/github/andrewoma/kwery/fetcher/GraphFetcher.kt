@@ -247,7 +247,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
 
     fun findMatchingType(obj: Any): Type<*, *> {
         val type = typeCache.getOrPut(obj.javaClass) { types.firstOrNull { it.supports(obj) } ?: noType }
-        require(type != noType) { "Unknown type: ${obj.javaClass.getName()}" }
+        require(type != noType) { "Unknown type: ${obj.javaClass.name}" }
         return type
     }
 }

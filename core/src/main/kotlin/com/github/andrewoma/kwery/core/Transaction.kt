@@ -87,7 +87,7 @@ internal class DefaultTransaction(val session: DefaultSession) : ManualTransacti
 
     override var rollbackOnly: Boolean = false // Can only set to true, can never unset
         set(value) {
-            if (value) $rollbackOnly = value
+            if (value) field = value
         }
 
     override fun commit() {

@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 interface Cache<K, V : Any> {
-    fun get(key: K): V?
+    operator fun get(key: K): V?
     fun getOrPut(key: K, ifAbsent: (K) -> V): V
 }
 

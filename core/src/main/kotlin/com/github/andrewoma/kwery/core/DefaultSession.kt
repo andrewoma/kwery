@@ -61,7 +61,7 @@ class DefaultSession(override val connection: Connection,
     override val currentTransaction: Transaction?
         get() = transaction
 
-    internal var transaction: Transaction? = null
+    /*internal*/var transaction: Transaction? = null
 
     override fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->

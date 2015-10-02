@@ -31,10 +31,14 @@ interface Listener {
     fun onEvent(session: Session, events: List<Event>)
 }
 
-open class Event(val table: Table<*, *>, val id: Any)
-data class InsertEvent(table: Table<*, *>, id: Any, val value: Any) : Event(table, id)
-data class DeleteEvent(table: Table<*, *>, id: Any, val value: Any?) : Event(table, id)
-data class UpdateEvent(table: Table<*, *>, id: Any, val new: Any?, val old: Any?) : Event(table, id)
+interface Event {
+    val table: Table<*, *>
+    val id: Any
+}
+
+data class InsertEvent(override val table: Table<*, *>, override val id: Any, val value: Any) : Event
+data class DeleteEvent(override val table: Table<*, *>, override val id: Any, val value: Any?) : Event
+data class UpdateEvent(override val table: Table<*, *>, override val id: Any, val new: Any?, val old: Any?) : Event
 
 abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
     private val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()

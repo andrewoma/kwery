@@ -30,7 +30,7 @@ private class AllDescendants : Node("**", setOf()) {
     override fun toString() = name
 }
 
-open data class Node protected constructor(val name: String, val children: Set<Node>) {
+open class Node protected constructor(val name: String, val children: Set<Node>) {
     companion object {
         val all: Node = Node("*", setOf())
         val allDescendants: Node = AllDescendants()
@@ -84,7 +84,15 @@ open data class Node protected constructor(val name: String, val children: Set<N
 
     private fun buildChildrenByName() = children.map { it.name to it }.toMap()
 
-    open fun get(name: String) = if (allNode != null) allNode else childrenByName[name]
+    operator open fun get(name: String) = if (allNode != null) allNode else childrenByName[name]
+
+    override fun equals(other: Any?) = when {
+        this === other -> true
+        other is Node ->  name == other.name && children == other.children
+        else -> false
+    }
+
+    override fun hashCode() = 31 * name.hashCode() + children.hashCode()
 
     override fun toString(): String {
         val isRoot = name == ""

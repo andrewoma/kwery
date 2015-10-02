@@ -32,6 +32,7 @@ import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
 import java.time.ZonedDateTime
+import java.util.*
 import kotlin.test.assertEquals
 
 private val table = "standard_mapping"
@@ -66,7 +67,40 @@ data class Standard(
         val blob: ByteArray,
         val clob: String,
         val intArray: List<Int>
-)
+) {
+    override fun hashCode() = int
+
+    override fun equals(other: Any?) = other is Standard
+            && other.boolean == boolean
+            && other.byte == byte
+            && other.short == short
+            && other.int == int
+            && other.long == long
+            && other.float == float
+            && other.double == double
+            && other.decimal == decimal
+            && other.string == string
+            && other.timestamp == timestamp
+            && other.date == date
+            && other.time == time
+            && Arrays.equals(other.bytes, bytes)
+            && other.optBoolean == optBoolean
+            && other.optByte == optByte
+            && other.optShort == optShort
+            && other.optInt == optInt
+            && other.optLong == optLong
+            && other.optFloat == optFloat
+            && other.optDouble == optDouble
+            && other.optDecimal == optDecimal
+            && other.optString == optString
+            && other.optTimestamp == optTimestamp
+            && other.optDate == optDate
+            && other.optTime == optTime
+            && Arrays.equals(other.optBytes, optBytes)
+            && Arrays.equals(other.blob, blob)
+            && other.clob == clob
+            && other.intArray == intArray
+}
 
 object standardTable : Table<Standard, Int>(table) {
     // @formatter:off
