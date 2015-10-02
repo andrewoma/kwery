@@ -226,6 +226,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
     protected fun <T> converter(type: KType): Converter<T> {
         // TODO ... converters are currently defined as Java classes as I can't figure out how to
         // convert a nullable KType into its non-nullable equivalent
+        // Try udalov's workaround: (t.javaType as Class<*>).kotlin.defaultType`
         val javaClass = type.javaType as Class<T>
         val converter = config.converters[javaClass] ?: if (javaClass.isEnum) EnumByNameConverter(javaClass as Class<DummyEnum>) as T else null
         checkNotNull(converter) { "Converter undefined for type $type as $javaClass" }
