@@ -11,7 +11,7 @@ Kwery's manifesto:
 * **No magic.** No proxies, interceptors, reflection or implicit saves. Explicit functions with sensible defaults control everything.
 * **Useful logging.** Logged statements are valid SQL with inline parameters for your dialect.
 
-[![Build Status](https://travis-ci.org/andrewoma/kwery.svg?branch=master)](https://travis-ci.org/andrewoma/kwery.svg?branch=master)
+[![Build Status](https://travis-ci.org/andrewoma/kwery.svg?branch=master)](https://travis-ci.org/andrewoma/kwery)
 
 #### Core
 
@@ -207,6 +207,7 @@ Fetcher:
 
 Modules:
 * Dropwizard metrics integration
+* Generator - Generate initial `Table` and domain objects from reading JDBC metadata
 
 Robustness/Performance:
 * Soak test - check for leaking connections/resources over extended usage
