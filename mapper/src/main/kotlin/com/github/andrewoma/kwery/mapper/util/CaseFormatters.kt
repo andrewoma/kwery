@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.mapper.util
 
 val camelToLowerUnderscore: (String) -> String = { s ->
     if (s.isEmpty()) s else {
-        val sb = StringBuilder(s.length() + s.length() / 3)
+        val sb = StringBuilder(s.length + s.length / 3)
 
         sb.append(Character.toLowerCase(s[0]))
         for (ch in s.substring(1)) {

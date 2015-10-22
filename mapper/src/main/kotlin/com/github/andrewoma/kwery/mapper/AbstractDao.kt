@@ -135,10 +135,10 @@ abstract class AbstractDao<T : Any, ID : Any>(
         fun delta(): Pair<String, Map<String, Any?>> {
             val differences = difference(oldMap, newMap)
             val sql = sql(name to differences) {
-                val columns = differences.keySet().map { "$it = :$it" }.joinToString(", ")
+                val columns = differences.keys.map { "$it = :$it" }.joinToString(", ")
                 "update ${table.name}\nset $columns \nwhere ${table.idColumns.equate(" and ")} and $versionCol = :$oldVersionParam"
             }
-            val parameters = hashMapOfExpectedSize<String, Any?>(differences.size() + table.idColumns.size() + 1)
+            val parameters = hashMapOfExpectedSize<String, Any?>(differences.size + table.idColumns.size + 1)
             parameters.putAll(differences)
             parameters.putAll(table.idMap(session, id(newValue), nf))
             parameters[oldVersionParam] = oldMap[versionCol]
@@ -149,7 +149,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
             val sql = sql(name) {
                 "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")} and $versionCol = :$oldVersionParam"
             }
-            val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size() + table.idColumns.size() + 1)
+            val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size + table.idColumns.size + 1)
             parameters.putAll(newMap)
             parameters.putAll(table.idMap(session, id(newValue), nf))
             parameters[oldVersionParam] = oldMap[versionCol]
@@ -200,7 +200,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
         val name = "batchInsert"
         val generateKeys = isGeneratedKey(values.firstOrNull(), idStrategy)
 
-        if (generateKeys && table.idColumns.size() > 1) {
+        if (generateKeys && table.idColumns.size > 1) {
             throw UnsupportedOperationException("Batch insert with generated compound keys is unsupported")
         }
 
@@ -212,7 +212,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
-            check(count == values.size()) { "$name inserted $count rows, but expected ${values.size()}" }
+            check(count == values.size) { "$name inserted $count rows, but expected ${values.size}" }
 
             values.zip(list.map { it.second }).map {
                 val (value, idValue) = it
@@ -221,7 +221,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
         } else {
             val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name))
             val count = counts.fold(0) { sum, value -> sum + value }
-            check(count == values.size()) { "$name inserted $count rows, but expected ${values.size()}" }
+            check(count == values.size) { "$name inserted $count rows, but expected ${values.size}" }
             values
         }
 
@@ -257,12 +257,12 @@ abstract class AbstractDao<T : Any, ID : Any>(
         val name = "findByIds"
         if (ids.isEmpty()) return mapOf()
 
-        if (ids.size() == 1) {
+        if (ids.size == 1) {
             return findById(ids.first())?.let { mapOf(id(it) to it) } ?: mapOf()
         }
 
         // TODO ... support compound ids? No nice way of doing this without spamming statement caches
-        if (table.idColumns.size() != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
+        if (table.idColumns.size != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
 
         val values = if (session.dialect.supportsArrayBasedIn) {
             val sql = sql(name to columns) {
@@ -306,7 +306,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         val counts = session.batchUpdate(sql, updates, options(name))
 
-        check(counts.size() == values.size()) { "$name updated ${counts.size()} rows, but expected ${values.size()}" }
+        check(counts.size == values.size) { "$name updated ${counts.size} rows, but expected ${values.size}" }
 
         for ((i, count) in counts.withIndex()) {
             check(count == 1) { "Batch update failed to update row with id ${id(values[i])}" }
@@ -318,7 +318,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun version(value: T): Any {
-        return table.objectMap(session, value, setOf(table.versionColumn!!)).values().first()!!
+        return table.objectMap(session, value, setOf(table.versionColumn!!)).values.first()!!
     }
 
     override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
@@ -338,7 +338,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
             val result = table.copy(new, mapOf(versionColumn to newVersion))
             val newMap = table.objectMap(session, result, table.dataColumns)
 
-            val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size() + table.idColumns.size() + 1)
+            val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size + table.idColumns.size + 1)
             parameters.putAll(newMap)
             parameters.putAll(table.idMap(session, id(new), nf))
             parameters[oldVersionParam] = version(old)
@@ -350,7 +350,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
         }
 
         val counts = session.batchUpdate(sql, updates.map { it.first }, options(name))
-        check(counts.size() == values.size()) { "$name updated ${counts.size()} rows, but expected ${values.size()}" }
+        check(counts.size == values.size) { "$name updated ${counts.size} rows, but expected ${values.size}" }
         for ((count, value) in counts.zip(values)) {
             if (count == 0) {
                 throw OptimisticLockException("The same version (${version(value.first)}) of ${table.name} with id ${id(value.first)} has been updated by another transaction")
@@ -367,7 +367,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     override fun allocateIds(count: Int): List<ID> {
         require(session.dialect.supportsAllocateIds) { "Dialect does not support allocate ids" }
         require(table.sequence != null) { "Table sequence is not defined" }
-        require(table.idColumns.size() == 1) { "Compound ids are not supported" }
+        require(table.idColumns.size == 1) { "Compound ids are not supported" }
 
         val sql = session.dialect.allocateIds(count, table.sequence!!, table.idColumns.first().name)
         return session.select(sql, mapOf(), options("allocateIds")) { row ->

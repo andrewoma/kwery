@@ -45,7 +45,7 @@ import javax.ws.rs.core.MediaType
                 actorTable.LastName optional lastName
         )
 
-        return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keySet()).fetch(root)
+        return actorDao.findByExample(actorTable.copy(Actor(), filter), filter.keys).fetch(root)
     }
 
     @Timed @GET @Path("/{id}")

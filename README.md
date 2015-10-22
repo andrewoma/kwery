@@ -180,6 +180,8 @@ Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7
 
 `0.5` Compatible with Kotlin M14.
 
+`0.6` Compatible with Kotlin 1.0.0-beta-1038.
+
 #### Building
 
 ```bash

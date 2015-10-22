@@ -45,7 +45,7 @@ data class Film(
         val originalLanguage: Language?,
         val duration: Duration?, // minutes
         val rating: FilmRating?,
-        val lastUpdate: LocalDateTime,
+        val lastUpdate: LocalDateTime = LocalDateTime.now(),
         val specialFeatures: List<String> = listOf(),
         val actors: Set<Actor> = setOf()
 )

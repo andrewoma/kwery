@@ -24,14 +24,14 @@ package com.github.andrewoma.kwery.core
 
 import java.util.regex.Pattern
 
-internal data class BoundQuery(val query: String, val bindings: List<String>)
+data class BoundQuery(val query: String, val bindings: List<String>)
 
 internal fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQuery {
     val bindings = arrayListOf<String>()
     val bound = replaceBindings(query) { key ->
         bindings.add(key)
         val size = inClauseSizes[key] ?: 1
-        Array(size) { "?" }.join(",")
+        Array(size) { "?" }.joinToString(",")
     }
     return BoundQuery(bound, bindings)
 }
@@ -54,8 +54,8 @@ internal fun inClauseSizes(parametersList: List<Map<String, Any?>>): Map<String,
 
     for (parameters in parametersList) {
         for ((key, value) in parameters) {
-            if (value is Collection<*> && value.size() != 0) {
-                sizes[key] = Math.max(inClauseSize(value.size()), sizes.getOrElse(key, { 0 }))
+            if (value is Collection<*> && value.size != 0) {
+                sizes[key] = Math.max(inClauseSize(value.size), sizes.getOrElse(key, { 0 }))
             }
         }
     }

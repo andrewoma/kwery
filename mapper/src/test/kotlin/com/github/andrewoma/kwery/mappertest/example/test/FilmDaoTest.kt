@@ -119,11 +119,11 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         }
 
         // Check to see actors and language are populated
-        var fetched = dao.findByIds(ids).values().fetch(Node(Node.all))
-        assertEquals(films.size(), fetched.size())
+        var fetched = dao.findByIds(ids).values.fetch(Node(Node.all))
+        assertEquals(films.size, fetched.size)
 
         for (film in fetched) {
-            assertEquals(2, film.actors.size())
+            assertEquals(2, film.actors.size)
             assertEquals(sd.languageEnglish.name, film.language.name)
             if (film.title == "Underworld: Rise of the Lycans") {
                 assertEquals(sd.languageSpanish, film.originalLanguage)
@@ -133,11 +133,11 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         }
 
         // Check to see only the language is populate
-        fetched = dao.findByIds(ids).values().fetch(Node(Film::language.node()))
-        assertEquals(films.size(), fetched.size())
+        fetched = dao.findByIds(ids).values.fetch(Node(Film::language.node()))
+        assertEquals(films.size, fetched.size)
 
         for (film in fetched) {
-            assertEquals(0, film.actors.size())
+            assertEquals(0, film.actors.size)
             assertEquals(sd.languageEnglish.name, film.language.name)
         }
     }

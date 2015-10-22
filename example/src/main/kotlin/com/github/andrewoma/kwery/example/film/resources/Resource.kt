@@ -30,7 +30,7 @@ interface Resource {
     val fetcher: GraphFetcher
 
     fun <T> parameters(vararg parameters: Pair<Column<T, *>, Any?>): Map<Column<T, *>, Any?> {
-        return parameters.toList().toMap().filter { it.getValue() != null }
+        return parameters.toList().toMap().filter { it.value != null }
     }
 
     fun <T> List<T>.fetch(root: String?): List<T> {

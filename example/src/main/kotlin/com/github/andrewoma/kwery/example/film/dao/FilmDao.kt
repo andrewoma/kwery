@@ -54,6 +54,6 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
 
     fun findByActorIds(filmActors: Collection<FilmActor>): Map<Int, Collection<Film>> {
         val films = findByIds(filmActors.map { it.id.filmId }.toSet())
-        return filmActors.groupBy { it.id.filmId }.mapValues { it.getValue().map { films.get(it.id.filmId)!! } }
+        return filmActors.groupBy { it.id.filmId }.mapValues { it.value.map { films.get(it.id.filmId)!! } }
     }
 }

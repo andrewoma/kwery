@@ -49,7 +49,7 @@ object languageConverter : SimpleConverter<Language>(
 
 object filmRatingConverter : SimpleConverter<FilmRating>(
         { row, c -> FilmRating.valueOf(row.string(c).replace('-', '_')) },
-        { it.name().replace('_', '-') }
+        { it.name.replace('_', '-') }
 )
 
 val tableConfig = TableConfiguration(defaults, converters, camelToLowerUnderscore)

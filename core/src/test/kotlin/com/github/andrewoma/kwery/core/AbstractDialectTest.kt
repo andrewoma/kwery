@@ -144,12 +144,12 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
                 row.long("id")
             }
 
-            assertEquals(count, ids.size())
+            assertEquals(count, ids.size)
             all.addAll(ids)
         }
 
         // Check ids are unique across invocations
-        assertEquals(count * iterations, all.size())
+        assertEquals(count * iterations, all.size)
     }
 
     private fun findById(id: String): Value {

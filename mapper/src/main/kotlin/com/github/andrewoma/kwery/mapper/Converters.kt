@@ -114,5 +114,5 @@ fun <R : Any> optional(converter: Converter<R>): Converter<R?> = Converter(
 
 class EnumByNameConverter<T : Enum<T>>(type: Class<T>) : SimpleConverter<T>(
         { row, c -> java.lang.Enum.valueOf(type, row.string(c)) },
-        { it.name() }
+        { it.name }
 )

@@ -45,6 +45,6 @@ class SqlExceptionMapper : LoggingExceptionMapper<SQLException>() {
 
         return if (code == null) response else Response.status(code)
                 .type(MediaType.APPLICATION_JSON_TYPE)
-                .entity(ErrorMessage(code, exception.getMessage())).build()
+                .entity(ErrorMessage(code, exception.message)).build()
     }
 }

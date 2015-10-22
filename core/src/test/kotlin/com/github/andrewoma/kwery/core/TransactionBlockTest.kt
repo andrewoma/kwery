@@ -33,9 +33,9 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
         session.transaction { t ->
             actor = insert(Actor("Kate", "Beckinsale"))
             t.rollbackOnly = true
-            assertEquals(1, selectActors(setOf(actor?.id)).size())
+            assertEquals(1, selectActors(setOf(actor?.id)).size)
         }
-        assertEquals(0, selectActors(setOf(actor?.id)).size())
+        assertEquals(0, selectActors(setOf(actor?.id)).size)
     }
 
     @Test fun `exception should roll back transaction`() {
@@ -43,22 +43,22 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
         try {
             session.transaction { t ->
                 actor = insert(Actor("Kate", "Beckinsale"))
-                assertEquals(1, selectActors(setOf(actor?.id)).size())
+                assertEquals(1, selectActors(setOf(actor?.id)).size)
                 throw RuntimeException("From block")
             }
         } catch(e: Exception) {
-            assertEquals("From block", e.getMessage())
+            assertEquals("From block", e.message)
         }
-        assertEquals(0, selectActors(setOf(actor?.id)).size())
+        assertEquals(0, selectActors(setOf(actor?.id)).size)
     }
 
     @Test fun `block should be implicitly committed`() {
         var actor: Actor? = null
         session.transaction { t ->
             actor = insert(Actor("Kate", "Beckinsale"))
-            assertEquals(1, selectActors(setOf(actor?.id)).size())
+            assertEquals(1, selectActors(setOf(actor?.id)).size)
         }
-        assertEquals(1, selectActors(setOf(actor?.id)).size())
+        assertEquals(1, selectActors(setOf(actor?.id)).size)
     }
 }
 

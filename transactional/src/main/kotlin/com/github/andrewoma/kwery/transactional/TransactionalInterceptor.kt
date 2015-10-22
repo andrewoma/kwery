@@ -32,6 +32,7 @@ class TransactionalInterceptor : MethodInterceptor {
     override fun invoke(invocation: MethodInvocation): Any? {
         val transactional = getTransactional(invocation)
 
+        @Suppress("IMPLICIT_CAST_TO_UNIT_OR_ANY")
         return if (transactional == null || ManagedThreadLocalSession.isInitialised(transactional.name)) {
             invocation.proceed()
         } else {

@@ -85,10 +85,10 @@ open class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingI
         for (parameters in statement.parametersList) {
             sb.append("\n" + statement.session.bindParameters(statement.sql, parameters, false, parameterLimit, false)).append(";")
         }
-        val batch = statement.parametersList.size().let { if (it > 1) "for batch of $it " else "" }
+        val batch = statement.parametersList.size.let { if (it > 1) "for batch of $it " else "" }
 
         val count = statement.rowsCounts
-        val rowCount = when (count.size()) {
+        val rowCount = when (count.size) {
             0 -> ""
             1 -> ". Rows affected: ${count.first()}"
             else -> ". Rows affected: ${count.reduce { sum, i -> sum + i }} (${count.joinToString(", ")})"
@@ -98,7 +98,7 @@ open class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingI
         val message = if (context.exception == null) {
             "\nSuccessfully executed $timing"
         } else {
-            "\nFailed to execute $timing\nReason: ${context.exception.getMessage()}"
+            "\nFailed to execute $timing\nReason: ${context.exception.message}"
         }
 
         sb.append(message)

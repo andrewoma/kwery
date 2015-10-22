@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.fetcher
 
 import java.util.concurrent.ConcurrentHashMap
 
-internal class Value<T>(val get: () -> T, val set: (T) -> Unit) {
+class Value<T>(val get: () -> T, val set: (T) -> Unit) {
     override fun toString(): String {
         return get().toString()
     }
@@ -179,7 +179,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
                 val fetchedById = property.fetch(required)
 
                 val fetchedByType = fetched.getOrPut(property.type) { hashMapOf() }
-                for (collection in fetchedById.values()) {
+                for (collection in fetchedById.values) {
                     for (obj in collection) {
                         val id = property.type.id(obj)
                         fetchedByType.put(id, obj)

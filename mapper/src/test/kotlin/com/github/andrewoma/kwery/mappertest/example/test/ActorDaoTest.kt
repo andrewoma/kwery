@@ -53,7 +53,7 @@ class ActorDaoTest : AbstractFilmDaoTest<Actor, Int, ActorDao>() {
     @Test fun `findByExample matches example given`() {
         insertAll()
         val result = dao.findByExample(Actor().copy(name = Name("", lastName = "Ryan")), setOf(actorTable.LastName))
-        assertEquals(1, result.size())
+        assertEquals(1, result.size)
         assertEquals("Meg", result.first().name.firstName)
     }
 

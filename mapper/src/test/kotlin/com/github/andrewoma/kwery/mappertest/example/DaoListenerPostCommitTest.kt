@@ -51,7 +51,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
             dao.insert(Actor(Name("Bruce", "Lee")))
             assertTrue(cache.isEmpty())
         }
-        assertEquals(1, cache.size())
+        assertEquals(1, cache.size)
     }
 
     @Test fun `Values should not be visible after roll back`() {
@@ -60,7 +60,7 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
             assertTrue(cache.isEmpty())
             session.currentTransaction?.rollbackOnly = true
         }
-        assertEquals(0, cache.size())
+        assertEquals(0, cache.size)
     }
 
     @Test fun `Updates should be visible after commit`() {
@@ -70,8 +70,8 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
             dao.update(inserted, inserted.copy(name = tommy))
             assertTrue(cache.isEmpty())
         }
-        assertEquals(1, cache.size())
-        assertEquals(tommy, cache.values().first().name)
+        assertEquals(1, cache.size)
+        assertEquals(tommy, cache.values.first().name)
     }
 
     @Test fun `Multiple transactions should accumulate`() {
@@ -79,13 +79,13 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         val inserted = session.transaction {
             dao.insert(Actor(Name("Bruce", "Lee")))
         }
-        assertEquals(1, cache.size())
+        assertEquals(1, cache.size)
 
         val updated = session.transaction {
             dao.update(inserted, inserted.copy(name = tommy))
         }
-        assertEquals(1, cache.size())
-        assertEquals(tommy, cache.values().first().name)
+        assertEquals(1, cache.size)
+        assertEquals(tommy, cache.values.first().name)
 
         val deleted = session.transaction {
             dao.delete(updated.id)
@@ -104,8 +104,8 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
             assertTrue(cache.isEmpty())
             result
         }
-        assertEquals(2, cache.size())
-        assertEquals(inserted.toSet(), cache.values().toSet())
+        assertEquals(2, cache.size)
+        assertEquals(inserted.toSet(), cache.values.toSet())
     }
 
     @Test fun `Batch update should be visible after commit`() {
@@ -119,8 +119,8 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
             dao.batchUpdate(inserted.zip(inserted.map { it.copy(name = tommy) }))
             assertTrue(cache.isEmpty())
         }
-        assertEquals(2, cache.size())
-        cache.values().forEach { assertEquals(tommy, it.name) }
+        assertEquals(2, cache.size)
+        cache.values.forEach { assertEquals(tommy, it.name) }
     }
 
     inner class CacheListener : DeferredListener() {

@@ -108,7 +108,7 @@ class TimeConvertersMappingTest : AbstractSessionTest() {
         dao.insert(TimeTypes(id = 2, offsetDateTime = now.withOffsetSameInstant(ZoneOffset.MAX)))
 
         val fetched = dao.findAll()
-        assertEquals(2, fetched.size())
+        assertEquals(2, fetched.size)
         for (time in fetched) {
             assertEquals(now, time.offsetDateTime)
         }
@@ -120,7 +120,7 @@ class TimeConvertersMappingTest : AbstractSessionTest() {
         dao.insert(TimeTypes(id = 2, zonedDateTime = now.withZoneSameInstant(ZoneOffset.MAX)))
 
         val fetched = dao.findAll()
-        assertEquals(2, fetched.size())
+        assertEquals(2, fetched.size)
         for (time in fetched) {
             assertEquals(now, time.zonedDateTime)
         }

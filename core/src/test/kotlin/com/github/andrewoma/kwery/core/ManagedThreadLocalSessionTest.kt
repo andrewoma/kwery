@@ -78,7 +78,7 @@ class ManagedThreadLocalSessionTest {
         dao.insertCurrent()
         ManagedThreadLocalSession.finalise(commitTransaction = true)
         val sessions = getInsertedSessions()
-        assertEquals(1, sessions.size())
+        assertEquals(1, sessions.size)
     }
 
     @Test fun `An initialised session should not insert on rollback`() {
@@ -86,7 +86,7 @@ class ManagedThreadLocalSessionTest {
         dao.insertCurrent()
         ManagedThreadLocalSession.finalise(commitTransaction = false)
         val sessions = getInsertedSessions()
-        assertEquals(0, sessions.size())
+        assertEquals(0, sessions.size)
     }
 
     @Test fun `Inserts on different threads should use different connections`() {
@@ -110,16 +110,16 @@ class ManagedThreadLocalSessionTest {
         executor.awaitTermination(10, TimeUnit.SECONDS)
 
         val sessions = getInsertedSessions()
-        assertEquals(requests, sessions.size())
+        assertEquals(requests, sessions.size)
 
         // Should use a different connection per request (will usually be pooled)
-        assertEquals(requests, sessions.groupBy { it.poolConnection }.size())
+        assertEquals(requests, sessions.groupBy { it.poolConnection }.size)
 
         // Should have executed in multiple threads
-        assertEquals(threads, sessions.groupBy { it.thread }.size())
+        assertEquals(threads, sessions.groupBy { it.thread }.size)
 
         // Should have used 1 underlying connection per thread
-        assertEquals(threads, sessions.groupBy { it.connection }.size())
+        assertEquals(threads, sessions.groupBy { it.connection }.size)
 
         // Should have a majority server side prepared (by default the Postgres driver waits
         // unit a statement is used 5 times before it prepares on the server)
@@ -156,7 +156,7 @@ class ManagedThreadLocalSessionTest {
                 throw Exception()
             }
         } catch(e: Exception) {
-            assertEquals(0, getInsertedSessions().size())
+            assertEquals(0, getInsertedSessions().size)
         }
     }
 }

@@ -44,11 +44,11 @@ interface Dialect {
 }
 
 internal fun String.truncate(limit: Int): String {
-    return if (limit == -1 || limit >= this.length()) this else this.take(limit)
+    return if (limit == -1 || limit >= this.length) this else this.take(limit)
 }
 
 internal fun ByteArray.truncate(limit: Int): ByteArray {
-    return if (limit == -1 || limit >= this.size()) this else {
+    return if (limit == -1 || limit >= this.size) this else {
         val result = ByteArray(limit)
         System.arraycopy(this, 0, result, 0, limit)
         result

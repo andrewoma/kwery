@@ -45,7 +45,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     fun id(value: T) = dao.id(value)
 
     override fun afterSessionSetup() {
-        dao.session.update("delete from ${dao.table.name} where ${dao.table.idColumns.map { "${it.name} > -1000" }.join(" or ")}")
+        dao.session.update("delete from ${dao.table.name} where ${dao.table.idColumns.map { "${it.name} > -1000" }.joinToString(" or ")}")
     }
 
     @Test fun `Insert with generated key should return a new key`() {
@@ -73,11 +73,11 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     }
 
     @Test fun `Find all should include inserted`() {
-        val existing = dao.findAll().size()
+        val existing = dao.findAll().size
         val inserted = insert()
 
         val found = dao.findAll()
-        assertEquals(existing + 1, found.size())
+        assertEquals(existing + 1, found.size)
         assertNotNull(found.firstOrNull { id(it) == id(inserted) })
     }
 
@@ -99,19 +99,19 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     }
 
     @Test fun `Find by ids should return values by id`() {
-        if (dao.table.idColumns.size() > 1) return // Unsupported for now
+        if (dao.table.idColumns.size > 1) return // Unsupported for now
 
         val inserted = insert(3)
 
         val first = inserted.take(1).map { id(it) to it }.toMap()
-        assertContentEquals(first, dao.findByIds(first.keySet()))
+        assertContentEquals(first, dao.findByIds(first.keys))
 
         val rest = inserted.drop(1).map { id(it) to it }.toMap()
-        assertContentEquals(rest, dao.findByIds(rest.keySet()))
+        assertContentEquals(rest, dao.findByIds(rest.keys))
     }
 
     fun assertContentEquals(expected: Map<ID, T>, actual: Map<ID, T>) {
-        assertEquals(expected.keySet(), actual.keySet())
+        assertEquals(expected.keys, actual.keys)
         for ((id, value) in expected) {
             assertTrue(contentsEqual(value, actual.get(id)!!))
         }
@@ -122,7 +122,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
 
         val inserted = dao.batchInsert(dataWithoutKeys, IdStrategy.Generated)
 
-        assertEquals(dataWithoutKeys.size(), inserted.size())
+        assertEquals(dataWithoutKeys.size, inserted.size)
         for ((old, new) in dataWithoutKeys.zip(inserted)) {
             assertTrue(contentsEqual(old, new))
             assertFalse(id(old) == id(new))
@@ -133,7 +133,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         if (dataWithKeys.isEmpty()) return
 
         val inserted = dao.batchInsert(dataWithKeys, IdStrategy.Explicit)
-        assertEquals(dataWithKeys.size(), inserted.size())
+        assertEquals(dataWithKeys.size, inserted.size)
         for ((old, new) in dataWithKeys.zip(inserted)) {
             assertTrue(contentsEqual(old, new))
             assertEquals(id(old), id(new))
@@ -147,10 +147,10 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         val result = arrayListOf<T>()
         for (value in data) {
             result.add(dao.insert(value, IdStrategy.Auto))
-            if (count != -1 && result.size() == count) return result
+            if (count != -1 && result.size == count) return result
         }
 
-        check(result.size() >= count) { "Not enough test data" }
+        check(result.size >= count) { "Not enough test data" }
         return result
     }
 
@@ -215,13 +215,13 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     }
 
     @Test fun `Batch updates should update all values`() {
-        if (dao.table.versionColumn == null || dao.table.idColumns.size() > 1) return
+        if (dao.table.versionColumn == null || dao.table.idColumns.size > 1) return
 
         val inserted = insert(2)
         val mutated = inserted.map { mutateContents(it) }
 
         val updated = dao.batchUpdate(inserted.zip(mutated))
-        assertEquals(2, updated.size())
+        assertEquals(2, updated.size)
 
         val found = dao.findByIds(updated.map { id(it) })
 
@@ -231,7 +231,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     }
 
     @Test fun `Unsafe batch updates should update all values`() {
-        if (dao.table.idColumns.size() > 1) return
+        if (dao.table.idColumns.size > 1) return
 
         val inserted = insert(2)
         val mutated = inserted.map { mutateContents(it) }
@@ -253,7 +253,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
 
         Thread.sleep(2)
         val updated = dao.batchUpdate(inserted.zip(mutated))
-        assertEquals(2, updated.size())
+        assertEquals(2, updated.size)
 
         Thread.sleep(2)
         try {
@@ -269,6 +269,6 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         val count = 100
         val ids = dao.allocateIds(count)
 
-        assertEquals(count, ids.size())
+        assertEquals(count, ids.size)
     }
 }

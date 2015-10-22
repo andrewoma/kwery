@@ -41,7 +41,7 @@ import javax.ws.rs.core.MediaType
 
         val filter = parameters(languageTable.Name optional name)
 
-        return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keySet())
+        return languageDao.findByExample(languageTable.copy(Language(), filter), filter.keys)
     }
 
     @Timed @GET @Path("/{id}")

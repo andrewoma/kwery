@@ -74,7 +74,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             var percentage = 0
 
             for (summary in summaries) {
-                name = max(name, summary.name.length())
+                name = max(name, summary.name.length)
                 executions = max(executions, width(summary.executionCount))
                 closed = max(closed, width(summary.closedTime / nanoToMs))
                 executed = max(executed, width(summary.executionTime / nanoToMs))
@@ -83,12 +83,12 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             }
 
             return listOf(
-                    max(headings[0].length(), name),
-                    max(headings[1].length(), executions),
-                    max(headings[2].length(), executed + 4),
-                    max(headings[3].length(), closed + 4),
-                    max(headings[4].length(), rowCount),
-                    max(headings[5].length(), percentage + 2)
+                    max(headings[0].length, name),
+                    max(headings[1].length, executions),
+                    max(headings[2].length, executed + 4),
+                    max(headings[3].length, closed + 4),
+                    max(headings[4].length, rowCount),
+                    max(headings[5].length, percentage + 2)
             )
         }
 
@@ -103,7 +103,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             val headingsFormat = "    %${widths[0]}s  %${widths[1]}s  %${widths[2]}s  %${widths[3]}s  %${widths[4]}s  %${widths[5]}s"
             val totalWidth = widths.reduce { accum, i -> accum + i }
 
-            val sb = StringBuilder(150 + ((15 + totalWidth) * (summaries.size() + 1)))
+            val sb = StringBuilder(150 + ((15 + totalWidth) * (summaries.size + 1)))
 
             sb.append("\nExecuted %,d statements in %,.3f ms (closed in %,.3f ms) affecting %,d rows using %.1f%% of request total (%,.3f ms):\n".format(
                     totals.executionCount,
@@ -136,7 +136,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             // Prematurely optimise with some imperative code to summarise without lots of collection creation
             // Group by statement name (and collect totals)
             Collections.sort(executions, { e1, e2 -> e1.name.compareTo(e2.name) })
-            val summaries = ArrayList<ExecutionSummary>(executions.size() + 1)
+            val summaries = ArrayList<ExecutionSummary>(executions.size + 1)
 
             var total = ExecutionSummary("Total", 0L, 0L, 0L, 0L)
             var current = total

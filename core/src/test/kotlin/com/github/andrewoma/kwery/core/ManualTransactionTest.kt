@@ -31,16 +31,16 @@ class ManualTransactionTest : AbstractFilmSessionTest() {
     @Test fun `rollback should roll back transaction`() {
         val t = session.manualTransaction()
         val actor = insert(Actor("Kate", "Beckinsale"))
-        assertEquals(1, selectActors(setOf(actor.id)).size())
+        assertEquals(1, selectActors(setOf(actor.id)).size)
         t.rollback()
-        assertEquals(0, selectActors(setOf(actor.id)).size())
+        assertEquals(0, selectActors(setOf(actor.id)).size)
     }
 
     @Test fun `commit should commit transaction`() {
         val t = session.manualTransaction()
         val actor = insert(Actor("Kate", "Beckinsale"))
-        assertEquals(1, selectActors(setOf(actor.id)).size())
+        assertEquals(1, selectActors(setOf(actor.id)).size)
         t.commit()
-        assertEquals(1, selectActors(setOf(actor.id)).size())
+        assertEquals(1, selectActors(setOf(actor.id)).size)
     }
 }

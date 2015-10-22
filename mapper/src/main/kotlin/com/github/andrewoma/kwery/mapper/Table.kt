@@ -29,10 +29,7 @@ import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 import java.lang.reflect.ParameterizedType
 import java.util.*
 import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
-import kotlin.reflect.defaultType
+import kotlin.reflect.*
 import kotlin.reflect.jvm.javaType
 
 /**
@@ -90,13 +87,13 @@ data class Column<C, T>(
     /**
      * A type-safe variant of `to`
      */
-    fun of(value: T): Pair<Column<C, T>, T> = Pair(this, value)
+    infix fun of(value: T): Pair<Column<C, T>, T> = Pair(this, value)
 
     /**
      * A type-safe variant of `to` with an optional value
      */
     @Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
-    fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
+    infix fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
 
     override fun toString(): String {
         return "Column($name id=$id version=$version nullable=$isNullable)" // Prevent NPE in debugger on "property"
@@ -107,7 +104,7 @@ data class Column<C, T>(
  * Value allows extraction of column values by column.
  */
 interface Value<C> {
-    fun <T> of(column: Column<C, T>): T
+    infix fun <T> of(column: Column<C, T>): T
 }
 
 /**
@@ -182,7 +179,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
 
     // A delegated property that gets the column name from the property name unless it is defined
     inner class DelegatedColumn<R>(val template: Column<T, R>, private var value: Column<T, R>? = null) : ReadOnlyProperty<Any?, Column<T, R>> {
-        override fun get(thisRef: Any?, property: PropertyMetadata): Column<T, R> {
+        override fun getValue(thisRef: Any?, property: KProperty<*>): Column<T, R> {
             if (value == null) {
                 value = addColumn(template.copy(name = template.name.let { if (it != "") it else config.namingConvention(property.name) }))
             }
@@ -259,7 +256,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
     }
 
     fun objectMap(session: Session, value: T, columns: Set<Column<T, *>> = defaultColumns, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
-        val map = hashMapOfExpectedSize<String, Any?>(columns.size())
+        val map = hashMapOfExpectedSize<String, Any?>(columns.size)
         for (column in columns) {
             @Suppress("UNCHECKED_CAST")
             val col = column as Column<T, Any?>
@@ -270,7 +267,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
 
     fun idMap(session: Session, id: ID, nf: (Column<T, *>) -> String = columnName): Map<String, Any?> {
         val idCols = idColumns(id)
-        val map = hashMapOfExpectedSize<String, Any?>(idCols.size())
+        val map = hashMapOfExpectedSize<String, Any?>(idCols.size)
         for ((column, value) in idCols) {
             @Suppress("UNCHECKED_CAST")
             val col = column as Column<T, Any?>

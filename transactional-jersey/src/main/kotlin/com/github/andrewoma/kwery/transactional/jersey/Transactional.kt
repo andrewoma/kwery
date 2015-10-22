@@ -88,8 +88,8 @@ class TransactionListener : ApplicationEventListener {
                 val type = event.type
                 if (type == RequestEvent.Type.REQUEST_MATCHED || type == RequestEvent.Type.FINISHED) {
                     val method = event.uriInfo?.matchedResourceMethod?.invocable?.definitionMethod
-                    val transactional = transactionals[method]
-                    if (transactional != null) {
+                    if (method != null && method in transactionals) {
+                        val transactional = transactionals[method]!!
                         if (type == RequestEvent.Type.REQUEST_MATCHED) {
                             ManagedThreadLocalSession.initialise(!transactional.manual, transactional.name)
                         } else {

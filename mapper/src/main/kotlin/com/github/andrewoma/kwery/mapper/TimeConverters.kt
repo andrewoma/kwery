@@ -56,7 +56,7 @@ object localDateConverter : SimpleConverter<LocalDate>(
 object localTimeConverter : SimpleConverter<LocalTime>(
         { row, c -> row.time(c).toLocalTime() },
         {
-            @Suppress("DEPRECATED_SYMBOL_WITH_MESSAGE") // No sane alternative
+            @Suppress("DEPRECATION") // No sane alternative
             Time(it.hour, it.minute, it.second)
         }
 )
@@ -123,15 +123,15 @@ class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
     }
 
     init {
-        require(unit in supported) { "Only ${supported.joinToString(", ")} are supported" }
+        require(supported.containsRaw(unit)) { "Only ${supported.joinToString(", ")} are supported" }
     }
 }
 
 private val nanosInSecond: BigDecimal = BigDecimal.valueOf(1000000000L)
 
 fun BigDecimal.toDuration(): Duration {
-    val seconds = this.longValue()
-    val nanoseconds = this.remainder(BigDecimal.ONE).multiply(nanosInSecond).longValue()
+    val seconds = this.toLong()
+    val nanoseconds = this.remainder(BigDecimal.ONE).multiply(nanosInSecond).toLong()
     return Duration.ofSeconds(seconds, nanoseconds);
 }
 

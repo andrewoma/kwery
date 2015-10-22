@@ -57,9 +57,9 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
 
     @Test fun `delete should remove existing row`() {
         val actor = insert(Actor("Kate", "Beckinsale"))
-        assertEquals(1, selectActors(setOf(actor.id)).size())
+        assertEquals(1, selectActors(setOf(actor.id)).size)
         deleteActor(actor.id)
-        assertEquals(0, selectActors(setOf(actor.id)).size())
+        assertEquals(0, selectActors(setOf(actor.id)).size)
     }
 
     @Test(expected = IllegalArgumentException::class) fun `missing select parameters should be rejected`() {
@@ -73,9 +73,9 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
     @Test fun `in clauses should support null values`() {
         val actor = insert(Actor("Kate", "Beckinsale"))
         val actor2 = insert(Actor("Kate", "Beckinsale"))
-        assertEquals(1, selectActors(setOf(actor.id, null)).size())
-        assertEquals(1, selectActors(setOf(null, actor2.id)).size())
-        assertEquals(2, selectActors(setOf(null, actor2.id, null, actor.id, null)).size())
+        assertEquals(1, selectActors(setOf(actor.id, null)).size)
+        assertEquals(1, selectActors(setOf(null, actor2.id)).size)
+        assertEquals(2, selectActors(setOf(null, actor2.id, null, actor.id, null)).size)
     }
 
     @Test fun `forEach should call back for each row`() {

@@ -110,11 +110,11 @@ class DefaultSession(override val connection: Connection,
 
             val rs = ps.generatedKeys
             try {
-                val keys = ArrayList<K>(parametersList.size())
+                val keys = ArrayList<K>(parametersList.size)
                 while (rs.next()) {
                     keys.add(f(Row(rs)))
                 }
-                require(keys.size() == parametersList.size()) { "Expected ${parametersList.size()} keys but received ${keys.size()}" }
+                require(keys.size == parametersList.size) { "Expected ${parametersList.size} keys but received ${keys.size}" }
                 statement.copy(rowsCounts = rowsAffected) to rowsAffected.zip(keys)
             } finally {
                 rs.close()
@@ -309,7 +309,7 @@ class DefaultSession(override val connection: Connection,
         for ((i, value) in values.withIndex()) {
             ps.setObject(i + 1, value)
         }
-        for (i in values.size()..size - 1) {
+        for (i in values.size..size - 1) {
             ps.setObject(i + 1, null)
         }
     }

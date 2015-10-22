@@ -48,7 +48,7 @@ import javax.ws.rs.core.MediaType
                 filmTable.Rating optional rating
         )
 
-        return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keySet()).fetch(root)
+        return filmDao.findByExample(filmTable.copy(Film(), filter), filter.keys).fetch(root)
     }
 
     @Timed @GET @Path("/{id}")

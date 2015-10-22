@@ -40,7 +40,7 @@ open class Type<T, ID>(
 ) {
     open fun supports(obj: Any?) = obj?.javaClass?.isAssignableFrom(javaClass)!!
 
-    override fun toString() = javaClass.simpleName + "(" + properties.map { it.name }.join(", ") + ")"
+    override fun toString() = javaClass.simpleName + "(" + properties.map { it.name }.joinToString(", ") + ")"
 }
 
 @Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
@@ -60,7 +60,7 @@ class Property<C, T, ID>(
 ) : BaseProperty<C, T, ID>(id, type, name)
 
 @Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
-fun Property<C, T, ID> (property: KProperty1<C, T?>,
+fun <C, T, ID> Property(property: KProperty1<C, T?>,
                         type: Type<T, ID>,
                         id: (C) -> ID?,
                         apply: (C, T) -> C
@@ -76,7 +76,7 @@ class CollectionProperty<C, T, ID>(
     override fun toString() = name
 }
 
-fun CollectionProperty<C, T, ID>(
+fun <C, T, ID> CollectionProperty(
         property: KProperty1<C, Collection<T>>,
         type: Type<T, ID>,
         id: (C) -> ID,

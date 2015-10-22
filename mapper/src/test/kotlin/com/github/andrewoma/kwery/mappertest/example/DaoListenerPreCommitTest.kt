@@ -94,7 +94,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
             row.int("transaction") to row.int("count")
         }.toMap()
 
-        assertEquals(2, audits.size())
+        assertEquals(2, audits.size)
         assertEquals(3, audits.get(transactionId))
         assertEquals(1, audits.get(transactionId + 1))
     }
@@ -119,7 +119,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
 
         private fun calculateChanges(event: Event, session: Session, table: Table<Any, Any>) = when (event) {
             is InsertEvent -> {
-                table.objectMap(session, event.value, table.dataColumns).entrySet().map {
+                table.objectMap(session, event.value, table.dataColumns).entries.map {
                     "${it.key}: ${session.dialect.bind(it.value!!, -1)}"
                 }.joinToString(", ")
             }
