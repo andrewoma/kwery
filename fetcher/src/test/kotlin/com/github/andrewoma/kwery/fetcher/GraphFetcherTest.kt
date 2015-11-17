@@ -119,7 +119,7 @@ class GraphFetcherTest {
 
     @Test(expected = IllegalArgumentException::class) fun testFindMatchingTypeRejectsUnknown() {
         val fetcher = GraphFetcher(setOf(film.type, actor.type, language.type))
-        assertEquals(film, fetcher.findMatchingType(""))
+        fetcher.findMatchingType("")
     }
 
     @Test fun testFindMatchingPropertiesAll() {
