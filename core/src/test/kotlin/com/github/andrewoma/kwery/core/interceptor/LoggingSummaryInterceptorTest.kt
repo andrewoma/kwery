@@ -70,7 +70,7 @@ Executed 8 statements in 43.846 ms (closed in 104.410 ms) affecting 19,989 rows 
         assertEquals(expected.replace("!".toRegex(), ""), generateReport(requestTime, executions))
     }
 
-    fun generateReport(requestTime: Long, executions: MutableList<Execution>): String {
+    internal fun generateReport(requestTime: Long, executions: MutableList<Execution>): String {
         val (totals, summaries) = LoggingSummaryInterceptor.summariseRequest(executions)
         return LoggingSummaryInterceptor.createReport(requestTime, totals, summaries)
     }

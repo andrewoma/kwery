@@ -65,7 +65,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             log.info(createReport(request.stopWatch.elapsed(TimeUnit.NANOSECONDS), totals, summaries))
         }
 
-        /*internal*/ fun calculateWidths(headings: Array<String>, totals: ExecutionSummary, summaries: List<ExecutionSummary>): List<Int> {
+        internal fun calculateWidths(headings: Array<String>, totals: ExecutionSummary, summaries: List<ExecutionSummary>): List<Int> {
             var name = 0
             var executions = 0
             var closed = 0
@@ -92,12 +92,12 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             )
         }
 
-        /*internal*/ fun width(count: Long): Int {
+        internal fun width(count: Long): Int {
             val digits = if (count == 0L) 1 else Math.log10(count.toDouble()).toInt() + 1
             return digits + ((digits - 1) / 3)
         }
 
-        /*internal*/ fun createReport(requestTime: Long, totals: ExecutionSummary, summaries: List<ExecutionSummary>): String {
+        internal fun createReport(requestTime: Long, totals: ExecutionSummary, summaries: List<ExecutionSummary>): String {
             val widths = calculateWidths(headings, totals, summaries)
             val format = "\n    %${widths[0]}s  %,${widths[1]}d  %,${widths[2]}.${3}f  %,${widths[3]}.${3}f  %,${widths[4]}d  %${widths[5]}.${1}f%%"
             val headingsFormat = "    %${widths[0]}s  %${widths[1]}s  %${widths[2]}s  %${widths[3]}s  %${widths[4]}s  %${widths[5]}s"
@@ -123,7 +123,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             return sb.toString()
         }
 
-        /*internal*/ fun formatSummary(formatter: Formatter, format: String, totals: ExecutionSummary, summary: ExecutionSummary) {
+        internal fun formatSummary(formatter: Formatter, format: String, totals: ExecutionSummary, summary: ExecutionSummary) {
             formatter.format(format, summary.name,
                     summary.executionCount,
                     summary.executionTime.toDouble() / nanoToMs,
@@ -132,7 +132,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
                     summary.closedTime.toDouble() / totals.closedTime.toDouble() * 100)
         }
 
-        /*internal*/ fun summariseRequest(executions: MutableList<Execution>): Pair<ExecutionSummary, List<ExecutionSummary>> {
+        internal fun summariseRequest(executions: MutableList<Execution>): Pair<ExecutionSummary, List<ExecutionSummary>> {
             // Prematurely optimise with some imperative code to summarise without lots of collection creation
             // Group by statement name (and collect totals)
             Collections.sort(executions, { e1, e2 -> e1.name.compareTo(e2.name) })
@@ -164,8 +164,8 @@ class LoggingSummaryInterceptor : StatementInterceptor {
         }
     }
 
-    /*internal*/ data class ExecutionSummary(val name: String, var executionTime: Long, var closedTime: Long, var executionCount: Long, var rowCounts: Long)
-    /*internal*/ data class Execution(val name: String, val started: Long, val executed: Long, val closed: Long, val rowCount: Long)
+    internal data class ExecutionSummary(val name: String, var executionTime: Long, var closedTime: Long, var executionCount: Long, var rowCounts: Long)
+    internal data class Execution(val name: String, val started: Long, val executed: Long, val closed: Long, val rowCount: Long)
 
     private var ExecutingStatement.context: Execution?
         get() = this.contexts[LoggingSummaryInterceptor::class.java.name] as Execution?
