@@ -190,11 +190,18 @@ cd kwery
 ./gradlew check install
 ```
 
-Note: The tests require a local postgres database named `kwery`. e.g. On OS X
+Note: The tests require a local postgres and mysql database named `kwery`. e.g. On OS X
 ```
 brew install postgres
 launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
 createdb kwery
+
+brew install mysql
+ln -sfv /usr/local/opt/mysql/*.plist ~/Library/LaunchAgents
+launchctl load ~/Library/LaunchAgents/homebrew.mxcl.mysql.plist
+mysql -uroot -e 'create database kwery'
+mysql -uroot -e "create user 'kwery'@'localhost' identified by 'kwery'"
+mysql -uroot -e "grant all privileges on *.* to 'kwery'@'localhost'"
 ```
 
 To open in IntelliJ, just open the `build.gradle` file and IntelliJ will generate the project automatically.

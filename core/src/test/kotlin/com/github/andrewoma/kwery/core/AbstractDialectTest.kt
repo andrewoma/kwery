@@ -23,6 +23,7 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.Dialect
+import com.github.andrewoma.kwery.core.dialect.MysqlDialect
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import org.junit.Test
 import org.postgresql.largeobject.LargeObjectManager
@@ -129,7 +130,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             "varchar_col" to value.varchar,
             "blob_col" to toBlob(value.blob),
             "clob_col" to toClob(value.clob),
-            "array_col" to session.connection.createArrayOf("int", value.ints.toTypedArray())
+            "array_col" to if (dialect is MysqlDialect) "" else session.connection.createArrayOf("int", value.ints.toTypedArray())
     )
 
     @Test fun `Allocate ids should contain a unique sequence of ids`() {
@@ -161,7 +162,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
                     row.string("varchar_col"),
                     fromBlob(row, "blob_col"),
                     fromClob(row, "clob_col"),
-                    row.array<Int>("array_col"))
+                    if (dialect is MysqlDialect) listOf() else row.array<Int>("array_col"))
         }.single()
     }
 
@@ -202,6 +203,9 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEquals(expected.varchar, actual.varchar)
         assertEquals(expected.blob, actual.blob)
         assertEquals(expected.clob, actual.clob)
-        assertEquals(expected.ints, actual.ints)
+
+        if (dialect !is MysqlDialect) {
+            assertEquals(expected.ints, actual.ints)
+        }
     }
 }

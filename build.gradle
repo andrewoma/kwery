@@ -8,6 +8,7 @@ buildscript {
         logbackVersion = '1.1.3'
         hsqlVersion = '2.3.3'
         postgresVersion = '9.4-1201-jdbc41'
+        mysqlVersion = '5.1.37'
         jerseyVersion = '2.19'
         dropwizardVersion = '0.9.0-rc3'
         jacksonVersion = '2.5.4'
@@ -136,6 +137,7 @@ project(':core') {
                 "ch.qos.logback:logback-classic:$logbackVersion",
                 "org.hsqldb:hsqldb:$hsqlVersion",
                 "org.postgresql:postgresql:$postgresVersion",
+                "mysql:mysql-connector-java:$mysqlVersion",
         )
     }
 }

@@ -4,9 +4,16 @@ jdk:
 
 before_script:
 - psql -c 'create database kwery;' -U postgres
+- mysql -uroot -e "create database if not exists kwery"
+- mysql -uroot -e "create user 'kwery'@'localhost' identified by 'kwery'"
+- mysql -uroot -e "grant all privileges on *.* to 'kwery'@'localhost'"
 
 script:
 - ./gradlew --info check
+
+services:
+#  - postgresql
+  - mysql
 
 addons:
   postgresql: "9.3"

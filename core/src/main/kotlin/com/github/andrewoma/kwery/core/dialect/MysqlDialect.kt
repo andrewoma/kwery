@@ -20,27 +20,29 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.core
+package com.github.andrewoma.kwery.core.dialect
 
-import org.apache.tomcat.jdbc.pool.DataSource
+import java.sql.*
 
-val hsqlDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "org.hsqldb.jdbc.JDBCDriver"
-    url = "jdbc:hsqldb:mem:kwery"
-}
+open class MysqlDialect : Dialect {
 
-val postgresDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "org.postgresql.Driver"
-    url = "jdbc:postgresql://localhost:5432/kwery"
-    jdbcInterceptors = "com.github.andrewoma.kwery.tomcat.pool.StatementCache"
-}
+    override fun bind(value: Any, limit: Int) = when (value) {
+        is String -> escapeSingleQuotedString(value.truncate(limit))
+        is Timestamp -> timestampFormat.get().format(value)
+        is Date -> "'$value'"
+        is Time -> "'$value'"
+        is java.sql.Array -> throw UnsupportedOperationException()
+        is Clob -> escapeSingleQuotedString(standardClob(value, limit))
+        is Blob -> standardBlob(value, limit)
+        is ByteArray -> standardByteArray(value, limit)
+        else -> value.toString()
+    }
 
-val mysqlDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "com.mysql.jdbc.Driver"
-    url = "jdbc:mysql://localhost:3306/kwery"
-    username = "kwery"
-    password = "kwery"      
+    override fun arrayBasedIn(name: String) = throw UnsupportedOperationException()
+
+    override val supportsArrayBasedIn = false
+
+    override val supportsAllocateIds = false
+
+    override fun allocateIds(count: Int, sequence: String, columnName: String) = throw UnsupportedOperationException()
 }

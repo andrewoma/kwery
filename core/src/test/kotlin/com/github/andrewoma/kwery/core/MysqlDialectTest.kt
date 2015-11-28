@@ -22,25 +22,37 @@
 
 package com.github.andrewoma.kwery.core
 
-import org.apache.tomcat.jdbc.pool.DataSource
+import com.github.andrewoma.kwery.core.dialect.MysqlDialect
+import org.junit.Test
+import kotlin.test.assertEquals
 
-val hsqlDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "org.hsqldb.jdbc.JDBCDriver"
-    url = "jdbc:hsqldb:mem:kwery"
-}
+class MysqlDialectTest : AbstractDialectTest(mysqlDataSource, MysqlDialect()) {
+    //language=MySQL
+    override val sql = """
+            drop table if exists dialect_test;
 
-val postgresDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "org.postgresql.Driver"
-    url = "jdbc:postgresql://localhost:5432/kwery"
-    jdbcInterceptors = "com.github.andrewoma.kwery.tomcat.pool.StatementCache"
-}
+            create table dialect_test (
+              id            varchar(255),
+              time_col      time,
+              date_col      date,
+              timestamp_col timestamp(3),
+              binary_col    blob,
+              varchar_col   varchar(1000),
+              blob_col      blob,
+              clob_col      text,
+              array_col     text -- Not supported
+            ) engine innodb char set utf8;
 
-val mysqlDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "com.mysql.jdbc.Driver"
-    url = "jdbc:mysql://localhost:3306/kwery"
-    username = "kwery"
-    password = "kwery"      
+            drop table if exists test;
+
+            create table test (
+              id            varchar(255),
+              value         varchar(255)
+            ) engine innodb char set utf8
+        """
+
+    @Test fun `Limits should be applied to variable parameters`() {
+        assertEquals("'12'", dialect.bind("12345", 2))
+        assertEquals("X'3132'", dialect.bind("12345".toByteArray(), 2))
+    }
 }
