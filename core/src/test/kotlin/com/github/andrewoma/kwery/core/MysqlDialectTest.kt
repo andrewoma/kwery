@@ -35,7 +35,8 @@ class MysqlDialectTest : AbstractDialectTest(mysqlDataSource, MysqlDialect()) {
               id            varchar(255),
               time_col      time,
               date_col      date,
-              timestamp_col timestamp(3),
+              timestamp_col timestamp,
+--              timestamp_col timestamp(3), Waiting on travis to support this
               binary_col    blob,
               varchar_col   varchar(1000),
               blob_col      blob,

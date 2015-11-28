@@ -198,14 +198,14 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         // Dates and times aren't equal by equality with hsqldb, so test the strings
         assertEquals(expected.time.toString(), actual.time.toString())
         assertEquals(expected.date.toString(), actual.date.toString())
-        assertEquals(expected.timestamp.toString(), actual.timestamp.toString())
         assertEquals(expected.binary, actual.binary)
         assertEquals(expected.varchar, actual.varchar)
         assertEquals(expected.blob, actual.blob)
         assertEquals(expected.clob, actual.clob)
 
         if (dialect !is MysqlDialect) {
-            assertEquals(expected.ints, actual.ints)
+            assertEquals(expected.ints, actual.ints) // Arrays not supported
+            assertEquals(expected.timestamp.toString(), actual.timestamp.toString()) // travis doesn't support millis
         }
     }
 }
