@@ -29,36 +29,37 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
     override var startTransactionByDefault: Boolean = false
 
     @Test fun `setRollbackOnly should roll back transaction`() {
-        var actor: Actor? = null
-        session.transaction { t ->
-            actor = insert(Actor("Kate", "Beckinsale"))
+        val actor = session.transaction { t ->
+            val inserted = insert(Actor("Kate", "Beckinsale"))
             t.rollbackOnly = true
-            assertEquals(1, selectActors(setOf(actor?.id)).size)
+            assertEquals(1, selectActors(setOf(inserted.id)).size)
+            inserted
         }
-        assertEquals(0, selectActors(setOf(actor?.id)).size)
+        assertEquals(0, selectActors(setOf(actor.id)).size)
     }
 
     @Test fun `exception should roll back transaction`() {
-        var actor: Actor? = null
+        var id: Int? = null
         try {
             session.transaction { t ->
-                actor = insert(Actor("Kate", "Beckinsale"))
-                assertEquals(1, selectActors(setOf(actor?.id)).size)
+                val actor = insert(Actor("Kate", "Beckinsale"))
+                id = actor.id
+                assertEquals(1, selectActors(setOf(actor.id)).size)
                 throw RuntimeException("From block")
             }
         } catch(e: Exception) {
             assertEquals("From block", e.message)
         }
-        assertEquals(0, selectActors(setOf(actor?.id)).size)
+        assertEquals(0, selectActors(setOf(id)).size)
     }
 
     @Test fun `block should be implicitly committed`() {
-        var actor: Actor? = null
-        session.transaction { t ->
-            actor = insert(Actor("Kate", "Beckinsale"))
-            assertEquals(1, selectActors(setOf(actor?.id)).size)
+        val actor = session.transaction { t ->
+            val inserted = insert(Actor("Kate", "Beckinsale"))
+            assertEquals(1, selectActors(setOf(inserted.id)).size)
+            inserted
         }
-        assertEquals(1, selectActors(setOf(actor?.id)).size)
+        assertEquals(1, selectActors(setOf(actor.id)).size)
     }
 }
 

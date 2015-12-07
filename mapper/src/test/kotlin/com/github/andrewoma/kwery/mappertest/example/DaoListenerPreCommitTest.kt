@@ -95,8 +95,8 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
         }.toMap()
 
         assertEquals(2, audits.size)
-        assertEquals(3, audits.get(transactionId))
-        assertEquals(1, audits.get(transactionId + 1))
+        assertEquals(3, audits[transactionId])
+        assertEquals(1, audits[transactionId + 1])
     }
 
     data class Audit(val transactionId: Int, val table: String, val id: Int, val operation: String, val changes: String)

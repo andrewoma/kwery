@@ -29,5 +29,5 @@ import com.google.common.cache.Cache as GCache
 class GuavaCache<K, V : Any>(val underlying: GCache<K, V> = CacheBuilder.newBuilder().build()) : Cache<K, V> {
 
     override fun get(key: K) = underlying.getIfPresent(key)
-    override fun getOrPut(key: K, ifAbsent: (K) -> V) = underlying.get(key) { ifAbsent(key) }
+    override fun getOrPut(key: K, ifAbsent: (K) -> V) = underlying[key, { ifAbsent(key) }]
 }

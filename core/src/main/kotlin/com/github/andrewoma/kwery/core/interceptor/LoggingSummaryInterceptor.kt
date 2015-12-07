@@ -167,16 +167,16 @@ class LoggingSummaryInterceptor : StatementInterceptor {
     internal data class ExecutionSummary(val name: String, var executionTime: Long, var closedTime: Long, var executionCount: Long, var rowCounts: Long)
     internal data class Execution(val name: String, val started: Long, val executed: Long, val closed: Long, val rowCount: Long)
 
-    private var ExecutingStatement.context: Execution?
-        get() = this.contexts[LoggingSummaryInterceptor::class.java.name] as Execution?
+    private var ExecutingStatement.context: Execution
+        get() = this.contexts[LoggingSummaryInterceptor::class.java.name]!! as Execution
         set(value) {
             this.contexts[LoggingSummaryInterceptor::class.java.name] = value
         }
 
     override fun executed(statement: ExecutingStatement) {
-        if (statement.context != null) {
-            statement.context = statement.context?.copy(executed = System.nanoTime())
-        }
+        if (requests.get() == null) return
+
+        statement.context = statement.context.copy(executed = System.nanoTime())
     }
 
     override fun construct(statement: ExecutingStatement): ExecutingStatement {
@@ -190,9 +190,10 @@ class LoggingSummaryInterceptor : StatementInterceptor {
     }
 
     override fun closed(statement: ExecutingStatement) {
-        if (statement.context != null) {
-            val rowCount = statement.rowsCounts.fold(0L, { acc, i -> acc + i })
-            requests.get()?.executions?.add(statement.context?.copy(closed = System.nanoTime(), rowCount = rowCount)!!)
-        }
+        if (requests.get() == null) return
+
+        val rowCount = statement.rowsCounts.fold(0L, { acc, i -> acc + i })
+        statement.context = statement.context.copy(closed = System.nanoTime(), rowCount = rowCount)
+        requests.get()?.executions?.add(statement.context)
     }
 }

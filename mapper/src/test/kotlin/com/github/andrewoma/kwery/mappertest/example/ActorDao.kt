@@ -56,6 +56,6 @@ class ActorDao(session: Session, val filmActorDao: FilmActorDao) :
     fun findByFilmIds(ids: Collection<Int>): Map<Int, Collection<Actor>> {
         val filmActors = filmActorDao.findByFilmIds(ids)
         val films = findByIds(filmActors.map { it.id.actorId }.toSet())
-        return filmActors.groupBy { it.id.filmId }.mapValues { it.value.map { films.get(it.id.actorId)!! } }
+        return filmActors.groupBy { it.id.filmId }.mapValues { it.value.map { films[it.id.actorId]!! } }
     }
 }

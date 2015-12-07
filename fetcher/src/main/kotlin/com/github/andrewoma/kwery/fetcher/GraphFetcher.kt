@@ -188,7 +188,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
 
                 for (value in values) {
                     val id = property.id(value.get())
-                    val existing = (fetchedById.get(id) ?: listOf()).toArrayList()
+                    val existing = (fetchedById[id] ?: listOf()).toArrayList()
 
                     if (node.children.isEmpty() && node != Node.allDescendants) {
                         // Apply the fetched object to it's containing object

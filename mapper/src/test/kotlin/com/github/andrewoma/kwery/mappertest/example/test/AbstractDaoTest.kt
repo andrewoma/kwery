@@ -113,7 +113,7 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
     fun assertContentEquals(expected: Map<ID, T>, actual: Map<ID, T>) {
         assertEquals(expected.keys, actual.keys)
         for ((id, value) in expected) {
-            assertTrue(contentsEqual(value, actual.get(id)!!))
+            assertTrue(contentsEqual(value, actual[id]!!))
         }
     }
 

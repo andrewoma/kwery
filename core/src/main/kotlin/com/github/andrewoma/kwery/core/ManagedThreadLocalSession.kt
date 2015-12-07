@@ -65,7 +65,7 @@ class ManagedThreadLocalSession(val dataSource: DataSource,
 
         fun finalise(commitTransaction: Boolean, name: String = defaultThreadLocalSessionName) {
             val configs = threadLocalSession.get()
-            val config = configs.get(name)
+            val config = configs[name]
             check(config != null) { "A session has not been initialised for this thread" }
 
             try {
@@ -104,7 +104,7 @@ class ManagedThreadLocalSession(val dataSource: DataSource,
     private val session: DefaultSession
         get() {
             val configs = threadLocalSession.get()
-            val config = configs.get(name) ?: error("A session has not been initialised for this thread")
+            val config = configs[name] ?: error("A session has not been initialised for this thread")
             return if (config.session == null) {
                 val session = DefaultSession(dataSource.connection, dialect, interceptor, defaultOptions)
                 val transaction = if (!config.startTransaction) null else session.manualTransaction()
