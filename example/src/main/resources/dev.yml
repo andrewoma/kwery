@@ -9,7 +9,7 @@ database:
   logValidationErrors: true
 
 server:
-  rootPath: /api/*
+  applicationContextPath: /api/*
   applicationConnectors:
     - type: http
       port: 9090

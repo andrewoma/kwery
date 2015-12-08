@@ -89,7 +89,6 @@ class FilmApplicationAcceptanceTest {
               "language" : {
                 "id" : 1
               },
-              "originalLanguage" : null,
               "duration" : 2880.000000000,
               "rating" : "G",
               "specialFeatures" : [ "Trailers", "Deleted Scenes" ],
