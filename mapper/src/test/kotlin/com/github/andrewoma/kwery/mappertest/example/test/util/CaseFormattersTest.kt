@@ -20,22 +20,19 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.mapper.util
+package com.github.andrewoma.kwery.mappertest.example.test.util
 
-val camelToLowerUnderscore: (String) -> String = { s ->
-    if (s.isEmpty()) s else {
-        val sb = StringBuilder(s.length + s.length / 3)
+import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
+import com.github.andrewoma.kwery.mapper.util.camelToTitle
+import org.junit.Test
+import kotlin.test.assertEquals
 
-        sb.append(Character.toLowerCase(s[0]))
-        for (ch in s.substring(1)) {
-            sb.append(if (ch.isUpperCase()) "_" + Character.toLowerCase(ch) else ch)
-        }
-        sb.toString()
+class CaseFormattersTest {
+    @Test fun `should convert to TitleCase`() {
+        assertEquals("TitleCase", camelToTitle("titleCase"))
     }
-}
 
-val camelToTitle: (String) -> String = { s ->
-    if (s.isEmpty()) s else {
-        s.capitalize()
+    @Test fun `should convert to lower_underscore`() {
+        assertEquals("lower_underscore", camelToLowerUnderscore("lowerUnderscore"))
     }
 }
