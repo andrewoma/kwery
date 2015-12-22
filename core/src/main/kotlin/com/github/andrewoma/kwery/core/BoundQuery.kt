@@ -55,7 +55,7 @@ internal fun inClauseSizes(parametersList: List<Map<String, Any?>>): Map<String,
     for (parameters in parametersList) {
         for ((key, value) in parameters) {
             if (value is Collection<*> && value.size != 0) {
-                sizes[key] = Math.max(inClauseSize(value.size), sizes.getOrElse(key, { 0 }))
+                sizes[key] = Math.max(inClauseSize(value.size), sizes[key] ?: 0)
             }
         }
     }
