@@ -123,7 +123,7 @@ class DurationConverter(unit: TemporalUnit) : SimpleConverter<Duration>(
     }
 
     init {
-        require(supported.containsRaw(unit)) { "Only ${supported.joinToString(", ")} are supported" }
+        require(unit in supported) { "Only ${supported.joinToString(", ")} are supported" }
     }
 }
 

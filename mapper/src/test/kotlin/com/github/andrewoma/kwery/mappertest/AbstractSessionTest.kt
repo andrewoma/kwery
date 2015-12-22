@@ -68,7 +68,7 @@ abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDa
     open fun afterSessionSetup() {
     }
 
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST", "DEPRECATION")
     fun <R> initialise(token: String, f: (Session) -> R): R {
         return initialised.getOrPut(token) { f(session) } as R
     }
