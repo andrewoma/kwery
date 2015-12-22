@@ -117,6 +117,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun update(oldValue: T, newValue: T, deltaOnly: Boolean): T {
+        fireEvent(listOf(PreUpdateEvent(table, id(oldValue), newValue, oldValue)))
         val name = "update"
         require(id(oldValue) == id(newValue)) { "Attempt to update ${table.name} objects with different ids: ${id(oldValue)} ${id(newValue)}" }
         require(table is Versioned<*>) { "table must be Versioned to use update. Use unsafeUpdate for unversioned tables" }
@@ -197,6 +198,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {
+        fireEvent(values.map { PreInsertEvent(table, id(it), it) })
         val name = "batchInsert"
         val generateKeys = isGeneratedKey(values.firstOrNull(), idStrategy)
 
@@ -231,6 +233,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun insert(value: T, idStrategy: IdStrategy): T {
+        fireEvent(listOf(PreInsertEvent(table, id(value), value)))
         val name = "insert"
         val generateKeys = isGeneratedKey(value, idStrategy)
 
@@ -322,6 +325,10 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
+        for ((old, new) in values.asSequence().map { it.first }.zip(values.asSequence().map { it.second })) {
+            fireEvent(listOf(UpdateEvent(table, id(old), new, old)))
+        }
+
         val name = "batchUpdate"
         require(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
         val versionColumn = table.versionColumn!!

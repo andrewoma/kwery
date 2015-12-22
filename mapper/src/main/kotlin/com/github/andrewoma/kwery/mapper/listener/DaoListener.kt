@@ -36,8 +36,10 @@ interface Event {
     val id: Any
 }
 
+data class PreInsertEvent(override val table: Table<*, *>, override val id: Any, val value: Any) : Event
 data class InsertEvent(override val table: Table<*, *>, override val id: Any, val value: Any) : Event
 data class DeleteEvent(override val table: Table<*, *>, override val id: Any, val value: Any?) : Event
+data class PreUpdateEvent(override val table: Table<*, *>, override val id: Any, val new: Any?, val old: Any?) : Event
 data class UpdateEvent(override val table: Table<*, *>, override val id: Any, val new: Any?, val old: Any?) : Event
 
 abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
