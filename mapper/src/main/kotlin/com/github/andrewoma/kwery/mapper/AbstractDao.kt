@@ -188,6 +188,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun unsafeUpdate(newValue: T): Int {
+        fireEvent(listOf(PreUpdateEvent(table, id(newValue), newValue, null)))
         val name = "unsafeUpdate"
 
         val sql = sql(name) {
@@ -299,6 +300,10 @@ abstract class AbstractDao<T : Any, ID : Any>(
     protected fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, { f() })
 
     override fun unsafeBatchUpdate(values: List<T>) {
+        for (value in values) {
+            fireEvent(listOf(PreUpdateEvent(table, id(value), value, null)))
+        }
+
         val name = "unsafeBatchUpdate"
 
         val updates = values.map { table.objectMap(session, it, table.allColumns) }
@@ -326,7 +331,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
     override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
         for ((old, new) in values.asSequence().map { it.first }.zip(values.asSequence().map { it.second })) {
-            fireEvent(listOf(UpdateEvent(table, id(old), new, old)))
+            fireEvent(listOf(PreUpdateEvent(table, id(old), new, old)))
         }
 
         val name = "batchUpdate"
