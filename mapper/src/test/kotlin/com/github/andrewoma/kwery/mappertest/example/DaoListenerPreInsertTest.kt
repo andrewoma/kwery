@@ -63,6 +63,7 @@ class EntityDao(session: Session) : AbstractDao<Entity, Int>(
     }
 
     inner class DateModifiedHandler : Listener {
+        @Suppress("USELESS_CAST")
         override fun onEvent(session: Session, events: List<Event>) {
             for (event in events) {
                 if (event is PreInsertEvent && event.value is Entity) {
@@ -81,7 +82,6 @@ class EntityDao(session: Session) : AbstractDao<Entity, Int>(
 
 class DaoListenerPreInsertTest : AbstractSessionTest() {
     var dao: EntityDao by Delegates.notNull()
-    var nextTransactionId = 0
 
     override var startTransactionByDefault = false
 

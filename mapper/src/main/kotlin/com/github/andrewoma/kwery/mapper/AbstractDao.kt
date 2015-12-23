@@ -195,7 +195,12 @@ abstract class AbstractDao<T : Any, ID : Any>(
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
         }
         val newMap = table.objectMap(session, newValue, table.allColumns)
-        return session.update(sql, newMap, options(name))
+
+        val result = session.update(sql, newMap, options(name))
+
+        fireEvent(listOf(UpdateEvent(table, id(newValue), newValue, null)))
+
+        return result
     }
 
     override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {

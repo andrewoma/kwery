@@ -74,6 +74,17 @@ class DaoListenerPostCommitTest : AbstractSessionTest() {
         assertEquals(tommy, cache.values.first().name)
     }
 
+    @Test fun `Unsafe updates should be visible after commit`() {
+        val tommy = Name("Tommy", "Lee")
+        session.transaction {
+            val inserted = dao.insert(Actor(Name("Bruce", "Lee")))
+            dao.unsafeUpdate(inserted.copy(name = tommy))
+            assertTrue(cache.isEmpty())
+        }
+        assertEquals(1, cache.size)
+        assertEquals(tommy, cache.values.first().name)
+    }
+
     @Test fun `Multiple transactions should accumulate`() {
         val tommy = Name("Tommy", "Lee")
         val inserted = session.transaction {
