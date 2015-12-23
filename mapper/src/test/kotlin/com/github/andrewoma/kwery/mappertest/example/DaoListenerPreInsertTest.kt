@@ -23,7 +23,10 @@
 package com.github.andrewoma.kwery.mappertest.example
 
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.mapper.*
+import com.github.andrewoma.kwery.mapper.AbstractDao
+import com.github.andrewoma.kwery.mapper.Table
+import com.github.andrewoma.kwery.mapper.Value
+import com.github.andrewoma.kwery.mapper.VersionedWithInt
 import com.github.andrewoma.kwery.mapper.listener.Event
 import com.github.andrewoma.kwery.mapper.listener.Listener
 import com.github.andrewoma.kwery.mapper.listener.PreInsertEvent
@@ -102,7 +105,7 @@ class DaoListenerPreInsertTest : AbstractSessionTest() {
     }
 
     @Test fun `dateCreated and dateModified should be populated by Listener`() {
-        val entity = Entity(1);
+        val entity = Entity(1)
 
         session.transaction {
             dao.insert(entity)
@@ -123,8 +126,8 @@ class DaoListenerPreInsertTest : AbstractSessionTest() {
     }
 
     @Test fun `dateCreated and dateModified should be populated by Batch Operations`() {
-        val one = Entity(2);
-        val two = Entity(3);
+        val one = Entity(2)
+        val two = Entity(3)
 
         session.transaction {
             dao.batchInsert(listOf(one, two))
