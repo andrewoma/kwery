@@ -95,7 +95,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
         }.toMap()
 
         assertEquals(2, audits.size)
-        assertEquals(3, audits[transactionId])
+        assertEquals(6, audits[transactionId])
         assertEquals(1, audits[transactionId + 1])
     }
 
@@ -131,6 +131,8 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
                 }.joinToString(", ")
             }
             is DeleteEvent -> ""
+            is PreInsertEvent -> ""
+            is PreUpdateEvent -> ""
             else -> throw UnsupportedOperationException("Unknown event: $event")
         }
 
