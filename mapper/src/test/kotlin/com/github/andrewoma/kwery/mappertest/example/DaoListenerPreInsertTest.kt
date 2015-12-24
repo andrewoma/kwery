@@ -27,10 +27,7 @@ import com.github.andrewoma.kwery.mapper.AbstractDao
 import com.github.andrewoma.kwery.mapper.Table
 import com.github.andrewoma.kwery.mapper.Value
 import com.github.andrewoma.kwery.mapper.VersionedWithInt
-import com.github.andrewoma.kwery.mapper.listener.Event
-import com.github.andrewoma.kwery.mapper.listener.Listener
-import com.github.andrewoma.kwery.mapper.listener.PreInsertEvent
-import com.github.andrewoma.kwery.mapper.listener.PreUpdateEvent
+import com.github.andrewoma.kwery.mapper.listener.*
 import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import org.junit.Test
 import java.time.LocalDateTime
@@ -61,29 +58,29 @@ class EntityDao(session: Session) : AbstractDao<Entity, Int>(
         entityTable,
         { it.id }
 ) {
+    val listener = DateModifiedHandler()
+
     init {
-        addListener(DateModifiedHandler())
+        addListener(listener)
     }
 
     inner class DateModifiedHandler : Listener {
-        @Suppress("USELESS_CAST")
-        override fun onEvent(session: Session, events: List<Event>) {
-            for (event in events) {
-                if (event is PreInsertEvent && event.value is Entity) {
-                    // TODO: figure out why smart casting doesn't work here
-                    ((event.value) as Entity).dateCreated = LocalDateTime.now()
-                    ((event.value) as Entity).dateModified = LocalDateTime.now()
+        override fun onEvent(session: Session, event: Event) {
+            if (event is TransformingEvent && event.new is Entity) {
+                val entity = event.new as Entity
+                if (event is PreInsertEvent) {
+                    entity.dateCreated = LocalDateTime.now()
+                    entity.dateModified = LocalDateTime.now()
                 }
-
                 if (event is PreUpdateEvent && event.new is Entity) {
-                    ((event.new) as Entity).dateModified = LocalDateTime.now()
+                    entity.dateModified = LocalDateTime.now()
                 }
             }
         }
     }
 }
 
-class DaoListenerPreInsertTest : AbstractSessionTest() {
+open class DaoListenerPreInsertTest : AbstractSessionTest() {
     var dao: EntityDao by Delegates.notNull()
 
     override var startTransactionByDefault = false
@@ -99,26 +96,26 @@ class DaoListenerPreInsertTest : AbstractSessionTest() {
                 )
             """)
         }
-        super.afterSessionSetup()
+        session.update("delete from entity")
 
         dao = EntityDao(session)
     }
 
     @Test fun `dateCreated and dateModified should be populated by Listener`() {
-        val entity = Entity(1)
+        var entity = Entity(1)
 
         session.transaction {
-            dao.insert(entity)
+            entity = dao.insert(entity)
         }
 
         assertNotNull(entity.dateCreated)
         assertNotNull(entity.dateModified)
 
-        val new = entity.copy()
+        var new = entity.copy()
         Thread.sleep(1)
 
         session.transaction {
-            dao.update(entity, new)
+            new = dao.update(entity, new)
         }
 
         println("${entity.dateModified} -> ${new.dateModified}")
@@ -126,11 +123,13 @@ class DaoListenerPreInsertTest : AbstractSessionTest() {
     }
 
     @Test fun `dateCreated and dateModified should be populated by Batch Operations`() {
-        val one = Entity(2)
-        val two = Entity(3)
+        var one = Entity(2)
+        var two = Entity(3)
 
         session.transaction {
-            dao.batchInsert(listOf(one, two))
+            val result = dao.batchInsert(listOf(one, two))
+            one = result[0]
+            two = result[1]
         }
 
         assertNotNull(one.dateCreated)
@@ -153,36 +152,56 @@ class DaoListenerPreInsertTest : AbstractSessionTest() {
     }
 
     @Test fun `dateModified should be incremented by unsafeUpdate`() {
-        val entity = Entity(4)
+        var entity = Entity(4)
 
         session.transaction {
-            dao.insert(entity)
+            entity = dao.insert(entity)
         }
 
         val initialDateModified = entity.dateModified
         Thread.sleep(1)
 
         session.transaction {
-            dao.unsafeUpdate(entity)
+            entity = dao.unsafeUpdate(entity)
         }
 
         assertTrue(entity.dateModified!!.isAfter(initialDateModified))
     }
 
     @Test fun `dateModified should be incremented by unsafeBatchUpdate`() {
-        val entity = Entity(5)
+        var entity = Entity(5)
 
         session.transaction {
-            dao.insert(entity)
+            entity = dao.insert(entity)
         }
 
         val initialDateModified = entity.dateModified
         Thread.sleep(1)
 
         session.transaction {
-            dao.unsafeBatchUpdate(listOf(entity))
+            entity = dao.unsafeBatchUpdate(listOf(entity)).first()
         }
 
         assertTrue(entity.dateModified!!.isAfter(initialDateModified))
+    }
+}
+
+class DaoListenerPreInsertTransformingTest : DaoListenerPreInsertTest() {
+    override fun afterSessionSetup() {
+        super.afterSessionSetup()
+        dao.removeListener(dao.listener)
+        dao.addListener(object : Listener {
+            override fun onEvent(session: Session, event: Event) {
+                if (event is TransformingEvent && event.new is Entity) {
+                    val entity = event.new as Entity
+                    if (event is PreInsertEvent) {
+                        event.transformed = entity.copy(dateCreated = LocalDateTime.now(), dateModified = LocalDateTime.now())
+                    }
+                    if (event is PreUpdateEvent && event.new is Entity) {
+                        event.transformed = entity.copy(dateModified = LocalDateTime.now())
+                    }
+                }
+            }
+        })
     }
 }

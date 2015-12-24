@@ -205,11 +205,11 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         val inserted = insert()
 
         Thread.sleep(2)
-        assertEquals(1, dao.unsafeUpdate(mutateContents(inserted))) // This mutation will be silently lost
+        dao.unsafeUpdate(mutateContents(inserted)) // This mutation will be silently lost
 
         Thread.sleep(2)
         val updated = mutateContents(inserted)
-        assertEquals(1, dao.unsafeUpdate(updated))
+        dao.unsafeUpdate(updated)
         val found = dao.findById(id(updated))
         assertTrue(contentsEqual(updated, found!!))
     }

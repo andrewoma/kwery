@@ -125,7 +125,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
             }
             is UpdateEvent -> {
                 val old = table.objectMap(session, event.old!!, table.dataColumns)
-                val new = table.objectMap(session, event.new!!, table.dataColumns)
+                val new = table.objectMap(session, event.new, table.dataColumns)
                 old.mapValues { it.value to new[it.key] }.filter { it.value.first != it.value.second }.map {
                     "${it.key}: ${session.dialect.bind(it.value.first!!, -1)} -> ${session.dialect.bind(it.value.second!!, -1)}"
                 }.joinToString(", ")

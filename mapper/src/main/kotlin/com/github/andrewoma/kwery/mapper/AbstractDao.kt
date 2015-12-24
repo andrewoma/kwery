@@ -58,8 +58,20 @@ abstract class AbstractDao<T : Any, ID : Any>(
         listeners.remove(listener)
     }
 
-    protected fun fireEvent(events: List<Event>) {
-        listeners.forEach { it.onEvent(session, events) }
+    protected fun fireEvent(f: () -> Event) {
+        if (listeners.isEmpty()) return
+        val event = f()
+        for (listener in listeners) {
+            listener.onEvent(session, event)
+        }
+    }
+
+    protected fun fireTransformingEvent(value: T, f: () -> TransformingEvent): T {
+        if (listeners.isEmpty()) return value
+        val event = f()
+        fireEvent { event }
+        @Suppress("UNCHECKED_CAST")
+        return event.transformed as T
     }
 
     protected fun <T1, T2> List<Pair<T1, T2>>.join(apply: (T1, List<T2>) -> T1): List<T1> {
@@ -117,15 +129,16 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun update(oldValue: T, newValue: T, deltaOnly: Boolean): T {
-        fireEvent(listOf(PreUpdateEvent(table, id(oldValue), newValue, oldValue)))
         val name = "update"
-        require(id(oldValue) == id(newValue)) { "Attempt to update ${table.name} objects with different ids: ${id(oldValue)} ${id(newValue)}" }
+        val new = fireTransformingEvent(newValue) { PreUpdateEvent(table, id(oldValue), newValue, oldValue) }
+
+        require(id(oldValue) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(oldValue)} ${id(newValue)}" }
         require(table is Versioned<*>) { "table must be Versioned to use update. Use unsafeUpdate for unversioned tables" }
 
         val versionColumn = table.versionColumn!!
         @Suppress("UNCHECKED_CAST")
         val newVersion = (table as Versioned<Any?>).nextVersion(versionColumn.property(oldValue))
-        val result = table.copy(newValue, mapOf(versionColumn to newVersion))
+        val result = table.copy(new, mapOf(versionColumn to newVersion))
 
         val oldMap = table.objectMap(session, oldValue, table.dataColumns)
         val newMap = table.objectMap(session, result, table.dataColumns)
@@ -141,7 +154,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
             }
             val parameters = hashMapOfExpectedSize<String, Any?>(differences.size + table.idColumns.size + 1)
             parameters.putAll(differences)
-            parameters.putAll(table.idMap(session, id(newValue), nf))
+            parameters.putAll(table.idMap(session, id(new), nf))
             parameters[oldVersionParam] = oldMap[versionCol]
             return sql to parameters
         }
@@ -152,7 +165,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
             }
             val parameters = hashMapOfExpectedSize<String, Any?>(newMap.size + table.idColumns.size + 1)
             parameters.putAll(newMap)
-            parameters.putAll(table.idMap(session, id(newValue), nf))
+            parameters.putAll(table.idMap(session, id(new), nf))
             parameters[oldVersionParam] = oldMap[versionCol]
             return sql to parameters
         }
@@ -164,7 +177,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
             throw OptimisticLockException("The same version (${oldMap[versionCol]}) of ${table.name} with id ${id(oldValue)} has been updated by another transaction")
         }
 
-        fireEvent(listOf(UpdateEvent(table, id(oldValue), result, oldValue)))
+        fireEvent { UpdateEvent(table, id(oldValue), result, oldValue) }
 
         return result
     }
@@ -182,31 +195,36 @@ abstract class AbstractDao<T : Any, ID : Any>(
         val sql = sql(name) { "delete from ${table.name} where ${table.idColumns.equate(" and ")}" }
         val count = session.update(sql, table.idMap(session, id, nf), options(name))
 
-        fireEvent(listOf(DeleteEvent(table, id, null)))
+        fireEvent { DeleteEvent(table, id, null) }
 
         return count
     }
 
-    override fun unsafeUpdate(newValue: T): Int {
-        fireEvent(listOf(PreUpdateEvent(table, id(newValue), newValue, null)))
+    override fun unsafeUpdate(newValue: T): T {
         val name = "unsafeUpdate"
+        val new = fireTransformingEvent(newValue) { PreUpdateEvent(table, id(newValue), newValue, null) }
 
         val sql = sql(name) {
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
         }
-        val newMap = table.objectMap(session, newValue, table.allColumns)
+        val newMap = table.objectMap(session, new, table.allColumns)
 
-        val result = session.update(sql, newMap, options(name))
+        val count = session.update(sql, newMap, options(name))
+        check(count == 1) { "$name updated $count rows, but expected 1" }
 
-        fireEvent(listOf(UpdateEvent(table, id(newValue), newValue, null)))
+        fireEvent { UpdateEvent(table, id(new), new, null) }
 
-        return result
+        return new
     }
 
     override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {
-        fireEvent(values.map { PreInsertEvent(table, id(it), it) })
         val name = "batchInsert"
-        val generateKeys = isGeneratedKey(values.firstOrNull(), idStrategy)
+
+        val new = if (listeners.isEmpty()) values else values.map { value ->
+            fireTransformingEvent(value) { PreInsertEvent(table, id(value), value) }
+        }
+
+        val generateKeys = isGeneratedKey(new.firstOrNull(), idStrategy)
 
         if (generateKeys && table.idColumns.size > 1) {
             throw UnsupportedOperationException("Batch insert with generated compound keys is unsupported")
@@ -216,48 +234,51 @@ abstract class AbstractDao<T : Any, ID : Any>(
         val sql = sql(name) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
 
         val inserted = if (generateKeys) {
-            val list = session.batchInsert(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name),
+            val list = session.batchInsert(sql, new.map { table.objectMap(session, it, columns, nf) }, options(name),
                     { table.rowMapper(table.idColumns, nf)(it) })
 
             val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
-            check(count == values.size) { "$name inserted $count rows, but expected ${values.size}" }
+            check(count == new.size) { "$name inserted $count rows, but expected ${new.size}" }
 
-            values.zip(list.map { it.second }).map {
+            new.zip(list.map { it.second }).map {
                 val (value, idValue) = it
                 table.copy(value, table.idColumns((id(idValue))).toMap())
             }
         } else {
-            val counts = session.batchUpdate(sql, values.map { table.objectMap(session, it, columns, nf) }, options(name))
+            val counts = session.batchUpdate(sql, new.map { table.objectMap(session, it, columns, nf) }, options(name))
             val count = counts.fold(0) { sum, value -> sum + value }
-            check(count == values.size) { "$name inserted $count rows, but expected ${values.size}" }
-            values
+            check(count == new.size) { "$name inserted $count rows, but expected ${new.size}" }
+            new
         }
 
-        fireEvent(inserted.map { InsertEvent(table, id(it), it) })
+        if (listeners.isNotEmpty()) inserted.forEach { value ->
+            fireEvent { InsertEvent(table, id(value), value) }
+        }
 
         return inserted
     }
 
     override fun insert(value: T, idStrategy: IdStrategy): T {
-        fireEvent(listOf(PreInsertEvent(table, id(value), value)))
         val name = "insert"
-        val generateKeys = isGeneratedKey(value, idStrategy)
+
+        val new = fireTransformingEvent(value) { PreInsertEvent(table, id(value), value) }
+        val generateKeys = isGeneratedKey(new, idStrategy)
 
         val columns = if (generateKeys) table.dataColumns else table.allColumns
         val sql = sql(name to columns) { "insert into ${table.name}(${columns.join()}) \nvalues (${columns.join { ":${it.name}" }})" }
-        val parameters = table.objectMap(session, value, columns, nf)
+        val parameters = table.objectMap(session, new, columns, nf)
 
         val (count, inserted) = if (generateKeys) {
             val (count, key) = session.insert(sql, parameters, options(name), { table.rowMapper(table.idColumns, nf)(it) })
             check(count == 1) { "$name failed to insert any rows" }
-            count to table.copy(value, table.idColumns(id(key)).toMap()) // Generated key
+            count to table.copy(new, table.idColumns(id(key)).toMap()) // Generated key
         } else {
             val count = session.update(sql, parameters, options(name))
-            count to value
+            count to new
         }
         check(count == 1) { "$name failed to insert any rows" }
 
-        fireEvent(listOf(InsertEvent(table, id(inserted), inserted)))
+        fireEvent { InsertEvent(table, id(inserted), inserted) }
 
         return inserted
     }
@@ -304,14 +325,13 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
     protected fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, { f() })
 
-    override fun unsafeBatchUpdate(values: List<T>) {
-        for (value in values) {
-            fireEvent(listOf(PreUpdateEvent(table, id(value), value, null)))
+    override fun unsafeBatchUpdate(values: List<T>) : List<T> {
+        val name = "unsafeBatchUpdate"
+        val new = if (listeners.isEmpty()) values else values.map { value ->
+            fireTransformingEvent(value) { PreUpdateEvent(table, id(value), value, null) }
         }
 
-        val name = "unsafeBatchUpdate"
-
-        val updates = values.map { table.objectMap(session, it, table.allColumns) }
+        val updates = new.map { table.objectMap(session, it, table.allColumns) }
 
         val sql = sql(name) {
             "update ${table.name}\nset ${table.dataColumns.equate()} \nwhere ${table.idColumns.equate(" and ")}"
@@ -319,15 +339,17 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         val counts = session.batchUpdate(sql, updates, options(name))
 
-        check(counts.size == values.size) { "$name updated ${counts.size} rows, but expected ${values.size}" }
+        check(counts.size == new.size) { "$name updated ${counts.size} rows, but expected ${new.size}" }
 
         for ((i, count) in counts.withIndex()) {
-            check(count == 1) { "Batch update failed to update row with id ${id(values[i])}" }
+            check(count == 1) { "Batch update failed to update row with id ${id(new[i])}" }
         }
 
-        for (value in values) {
-            fireEvent(listOf(UpdateEvent(table, id(value), value, null)))
+        if (listeners.isNotEmpty()) new.forEach { value ->
+            fireEvent { UpdateEvent(table, id(value), value, null) }
         }
+
+        return new
     }
 
     protected fun version(value: T): Any {
@@ -335,18 +357,16 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
-        for ((old, new) in values.asSequence().map { it.first }.zip(values.asSequence().map { it.second })) {
-            fireEvent(listOf(PreUpdateEvent(table, id(old), new, old)))
-        }
-
         val name = "batchUpdate"
+
         require(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
         val versionColumn = table.versionColumn!!
         val versionCol = versionColumn.name
         val oldVersionParam = "old__$versionCol"
 
         val updates = values.map {
-            val (old, new) = it
+            val old = it.first
+            val new = fireTransformingEvent(it.second) { PreUpdateEvent(table, id(old), it.second, old) }
             require(id(old) == id(new)) { "Attempt to update ${table.name} objects with different ids: ${id(old)} ${id(new)}" }
 
             @Suppress("UNCHECKED_CAST")
@@ -368,14 +388,16 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         val counts = session.batchUpdate(sql, updates.map { it.first }, options(name))
         check(counts.size == values.size) { "$name updated ${counts.size} rows, but expected ${values.size}" }
-        for ((count, value) in counts.zip(values)) {
-            if (count == 0) {
-                throw OptimisticLockException("The same version (${version(value.first)}) of ${table.name} with id ${id(value.first)} has been updated by another transaction")
-            }
+        val invalid = counts.indexOfFirst { it != 1 }
+        if (invalid != -1) {
+            val value = values[invalid].first
+            throw OptimisticLockException("The same version (${version(value)}) of ${table.name} with id ${id(value)} has been updated by another transaction")
         }
 
-        for ((old, new) in values.asSequence().map { it.first }.zip(updates.asSequence().map { it.second })) {
-            fireEvent(listOf(UpdateEvent(table, id(old), new, old)))
+        if (listeners.isNotEmpty()) {
+            for ((old, new) in values.asSequence().map { it.first }.zip(updates.asSequence().map { it.second })) {
+                fireEvent { UpdateEvent(table, id(old), new, old) }
+            }
         }
 
         return updates.map { it.second }

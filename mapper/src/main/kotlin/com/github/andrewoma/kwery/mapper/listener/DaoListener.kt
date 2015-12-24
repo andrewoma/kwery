@@ -28,7 +28,7 @@ import com.github.andrewoma.kwery.mapper.Table
 import java.util.concurrent.ConcurrentHashMap
 
 interface Listener {
-    fun onEvent(session: Session, events: List<Event>)
+    fun onEvent(session: Session, event: Event)
 }
 
 interface Event {
@@ -36,26 +36,44 @@ interface Event {
     val id: Any
 }
 
-data class PreInsertEvent(override val table: Table<*, *>, override val id: Any, val value: Any) : Event
+interface TransformingEvent : Event {
+    val new: Any
+    var transformed: Any
+}
+
+data class PreInsertEvent(
+        override val table: Table<*, *>,
+        override val id: Any,
+        override val new: Any,
+        override var transformed: Any = new
+) : TransformingEvent
+
+data class PreUpdateEvent(
+        override val table: Table<*, *>,
+        override val id: Any,
+        override val new: Any,
+        val old: Any?,
+        override var transformed: Any = new
+) : TransformingEvent
+
 data class InsertEvent(override val table: Table<*, *>, override val id: Any, val value: Any) : Event
 data class DeleteEvent(override val table: Table<*, *>, override val id: Any, val value: Any?) : Event
-data class PreUpdateEvent(override val table: Table<*, *>, override val id: Any, val new: Any?, val old: Any?) : Event
-data class UpdateEvent(override val table: Table<*, *>, override val id: Any, val new: Any?, val old: Any?) : Event
+data class UpdateEvent(override val table: Table<*, *>, override val id: Any, val new: Any, val old: Any?) : Event
 
 abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
     private val eventsByTransaction = ConcurrentHashMap<Long, MutableList<Event>>()
 
-    override fun onEvent(session: Session, events: List<Event>) {
+    override fun onEvent(session: Session, event: Event) {
         val transaction = session.currentTransaction
         if (transaction == null) {
             // If there is no transaction, assume auto commit is true
-            onCommit(true, events)
+            onCommit(true, listOf(event))
         } else {
             if (!eventsByTransaction.containsKey(transaction.id)) {
                 addCommitHook(transaction)
             }
 
-            eventsByTransaction[transaction.id]?.addAll(events)
+            eventsByTransaction[transaction.id]?.add(event)
         }
     }
 

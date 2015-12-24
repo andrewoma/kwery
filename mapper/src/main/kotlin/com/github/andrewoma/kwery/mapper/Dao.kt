@@ -39,13 +39,13 @@ interface Dao<T : Any, ID : Any> {
 
     fun delete(id: ID): Int
 
-    fun unsafeUpdate(newValue: T): Int
+    fun unsafeUpdate(newValue: T): T
 
     fun insert(value: T, idStrategy: IdStrategy = defaultIdStrategy): T
 
     fun batchInsert(values: List<T>, idStrategy: IdStrategy = defaultIdStrategy): List<T>
 
-    fun unsafeBatchUpdate(values: List<T>)
+    fun unsafeBatchUpdate(values: List<T>): List<T>
 
     fun batchUpdate(values: List<Pair<T, T>>): List<T>
 
