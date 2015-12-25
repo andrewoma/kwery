@@ -163,9 +163,20 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
-`0.1` Compatible with Kotlin M11.
+`master (unreleased)` Compatible with Kotlin 1.0.0-beta-4584
+* Mapper: support PreUpdate and PreInsert events (thanks @davemaple)
+* Remove tomcat pool module as Postgres drivers now support prepared statement caching
 
-`0.2` Compatible with Kotlin M12, adding transactional interceptors.
+`0.7` Compatible with Kotlin 1.0.0-beta-3595.
+* Add MySQL dialect
+
+`0.6` Compatible with Kotlin 1.0.0-beta-1038.
+
+`0.5` Compatible with Kotlin M14.
+
+`0.4` Compatible with Kotlin M13:
+* Provide a consistent set of defaults and converters for mapping standard types
+* Add defaults and converters for OffsetDateTime and ZonedDateTime
 
 `0.3` Compatible with Kotlin M13:
 * Improved docs
@@ -174,16 +185,9 @@ Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7
 * Renamed ThreadLocalSession to ManagedThreadLocalSession and introduced a new ThreadLocalSession for
   use without interceptors and annotations.
 
-`0.4` Compatible with Kotlin M13:
-* Provide a consistent set of defaults and converters for mapping standard types
-* Add defaults and converters for OffsetDateTime and ZonedDateTime
+`0.2` Compatible with Kotlin M12, adding transactional interceptors.
 
-`0.5` Compatible with Kotlin M14.
-
-`0.6` Compatible with Kotlin 1.0.0-beta-1038.
-
-`0.7` Compatible with Kotlin 1.0.0-beta-3595.
-* Add MySQL dialect
+`0.1` Compatible with Kotlin M11.
 
 #### Building
 
