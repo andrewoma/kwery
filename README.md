@@ -232,7 +232,6 @@ Robustness/Performance:
 
 Misc:
 * Better IDE support for highlighting inline SQL. Vote for [KT-6610](https://youtrack.jetbrains.com/issue/KT-6610)
-* Create a guava backed statement cache for Tomcat's connection pool?
 
 #### License
 This project is licensed under a MIT license.

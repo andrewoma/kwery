@@ -26,8 +26,8 @@ import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
+import com.zaxxer.hikari.HikariDataSource
 import io.dropwizard.testing.junit.ResourceTestRule
-import org.apache.tomcat.jdbc.pool.DataSource
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -76,10 +76,9 @@ fun insert(session: Session, value: String) = session.update("insert into test(v
 
 class TransactionalTest {
     companion object {
-        val dataSource = DataSource().apply {
-            defaultAutoCommit = true
+        val dataSource = HikariDataSource().apply {
             driverClassName = "org.hsqldb.jdbc.JDBCDriver"
-            url = "jdbc:hsqldb:mem:transactional_test"
+            jdbcUrl = "jdbc:hsqldb:mem:transactional_test"
         }
     }
 

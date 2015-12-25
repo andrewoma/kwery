@@ -22,25 +22,18 @@
 
 package com.github.andrewoma.kwery.core
 
-import org.apache.tomcat.jdbc.pool.DataSource
+import com.zaxxer.hikari.HikariDataSource
 
-val hsqlDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "org.hsqldb.jdbc.JDBCDriver"
-    url = "jdbc:hsqldb:mem:kwery"
+val hsqlDataSource = HikariDataSource().apply {
+    jdbcUrl = "jdbc:hsqldb:mem:kwery"
 }
 
-val postgresDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "org.postgresql.Driver"
-    url = "jdbc:postgresql://localhost:5432/kwery"
-    jdbcInterceptors = "com.github.andrewoma.kwery.tomcat.pool.StatementCache"
+val postgresDataSource = HikariDataSource().apply {
+    jdbcUrl = "jdbc:postgresql://localhost:5432/kwery"
 }
 
-val mysqlDataSource = DataSource().apply {
-    defaultAutoCommit = true
-    driverClassName = "com.mysql.jdbc.Driver"
-    url = "jdbc:mysql://localhost:3306/kwery"
+val mysqlDataSource = HikariDataSource().apply {
+    jdbcUrl = "jdbc:mysql://localhost:3306/kwery"
     username = "kwery"
     password = "kwery"      
 }

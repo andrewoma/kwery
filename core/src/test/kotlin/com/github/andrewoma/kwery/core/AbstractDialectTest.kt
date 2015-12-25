@@ -25,6 +25,7 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.MysqlDialect
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
+import com.zaxxer.hikari.pool.ProxyConnection
 import org.junit.Test
 import org.postgresql.largeobject.LargeObjectManager
 import java.io.ByteArrayInputStream
@@ -168,7 +169,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
     private fun toBlob(data: String): Any = when (session.dialect) {
         is PostgresDialect -> {
-            val manager = ((session.connection as PooledConnection).connection as org.postgresql.PGConnection).largeObjectAPI
+            val manager = (session.connection as ProxyConnection).unwrap(org.postgresql.PGConnection::class.java).largeObjectAPI
             val oid = manager.createLO(LargeObjectManager.READ + LargeObjectManager.WRITE)
             val obj = manager.open(oid, LargeObjectManager.WRITE)
             obj.write(data.toByteArray(Charsets.UTF_8))

@@ -28,17 +28,16 @@ import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import org.apache.tomcat.jdbc.pool.DataSource
+import com.zaxxer.hikari.HikariDataSource
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.TestName
 import kotlin.properties.Delegates
 
-private val testDataSource = DataSource().apply {
-    defaultAutoCommit = true
+private val testDataSource = HikariDataSource().apply {
     driverClassName = "org.hsqldb.jdbc.JDBCDriver"
-    url = "jdbc:hsqldb:mem:kwerydao"
+    jdbcUrl = "jdbc:hsqldb:mem:kwerydao"
 }
 
 abstract class AbstractSessionTest(val dataSource: javax.sql.DataSource = testDataSource, val dialect: Dialect = HsqlDialect()) {

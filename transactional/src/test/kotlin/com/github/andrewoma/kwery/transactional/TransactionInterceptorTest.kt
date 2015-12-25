@@ -26,7 +26,7 @@ import com.github.andrewoma.kwery.core.ManagedThreadLocalSession
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import org.apache.tomcat.jdbc.pool.DataSource
+import com.zaxxer.hikari.HikariDataSource
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -89,10 +89,9 @@ fun insert(session: Session, value: String) = session.update("insert into test(v
 
 class TransactionalInterceptorTest {
     companion object {
-        val dataSource = DataSource().apply {
-            defaultAutoCommit = true
+        val dataSource = HikariDataSource().apply {
             driverClassName = "org.hsqldb.jdbc.JDBCDriver"
-            url = "jdbc:hsqldb:mem:transactional_test"
+            jdbcUrl = "jdbc:hsqldb:mem:transactional_test"
         }
     }
 

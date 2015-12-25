@@ -25,14 +25,14 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.HsqlDialect
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
 import com.github.andrewoma.kwery.core.interceptor.LoggingInterceptor
-import com.github.andrewoma.kwery.tomcat.pool.StatementCache
+import com.zaxxer.hikari.pool.ProxyConnection
+import com.zaxxer.hikari.pool.ProxyStatement
 import org.junit.Before
 import org.junit.Test
 import org.postgresql.PGStatement
-import java.lang.reflect.Proxy
+import java.sql.Connection
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import javax.sql.PooledConnection
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
@@ -168,7 +168,7 @@ class SessionInfoDao(val session: Session) {
         val sql = "insert into sessions_test(thread, pool_connection, connection) values (:thread, :pool_connection, :connection)"
         val params = mapOf("thread" to Thread.currentThread().name,
                 "pool_connection" to System.identityHashCode(session.connection),
-                "connection" to System.identityHashCode((session.connection as PooledConnection).connection))
+                "connection" to System.identityHashCode((session.connection as ProxyConnection).unwrap(Connection::class.java)))
         session.update(sql, params)
     }
 }
@@ -183,8 +183,7 @@ object postgresLoggingInterceptor : LoggingInterceptor() {
     }
 
     override fun additionalInfo(statement: ExecutingStatement): String {
-        val pgStatement = (Proxy.getInvocationHandler(statement.statement!!) as StatementCache.CachedStatement)
-                .statement as PGStatement
+        val pgStatement = (statement.statement!! as ProxyStatement).unwrap(PGStatement::class.java)
 
         total++
 
@@ -192,7 +191,7 @@ object postgresLoggingInterceptor : LoggingInterceptor() {
             serverPrepared++
         }
 
-        return ". Connection: " + System.identityHashCode((statement.session.connection as PooledConnection).connection) +
+        return ". Connection: " + System.identityHashCode((statement.statement!!.connection as ProxyConnection).unwrap(Connection::class.java)) +
                 ". ServerPrepared=" + pgStatement.isUseServerPrepare
     }
 }
