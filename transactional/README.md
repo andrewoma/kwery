@@ -1,5 +1,9 @@
 The transactional module provides general purpose transactional interceptors for kwery.
 
+Note: the use of this module is discouraged - using a `ThreadLocalSession` with
+[transaction blocks](../core#transactions) is preferred as they work without interceptor
+configuration.
+
 Transaction interceptors are useful to automatically start transactions for method calls,
 rolling back on exceptions.
 
