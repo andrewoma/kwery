@@ -183,7 +183,8 @@ object postgresLoggingInterceptor : LoggingInterceptor() {
     }
 
     override fun additionalInfo(statement: ExecutingStatement): String {
-        val pgStatement = (statement.statement!! as ProxyStatement).unwrap(PGStatement::class.java)
+        val st = statement.statement!!
+        val pgStatement = (st as ProxyStatement).unwrap(PGStatement::class.java)
 
         total++
 
@@ -191,7 +192,7 @@ object postgresLoggingInterceptor : LoggingInterceptor() {
             serverPrepared++
         }
 
-        return ". Connection: " + System.identityHashCode((statement.statement!!.connection as ProxyConnection).unwrap(Connection::class.java)) +
+        return ". Connection: " + System.identityHashCode((st.connection as ProxyConnection).unwrap(Connection::class.java)) +
                 ". ServerPrepared=" + pgStatement.isUseServerPrepare
     }
 }

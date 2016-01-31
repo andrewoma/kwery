@@ -40,7 +40,7 @@ object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedW
 
     override fun idColumns(id: Int) = setOf(ActorId of id)
 
-    override fun create(value: Value<A>) = A(Name(value.of(FirstName), value.of(LastName)),
+    override fun create(value: Value<A>) = A(N(value.of(FirstName), value.of(LastName)),
             value.of(ActorId), value.of(LastUpdate))
 }
 
@@ -53,7 +53,7 @@ class ActorDao(session: Session, val filmActorDao: FilmActorDao) :
         return session.select(sql, parameters, options("findByLastNames"), table.rowMapper())
     }
 
-    fun findByFilmIds(ids: Collection<Int>): Map<Int, Collection<Actor>> {
+    fun findByFilmIds(ids: Collection<Int>): Map<Int, Collection<A>> {
         val filmActors = filmActorDao.findByFilmIds(ids)
         val films = findByIds(filmActors.map { it.id.actorId }.toSet())
         return filmActors.groupBy { it.id.filmId }.mapValues { it.value.map { films[it.id.actorId]!! } }

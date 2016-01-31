@@ -47,7 +47,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
         if (values.isEmpty()) return listOf()
 
         val fetched: MutableMap<Type<Any?, Any?>, MutableMap<Any?, Any?>> = hashMapOf()
-        val result = values.toArrayList()
+        val result = values.toMutableList()
         val mutableObjects = result.indices.map { i ->
             Value({ result[i] }, { result[i] = it })
         }
@@ -188,7 +188,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
 
                 for (value in values) {
                     val id = property.id(value.get())
-                    val existing = (fetchedById[id] ?: listOf()).toArrayList()
+                    val existing = (fetchedById[id] ?: listOf()).toMutableList()
 
                     if (node.children.isEmpty() && node != Node.allDescendants) {
                         // Apply the fetched object to it's containing object

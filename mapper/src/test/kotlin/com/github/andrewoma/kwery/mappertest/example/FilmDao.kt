@@ -68,7 +68,7 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
             where title = :title and release_year = :release_year
         """
 
-        val params = filmTable.objectMap(session, Film().copy(title = title, releaseYear = releaseYear))
+        val params = filmTable.objectMap(session, F().copy(title = title, releaseYear = releaseYear))
 
         return session.select(sql, params, StatementOptions("findWithActors"), combine(f.mapper, a.mapper))
                 .join { film, actors -> film.copy(actors = actors.toSet()) }
@@ -88,7 +88,7 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
               left join language ol on ol.language_id = f.original_language_id
             where title = :title and release_year = :release_year
         """
-        val params = filmTable.objectMap(session, Film().copy(title = title, releaseYear = releaseYear))
+        val params = filmTable.objectMap(session, F().copy(title = title, releaseYear = releaseYear))
 
         return session.select(sql, params, StatementOptions("findWithLanguages")) { row ->
             f.mapper(row).copy(language = l.mapper(row), originalLanguage = ol.optionalMapper(row))

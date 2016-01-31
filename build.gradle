@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        kotlinVersion = '1.0.0-beta-4584'
-        kommonVersion = '0.6'
+        kotlinVersion = '1.0.0-rc-1017'
+        kommonVersion = '0.7-SNAPSHOT'
         junitVersion = '4.12'
         slf4jVersion = '1.7.13'
         logbackVersion = '1.1.3'
@@ -17,6 +17,10 @@ buildscript {
         hikariVersion = '2.4.3'
     }
     repositories {
+        maven {
+            url "https://dl.bintray.com/kotlin/kotlin-eap/"
+        }
+
         jcenter()
     }
     dependencies {
@@ -48,7 +52,11 @@ subprojects {
     apply from: '../publish.gradle'
 
     repositories {
+        maven {
+            url "https://dl.bintray.com/kotlin/kotlin-eap/"
+        }
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
         compile(

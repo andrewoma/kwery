@@ -31,8 +31,10 @@ import kotlin.test.assertEquals
 
 class FilmApplicationAcceptanceTest {
     companion object {
-        @ClassRule val rule: DropwizardAppRule<FilmConfiguration> =
+        val rule: DropwizardAppRule<FilmConfiguration> =
                 DropwizardAppRule(FilmApplication::class.java, ResourceHelpers.resourceFilePath("dev.yml"))
+
+        @ClassRule @JvmStatic fun aRule() = rule
     }
 
     fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.localPort}$url")

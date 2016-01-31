@@ -35,7 +35,6 @@ import java.sql.SQLFeatureNotSupportedException
 import java.sql.Time
 import java.sql.Timestamp
 import javax.sql.DataSource
-import javax.sql.PooledConnection
 import kotlin.test.assertEquals
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {

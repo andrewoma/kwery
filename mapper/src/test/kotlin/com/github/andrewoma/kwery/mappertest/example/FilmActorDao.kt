@@ -39,7 +39,7 @@ object filmActorTable : Table<FA, FA.Id>("film_actor", tableConfig), VersionedWi
 
 class FilmActorDao(session: Session) : AbstractDao<FA, FA.Id>(session, filmActorTable, { it.id }, null, IdStrategy.Explicit) {
 
-    fun findByFilmIds(ids: Collection<Int>): List<FilmActor> {
+    fun findByFilmIds(ids: Collection<Int>): List<FA> {
         val name = "findByFilmIds"
         val sql = sql(name) { "select $columns from ${table.name} where film_id in (:ids)" }
         return session.select(sql, mapOf("ids" to ids), options(name), table.rowMapper())
