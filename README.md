@@ -163,7 +163,7 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
-`master (unreleased)` Compatible with Kotlin 1.0.0-beta-4584
+`0.8` Compatible with Kotlin 1.0.0-rc-1036.
 * Mapper: support PreUpdate and PreInsert events (thanks @davemaple)
 * Remove tomcat pool module as Postgres drivers now support prepared statement caching
 
