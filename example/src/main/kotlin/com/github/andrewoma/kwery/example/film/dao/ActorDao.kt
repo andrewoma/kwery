@@ -35,10 +35,10 @@ import com.github.andrewoma.kwery.example.film.model.Name as N
 
 object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedWithInt {
     // @formatter:off
-    val Id         by col(A::id,                 id = true)
+    val Id         by col(A::id, id = true)
     val FirstName  by col(N::first, { it.name })
     val LastName   by col(N::last,  { it.name })
-    val Version    by col(A::version,            version = true)
+    val Version    by col(A::version, version = true)
     // @formatter:on
 
     override fun idColumns(id: Int) = setOf(Id of id)

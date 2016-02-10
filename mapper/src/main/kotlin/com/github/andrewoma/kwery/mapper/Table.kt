@@ -45,7 +45,6 @@ data class Column<C, T>(
          */
         val property: (C) -> T,
 
-        // TODO ... Is this necessary - can it be left to construction?
         /**
          * If a value is not `nullable` a default value must be provided to allow construction
          * of partially selected objects
@@ -78,7 +77,6 @@ data class Column<C, T>(
          */
         val selectByDefault: Boolean,
 
-        // TODO ... is there any way to detect nullable bound?
         /**
          * True if the column is nullable
          */

@@ -34,10 +34,10 @@ val tableConfig = TableConfiguration(defaults, converters, camelToLowerUnderscor
 // A table object defines the mapping between columns and models
 // Conversions default to those defined in the configuration but may be overridden
 object actorTable : Table<Actor, Int>("actor", tableConfig), VersionedWithTimestamp {
-    val ActorId    by col(Actor::id,                     id = true)
+    val ActorId    by col(Actor::id, id = true)
     val FirstName  by col(Name::firstName, { it.name })
     val LastName   by col(Name::lastName,  { it.name })
-    val LastUpdate by col(Actor::lastUpdate,             version = true)
+    val LastUpdate by col(Actor::lastUpdate, version = true)
 
     override fun idColumns(id: Int) = setOf(ActorId of id)
 
@@ -45,6 +45,35 @@ object actorTable : Table<Actor, Int>("actor", tableConfig), VersionedWithTimest
             Name(value of FirstName, value of LastName), value of LastUpdate)
 }
 ```
+
+Each column in a table should have a corresponding `val` defined in the table object.
+
+The name of the `val` should match the name of the column after the naming convention
+is applied.
+
+So in the example above, `val ActorId` matches the `actor_id` column as we are
+using the `camelToLowerUnderscore` naming convention.
+
+`idColumns` must be overridden to define how to apply the primary key to an object.
+
+The `create` function essentially allows row to be converted into an object
+in a type safe manner.
+
+A row does not have to be mapped to a flat structure. In the example above,
+the first and last names are combined into a `Name` class.
+
+To achieve this you must:
+
+1. Use the overloaded variant of `col` that accepts a `property` (`Name::firstname`) and
+ a `path` (`{ it.name }`). The `path` arguments defines how fetch the `Name` object
+ given an `Actor` object in example above.
+
+2. Ensure your `create` function creates the appropriate nested structure (in this
+ case it constructs a `Name` object from the `FirstName` and `LastName` values).
+
+Finally, a `Column` object can be added directly if explicit control over mapping
+is required.
+
 
 #### Data Access Objects (DAOs) 
 
