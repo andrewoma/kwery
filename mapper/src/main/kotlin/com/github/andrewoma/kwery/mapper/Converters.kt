@@ -107,7 +107,7 @@ object blobConverter : Converter<ByteArray>(
         { c, v -> c.createBlob().let { it.setBytes(1, v); it } }
 )
 
-fun <R : Any> optional(converter: Converter<R>): Converter<R?> = Converter(
+fun <R> optional(converter: Converter<R>): Converter<R?> = Converter(
         { row, c -> if (row.objectOrNull(c) == null) null else converter.from(row, c) },
         { c, v -> if (v == null) null else converter.to(c, v) }
 )

@@ -74,17 +74,148 @@ To achieve this you must:
 Finally, a `Column` object can be added directly if explicit control over mapping
 is required.
 
-
-#### Data Access Objects (DAOs) 
+#### Data Access Objects (DAOs)
 
 Continuing the example from above a single line let's us use the `Table` definition to
 create a DAO will all the standard CRUD operations.
 
 ```kotlin
-class ActorDao(session: Session) : AbstractDao<Actor, Int>(session, actorTable, { it.id })
+class ActorDao(session: Session) : AbstractDao<Actor, Int>(session, actorTable, Actor::id)
 
 // Now we can use the DAO
 val dao = ActorDao(session)
 val inserted = dao.insert(Actor(1, Name("Kate", "Beckinsale"), LocalDateTime.now())
 val actors = dao.findAll()
 ```
+
+#### Mapping 1-1 and M-1 Relationships
+
+Kwery imposes no constraints on your model. You can use flat record-like structures
+or rich domain models. Your models may be mutable or immutable.
+
+With Kotlin, you must decide whether your model values are nullable or not. If you model
+them to match your domain (and database constraints) then you'll have not null
+values in your model.
+
+However, this is problematic in a couple of cases:
+
+1. Your query partially selects values from your model and excludes a mandatory value
+2. You construct a reference to another object and all you have is the foreign key id
+
+You can make all your model attributes nullable but this is pretty much unusable in
+Kotlin.
+
+For the case of partially selecting values, Kwery takes the approach of supplying
+default values in place of `null`. This requires that your column definitions supply
+a default value (this is usually done implicitly for standard types).
+
+For the case of constructing references to you need to supply a constructor or
+factory function that can construct the value with just the id.
+
+Given the above constraints, I tend to model my domain as immutable classes
+with default values as follows:
+
+```kotlin
+data class Film(
+    val id: Int = 0,
+    val language: Language = Language(0),
+    val originalLanguage: Language? = null
+)
+
+data class Language(
+    val id: Int = 0,
+    val name: String = "")
+```
+
+The only nullable values are those that are nullable in the domain (and database) -
+all other values have defaults.
+
+With the domain model above, there are two approaches to mapping it with Kwery to the
+following table definition:
+
+```SQL
+create table film (
+    id                   integer identity,
+    language_id          integer not null, -- FK to language table
+    original_language_id integer           -- FK to language table
+)
+```
+
+##### Mapping the structure
+
+Mapping the structure is the easiest approach if the related type (`Language` in this case) is used
+infrequently.
+
+This involves using `col` and `optionalCol` variants that allow you to specify that
+the column maps to value of another object (`Language::id`) via a function that
+returns the nested object (`Film::language` and `Film::originalLanguage`)
+
+The `create` function must then construct the nested `Language` objects from
+the ids (taking care in the nullable case).
+
+```kotlin
+object filmTable1 : Table<Film, Int>("film") {
+    val Id                 by col(Film::id, id = true)
+    val LanguageId         by col(Language::id, Film::language)
+    val OriginalLanguageId by optionalCol(Language::id, Film::originalLanguage)
+
+    override fun idColumns(id: Int) = setOf(Id of id)
+
+    override fun create(value: Value<Film>): Film =
+            Film(value of Id, Language(value of LanguageId),
+            (value of OriginalLanguageId)?.let { Language(it) })
+}
+
+class FilmDao1(session: Session) : AbstractDao<Film, Int>(
+        session, filmTable1, Film::id, "int", defaultId = 0)
+```
+
+##### Mapping with defaults and converters
+
+Mapping the structure is workable, but there is a cleaner way of mapping the `Language`
+column types at the expense of defining a `TableConfiguration` that includes `defaults` and `converters`.
+
+```kotlin
+val tableConfig = TableConfiguration(
+        defaults = standardDefaults + reifiedValue(Language(0)),
+        converters = standardConverters + reifiedConverter(languageConverter)
+)
+```
+
+The default defined above is fairly self explanatory - use the value `Language(0)`
+as a default for any value of type `Language`.
+
+The `converter` defines how a `Language` type can be mapped to and from a column.
+
+```kotlin
+object languageConverter : SimpleConverter<Language>(
+        { row, c -> Language(row.int(c)) },
+        Language::id
+)
+```
+
+Now the table object can be created using the custom `tableConfig`, allowing
+us to simplify the mapping. Columns now map directly to `Film` fields, not 
+`Language` fields and the `create` method now gets `Language` objects instead
+of `ints`.
+ 
+```kotlin
+object filmTable2 : Table<Film, Int>("film", tableConfig) {
+    val Id                 by col(Film::id, id = true)
+    val LanguageId         by col(Film::language)
+    val OriginalLanguageId by col(Film::originalLanguage)
+
+    override fun idColumns(id: Int) = setOf(Id of id)
+
+    override fun create(value: Value<Film>): Film =
+            Film(value of Id, value of LanguageId, value of OriginalLanguageId)
+}
+
+class FilmDao2(session: Session) : AbstractDao<Film, Int>(
+session, filmTable2, Film::id, "int", defaultId = 0)
+```
+
+Both approaches result in the same functionality. However, using defaults and converters
+is cleaner, clearer and less error prone (and is therefore recommended).
+
+The source for the above example is available [here](src/test/kotlin/com/github/andrewoma/kwery/mappertest/readme/Readme.kt).

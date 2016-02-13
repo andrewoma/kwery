@@ -214,6 +214,25 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
         return DelegatedColumn(column)
     }
 
+    /**
+     * A column variant for cases where the property value is not null but the column
+     * is optional via the path
+     */
+    fun <C, R> optionalCol(property: KProperty1<C, R>,
+                           path: (T) -> C?,
+                           id: Boolean = false,
+                           version: Boolean = false,
+                           converter: Converter<R> = converter(property.returnType),
+                           name: String? = null,
+                           selectByDefault: Boolean = true
+
+    ): DelegatedColumn<R?> {
+
+        val column = Column<T, R?>({ path(it)?.let { property.get(it) }}, null, optional(converter), name ?: "", id, version, selectByDefault, true)
+        return DelegatedColumn(column)
+    }
+
+
     // Can't cast T to Enum<T> due to recursive type, so cast to any enum to satisfy compiler
     private enum class DummyEnum
 
