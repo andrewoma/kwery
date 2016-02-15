@@ -45,8 +45,8 @@ class Actor(val id: Int, val name: Name, val lastUpdate: LocalDateTime)
 // Conversions default to those defined in the configuration but may be overridden
 object actorTable : Table<Actor, Int>("actor"), VersionedWithTimestamp {
     val ActorId    by col(Actor::id, id = true)
-    val FirstName  by col(Name::firstName, { it.name })
-    val LastName   by col(Name::lastName, { it.name })
+    val FirstName  by col(Name::firstName, Actor::name)
+    val LastName   by col(Name::lastName, Actor::name)
     val LastUpdate by col(Actor::lastUpdate, version = true)
 
     override fun idColumns(id: Int) = setOf(ActorId of id)
@@ -56,7 +56,7 @@ object actorTable : Table<Actor, Int>("actor"), VersionedWithTimestamp {
 }
 
 // Given a table object, a generic dao is a one-liner, including standard CRUD operations
-class ActorDao(session: Session) : AbstractDao<Actor, Int>(session, actorTable, { it.id })
+class ActorDao(session: Session) : AbstractDao<Actor, Int>(session, actorTable, Actor::id)
 
 // Now we can use the DAO
 val dao = ActorDao(session)

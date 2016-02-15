@@ -32,10 +32,10 @@ import com.github.andrewoma.kwery.mappertest.example.Name as N
 
 object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedWithTimestamp {
     // @formatter:off
-    val ActorId    by col(A::id,                     id = true)
-    val FirstName  by col(N::firstName, { it.name })
-    val LastName   by col(N::lastName,  { it.name })
-    val LastUpdate by col(A::lastUpdate,             version = true)
+    val ActorId    by col(A::id, id = true)
+    val FirstName  by col(N::firstName, A::name)
+    val LastName   by col(N::lastName, A::name)
+    val LastUpdate by col(A::lastUpdate, version = true)
     // @formatter:on
 
     override fun idColumns(id: Int) = setOf(ActorId of id)
@@ -45,7 +45,7 @@ object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedW
 }
 
 class ActorDao(session: Session, val filmActorDao: FilmActorDao) :
-        AbstractDao<A, Int>(session, actorTable, { it.id }, "int", defaultId = -1) {
+        AbstractDao<A, Int>(session, actorTable, A::id, "int", defaultId = -1) {
 
     fun findByLastNames(lastNames: List<String>): List<A> {
         val sql = "select $columns from ${table.name} where last_name in (:last_names)"
