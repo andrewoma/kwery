@@ -35,8 +35,8 @@ val tableConfig = TableConfiguration(defaults, converters, camelToLowerUnderscor
 // Conversions default to those defined in the configuration but may be overridden
 object actorTable : Table<Actor, Int>("actor", tableConfig), VersionedWithTimestamp {
     val ActorId    by col(Actor::id, id = true)
-    val FirstName  by col(Name::firstName, { it.name })
-    val LastName   by col(Name::lastName,  { it.name })
+    val FirstName  by col(Name::firstName, Actor::name)
+    val LastName   by col(Name::lastName, Actor::name)
     val LastUpdate by col(Actor::lastUpdate, version = true)
 
     override fun idColumns(id: Int) = setOf(ActorId of id)
