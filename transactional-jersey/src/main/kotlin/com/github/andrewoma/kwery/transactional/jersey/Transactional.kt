@@ -40,10 +40,7 @@ annotation class Transactional(
         /**
          * The name of the data source to use in the transaction
          */
-//        val name: String = defaultThreadLocalSessionName,
-        // TODO: Regression in 1.0.2-eap-44. If the default value is defined indirectly
-        // the default property value isn't set at runtime
-        val name: String = "default",
+        val name: String = defaultThreadLocalSessionName,
 
         /**
          * If true, a session will be initialised but a transaction will not be started.

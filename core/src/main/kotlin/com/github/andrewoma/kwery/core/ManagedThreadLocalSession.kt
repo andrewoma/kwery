@@ -40,7 +40,7 @@ import javax.sql.DataSource
  * Sessions are allocated lazily (on first use of the session). So there is no overhead in terms of
  * allocating connections if the thread doesn't actually use a session.
  */
-val defaultThreadLocalSessionName: String = "default"
+const val defaultThreadLocalSessionName: String = "default"
 
 class ManagedThreadLocalSession(val dataSource: DataSource,
                                 override val dialect: Dialect,
