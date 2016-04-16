@@ -82,7 +82,7 @@ interface Service {
 
 @Transactional open class Inner(val session: Session) {
     open fun insert(value: String) = insert(session, value)
-    open fun fail() = throw Exception("inner")
+    open fun fail(): Nothing = throw Exception("inner")
 }
 
 fun insert(session: Session, value: String) = session.update("insert into test(value) values (:value)", mapOf("value" to value))
