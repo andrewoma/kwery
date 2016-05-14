@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        kotlinVersion = '1.0.2-eap-44'
-        kommonVersion = '0.9'
+        kotlinVersion = '1.0.2'
+        kommonVersion = '0.10'
         junitVersion = '4.12'
         slf4jVersion = '1.7.13'
         logbackVersion = '1.1.3'

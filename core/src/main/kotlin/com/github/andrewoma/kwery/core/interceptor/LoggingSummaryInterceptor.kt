@@ -138,7 +138,7 @@ class LoggingSummaryInterceptor : StatementInterceptor {
             Collections.sort(executions, { e1, e2 -> e1.name.compareTo(e2.name) })
             val summaries = ArrayList<ExecutionSummary>(executions.size + 1)
 
-            var total = ExecutionSummary("Total", 0L, 0L, 0L, 0L)
+            val total = ExecutionSummary("Total", 0L, 0L, 0L, 0L)
             var current = total
 
             for (execution in executions) {

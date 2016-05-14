@@ -19,3 +19,4 @@
 /transactional/build
 /transactional-jersey/build
 target
+classes/

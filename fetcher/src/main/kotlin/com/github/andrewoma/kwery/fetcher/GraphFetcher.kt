@@ -33,9 +33,9 @@ class Value<T>(val get: () -> T, val set: (T) -> Unit) {
 class GraphFetcher(val types: Set<Type<*, *>>) {
     private val typeCache: MutableMap<Class<*>, Type<*, *>> = ConcurrentHashMap()
     private val noType: Type<*, *> = Type<Any?, Any>({ it }, { mapOf() })
-    protected val debug: Boolean = false
+    private val debug: Boolean = false
 
-    inline protected fun debug(f: () -> Unit) {
+    inline private fun debug(f: () -> Unit) {
         if (debug) f()
     }
 
