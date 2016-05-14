@@ -163,6 +163,8 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
+`0.10` Compatible with Kotlin 1.0.2.
+
 `0.9` Compatible with Kotlin 1.0.0.
 * Mapper: add `Table.optionalCol` to construct optional types via paths
 
