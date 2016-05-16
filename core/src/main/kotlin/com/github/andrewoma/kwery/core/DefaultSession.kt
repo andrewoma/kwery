@@ -235,10 +235,14 @@ class DefaultSession(override val connection: Connection,
             statement = interceptor.construct(statement)
 
             statement = statement.copy(inClauseSizes = inClauseSizes(parameters))
-            val namedQuery = namedQueryCache.getOrPut(StatementCacheKey(sql, statement.inClauseSizes, options.name to options.applyNameToQuery)) {
-                statement = statement.copy(sql = sql.trimIndent())
-                BoundQuery(statement.sql, statement.inClauseSizes)
+
+            val namedQuery = namedQueryCache.getOrPut(createStatementCacheKey(options, sql, statement)) {
+                val transformedSql = dialect.applyLimitAndOffset(options.limit, options.offset, sql.trimIndent())
+                BoundQuery(transformedSql, statement.inClauseSizes)
             }
+
+            statement = statement.copy(sql = namedQuery.originalQuery)
+
             statement = interceptor.preparing(statement.copy(preparedSql = namedQuery.query, preparedParameters = namedQuery.bindings))
 
             statement = statement.copy(statement = prepareStatement(statement.preparedSql!!, options))
@@ -256,6 +260,11 @@ class DefaultSession(override val connection: Connection,
                 statement.statement?.close()
             }
         }
+    }
+
+    private fun createStatementCacheKey(options: StatementOptions, sql: String, statement: ExecutingStatement): StatementCacheKey {
+        return  StatementCacheKey(sql, statement.inClauseSizes, if (options.applyNameToQuery) options.name else null,
+                options.limit != null, options.offset != null)
     }
 
     private fun prepareStatement(sql: String, options: StatementOptions): PreparedStatement {
@@ -291,7 +300,11 @@ class DefaultSession(override val connection: Connection,
     private fun bindParameters(parameters: Map<String, Any?>, statement: ExecutingStatement): PreparedStatement {
         val ps = statement.statement as PreparedStatement
         for ((i, key) in statement.preparedParameters.withIndex()) {
-            val value = parameters[key]
+            val value = when (key) {
+                Dialect.OffsetParam -> statement.options.offset
+                Dialect.LimitParam -> statement.options.limit
+                else -> parameters[key]
+            }
             require(value != null || parameters.containsKey(key)) { "Unknown query parameter: '$key'" }
             when (value) {
                 is TypedParameter -> ps.setObject(i + 1, value.value, value.sqlType)
@@ -329,4 +342,8 @@ data class ExecutingStatement(
         val rowsCounts: List<Int> = listOf()
 )
 
-data class StatementCacheKey(val sql: String, val collections: Map<String, Int>, val optionsKey: Any?)
+/**
+ * StatementCacheKey contains the sql and any options that modify the generated prepared statement
+ */
+data class StatementCacheKey(val sql: String, val collections: Map<String, Int>, val name: String?,
+                             val limit: Boolean, val offset: Boolean)

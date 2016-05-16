@@ -24,6 +24,7 @@ package com.github.andrewoma.kwery.core.interceptor
 
 import com.github.andrewoma.kommon.util.StopWatch
 import com.github.andrewoma.kwery.core.ExecutingStatement
+import com.github.andrewoma.kwery.core.dialect.Dialect
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -83,7 +84,11 @@ open class LoggingInterceptor(val log: Logger = LoggerFactory.getLogger(LoggingI
         val sb = StringBuilder()
 
         for (parameters in statement.parametersList) {
-            sb.append("\n" + statement.session.bindParameters(statement.sql, parameters, false, parameterLimit, false)).append(";")
+            val params = when {
+                statement.options.limit == null && statement.options.offset == null -> parameters
+                else -> parameters.plus(listOf(Dialect.LimitParam to statement.options.limit, Dialect.OffsetParam to statement.options.offset))
+            }
+            sb.append("\n" + statement.session.bindParameters(statement.sql, params, false, parameterLimit, false)).append(";")
         }
         val batch = statement.parametersList.size.let { if (it > 1) "for batch of $it " else "" }
 

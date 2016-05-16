@@ -86,6 +86,8 @@ data class StatementOptions(
 
         /**
          * Sets the maximum number of rows returned. Default (0) means no limit.
+         * This sets the max rows at the JDBC driver level. Whether this limits client or server side is
+         * up to the specific JDBC driver. See `limit` for a server side solution.
          */
         val maxRows: Long = 0,
 
@@ -102,7 +104,19 @@ data class StatementOptions(
         /**
          * Invoked before a statement is executed allowing the setting of infrequently used or driver specific settings.
          */
-        val beforeExecution: (Statement) -> Unit = {}
+        val beforeExecution: (Statement) -> Unit = {},
+
+        /**
+         * Limits the number of rows returned server side by modifying the query to include a
+         * dialect specific limit
+         */
+        val limit: Int? = null,
+
+        /**
+         * Skips to the offset specified server side by modifying the query to include a
+         * dialect specific limit
+         */
+        val offset: Int? = null
 )
 
 enum class ResultSetConcurrency private constructor(val value: Int) {

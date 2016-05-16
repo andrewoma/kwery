@@ -28,6 +28,11 @@ import java.text.SimpleDateFormat
 
 // TODO ... convert this to pass in a buffer for appending - improve performance in general
 interface Dialect {
+    companion object {
+        val LimitParam = "kwery_limit"
+        val OffsetParam = "kwery_offset"
+    }
+
     fun bind(value: Any, limit: Int): String
 
     fun bindArray(value: java.sql.Array, limit: Int, prefix: String = "", postfix: String = "") =
@@ -41,6 +46,14 @@ interface Dialect {
     fun arrayBasedIn(name: String): String
 
     fun allocateIds(count: Int, sequence: String, columnName: String): String
+
+    fun applyLimitAndOffset(limit: Int?, offset: Int?, sql: String): String {
+        if (limit == null && offset == null) return sql
+        val limitAndOffset = listOf(limit?.let { "limit :$LimitParam" }, offset?.let { "offset :$OffsetParam" })
+                .filterNotNull()
+                .joinToString(" ")
+        return sql + "\n" + limitAndOffset
+    }
 }
 
 internal fun String.truncate(limit: Int): String {

@@ -24,7 +24,7 @@ package com.github.andrewoma.kwery.core
 
 import java.util.regex.Pattern
 
-data class BoundQuery(val query: String, val bindings: List<String>)
+data class BoundQuery(val originalQuery: String, val query: String, val bindings: List<String>)
 
 internal fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQuery {
     val bindings = arrayListOf<String>()
@@ -33,7 +33,7 @@ internal fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQu
         val size = inClauseSizes[key] ?: 1
         Array(size) { "?" }.joinToString(",")
     }
-    return BoundQuery(bound, bindings)
+    return BoundQuery(query, bound, bindings)
 }
 
 internal inline fun replaceBindings(query: String, onBinding: (String) -> String): String {

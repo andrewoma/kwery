@@ -48,6 +48,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             }
         }
         session.update("delete from dialect_test")
+        session.update("delete from test")
     }
 
     data class Value(val time: Time, val date: Date, val timestamp: Timestamp, val binary: String,
@@ -56,8 +57,6 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
     @Test fun `Array based select should work inlined`() {
         if (!dialect.supportsArrayBasedIn) return
-
-        session.update("delete from test")
 
         for (id in listOf("a", "b", "c", "d")) {
             session.update("insert into test(id) values(:id)", mapOf("id" to id))
@@ -151,6 +150,25 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
         // Check ids are unique across invocations
         assertEquals(count * iterations, all.size)
+    }
+
+    @Test open fun `Should apply limit and offset`() {
+        for (id in listOf("1", "2", "3", "4")) {
+            session.update("insert into test(id) values(:id)", mapOf("id" to id))
+        }
+
+        fun assertLimitAndOffset(limit: Int?, offset: Int?, expected: List<String>) {
+            val options = session.defaultOptions.copy(limit = limit, offset = offset)
+            val actual = session.select("select * from test order by id", mapOf(), options) { row ->
+                row.string("id")
+            }
+            assertEquals(expected, actual)
+        }
+
+        assertLimitAndOffset(null, null, listOf("1", "2", "3", "4"))
+        assertLimitAndOffset(2, null, listOf("1", "2"))
+        assertLimitAndOffset(if (dialect is MysqlDialect) Int.MAX_VALUE else null, 2, listOf("3", "4"))
+        assertLimitAndOffset(2, 1, listOf("2", "3"))
     }
 
     private fun findById(id: String): Value {
