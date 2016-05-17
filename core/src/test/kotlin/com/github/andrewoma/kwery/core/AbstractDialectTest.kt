@@ -39,6 +39,7 @@ import kotlin.test.assertEquals
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String
+    val nullLimit = if (dialect is MysqlDialect) Int.MAX_VALUE else null
 
     override fun afterSessionSetup() {
         initialise(dialect.javaClass.name) {
@@ -167,8 +168,33 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
 
         assertLimitAndOffset(null, null, listOf("1", "2", "3", "4"))
         assertLimitAndOffset(2, null, listOf("1", "2"))
-        assertLimitAndOffset(if (dialect is MysqlDialect) Int.MAX_VALUE else null, 2, listOf("3", "4"))
+        assertLimitAndOffset(3, null, listOf("1", "2", "3"))
+        assertLimitAndOffset(nullLimit, 2, listOf("3", "4"))
+        assertLimitAndOffset(nullLimit, 3, listOf("4"))
         assertLimitAndOffset(2, 1, listOf("2", "3"))
+        assertLimitAndOffset(2, 2, listOf("3", "4"))
+    }
+
+    @Test open fun `Should apply limit and offset with parameters`() {
+        for (id in listOf("1", "2", "3", "4", "5", "6")) {
+            session.update("insert into test(id) values(:id)", mapOf("id" to id))
+        }
+
+        fun assertLimitAndOffset(limit: Int?, offset: Int?, expected: List<String>) {
+            val options = session.defaultOptions.copy(limit = limit, offset = offset)
+            val actual = session.select("select * from test where id > :id order by id", mapOf("id" to "2"), options) { row ->
+                row.string("id")
+            }
+            assertEquals(expected, actual)
+        }
+
+        assertLimitAndOffset(null, null, listOf("3", "4", "5", "6"))
+        assertLimitAndOffset(2, null, listOf("3", "4"))
+        assertLimitAndOffset(3, null, listOf("3", "4", "5"))
+        assertLimitAndOffset(nullLimit, 2, listOf("5", "6"))
+        assertLimitAndOffset(nullLimit, 3, listOf("6"))
+        assertLimitAndOffset(2, 1, listOf("4", "5"))
+        assertLimitAndOffset(2, 2, listOf("5", "6"))
     }
 
     private fun findById(id: String): Value {
