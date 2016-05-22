@@ -122,6 +122,7 @@ project(':mapper') {
                 "com.zaxxer:HikariCP:$hikariVersion",
                 "ch.qos.logback:logback-classic:$logbackVersion",
                 "org.hsqldb:hsqldb:$hsqlVersion",
+                "mysql:mysql-connector-java:$mysqlVersion",
         )
     }
 }

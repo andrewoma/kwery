@@ -45,4 +45,6 @@ open class MysqlDialect : Dialect {
     override val supportsAllocateIds = false
 
     override fun allocateIds(count: Int, sequence: String, columnName: String) = throw UnsupportedOperationException()
+
+    override val supportsFetchingGeneratedKeysByName = false
 }

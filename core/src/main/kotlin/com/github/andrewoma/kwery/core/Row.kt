@@ -31,60 +31,60 @@ import java.sql.*
  * Row is a thin wrapper over the JDBC ResultSet to provide clean and consistent
  * null handling.
  */
-class Row(val resultSet: ResultSet) {
-    fun obj(name: String): Any = requireNotNull(resultSet.getObject(name), name)
-    fun objectOrNull(name: String): Any? = resultSet.getObject(name)
+open class Row(val resultSet: ResultSet) {
+    open fun obj(name: String): Any = requireNotNull(resultSet.getObject(name), name)
+    open fun objectOrNull(name: String): Any? = resultSet.getObject(name)
 
-    fun boolean(name: String): Boolean = requireNotNull(resultSet.getBoolean(name), name)
-    fun booleanOrNull(name: String): Boolean? = valueOrNull(resultSet.getBoolean(name))
+    open fun boolean(name: String): Boolean = requireNotNull(resultSet.getBoolean(name), name)
+    open fun booleanOrNull(name: String): Boolean? = valueOrNull(resultSet.getBoolean(name))
 
-    fun byte(name: String): Byte = requireNotNull(resultSet.getByte(name), name)
-    fun byteOrNull(name: String): Byte? = valueOrNull(resultSet.getByte(name))
+    open fun byte(name: String): Byte = requireNotNull(resultSet.getByte(name), name)
+    open fun byteOrNull(name: String): Byte? = valueOrNull(resultSet.getByte(name))
 
-    fun short(name: String): Short = requireNotNull(resultSet.getShort(name), name)
-    fun shortOrNull(name: String): Short? = valueOrNull(resultSet.getShort(name))
+    open fun short(name: String): Short = requireNotNull(resultSet.getShort(name), name)
+    open fun shortOrNull(name: String): Short? = valueOrNull(resultSet.getShort(name))
 
-    fun int(name: String): Int = requireNotNull(resultSet.getInt(name), name)
-    fun intOrNull(name: String): Int? = valueOrNull(resultSet.getInt(name))
+    open fun int(name: String): Int = requireNotNull(resultSet.getInt(name), name)
+    open fun intOrNull(name: String): Int? = valueOrNull(resultSet.getInt(name))
 
-    fun long(name: String): Long = requireNotNull(resultSet.getLong(name), name)
-    fun longOrNull(name: String): Long? = valueOrNull(resultSet.getLong(name))
+    open fun long(name: String): Long = requireNotNull(resultSet.getLong(name), name)
+    open fun longOrNull(name: String): Long? = valueOrNull(resultSet.getLong(name))
 
-    fun float(name: String): Float = requireNotNull(resultSet.getFloat(name), name)
-    fun floatOrNull(name: String): Float? = valueOrNull(resultSet.getFloat(name))
+    open fun float(name: String): Float = requireNotNull(resultSet.getFloat(name), name)
+    open fun floatOrNull(name: String): Float? = valueOrNull(resultSet.getFloat(name))
 
-    fun double(name: String): Double = requireNotNull(resultSet.getDouble(name), name)
-    fun doubleOrNull(name: String): Double? = valueOrNull(resultSet.getDouble(name))
+    open fun double(name: String): Double = requireNotNull(resultSet.getDouble(name), name)
+    open fun doubleOrNull(name: String): Double? = valueOrNull(resultSet.getDouble(name))
 
-    fun bigDecimal(name: String): BigDecimal = resultSet.getBigDecimal(name)
-    fun bigDecimalOrNull(name: String): BigDecimal? = resultSet.getBigDecimal(name)
+    open fun bigDecimal(name: String): BigDecimal = resultSet.getBigDecimal(name)
+    open fun bigDecimalOrNull(name: String): BigDecimal? = resultSet.getBigDecimal(name)
 
-    fun string(name: String): String = resultSet.getString(name)
-    fun stringOrNull(name: String): String? = resultSet.getString(name)
+    open fun string(name: String): String = resultSet.getString(name)
+    open fun stringOrNull(name: String): String? = resultSet.getString(name)
 
-    fun bytes(name: String): ByteArray = resultSet.getBytes(name)
-    fun bytesOrNull(name: String): ByteArray? = resultSet.getBytes(name)
+    open fun bytes(name: String): ByteArray = resultSet.getBytes(name)
+    open fun bytesOrNull(name: String): ByteArray? = resultSet.getBytes(name)
 
-    fun timestamp(name: String): Timestamp = resultSet.getTimestamp(name)
-    fun timestampOrNull(name: String): Timestamp? = resultSet.getTimestamp(name)
+    open fun timestamp(name: String): Timestamp = resultSet.getTimestamp(name)
+    open fun timestampOrNull(name: String): Timestamp? = resultSet.getTimestamp(name)
 
-    fun time(name: String): Time = resultSet.getTime(name)
-    fun timeOrNull(name: String): Time? = resultSet.getTime(name)
+    open fun time(name: String): Time = resultSet.getTime(name)
+    open fun timeOrNull(name: String): Time? = resultSet.getTime(name)
 
-    fun date(name: String): Date = resultSet.getDate(name)
-    fun dateOrNull(name: String): Date? = resultSet.getDate(name)
+    open fun date(name: String): Date = resultSet.getDate(name)
+    open fun dateOrNull(name: String): Date? = resultSet.getDate(name)
 
-    fun clob(name: String): Clob = resultSet.getClob(name)
-    fun clobOrNull(name: String): Clob? = resultSet.getClob(name)
+    open fun clob(name: String): Clob = resultSet.getClob(name)
+    open fun clobOrNull(name: String): Clob? = resultSet.getClob(name)
 
-    fun blob(name: String): Blob = resultSet.getBlob(name)
-    fun blobOrNull(name: String): Blob? = resultSet.getBlob(name)
+    open fun blob(name: String): Blob = resultSet.getBlob(name)
+    open fun blobOrNull(name: String): Blob? = resultSet.getBlob(name)
 
-    fun characterStream(name: String): Reader = resultSet.getCharacterStream(name)
-    fun characterStreamOrNull(name: String): Reader? = resultSet.getCharacterStream(name)
+    open fun characterStream(name: String): Reader = resultSet.getCharacterStream(name)
+    open fun characterStreamOrNull(name: String): Reader? = resultSet.getCharacterStream(name)
 
-    fun binaryStream(name: String): InputStream = resultSet.getBinaryStream(name)
-    fun binaryStreamOrNull(name: String): InputStream? = resultSet.getBinaryStream(name)
+    open fun binaryStream(name: String): InputStream = resultSet.getBinaryStream(name)
+    open fun binaryStreamOrNull(name: String): InputStream? = resultSet.getBinaryStream(name)
 
     @Suppress("UNCHECKED_CAST")
     fun <T> array(name: String): List<T> {

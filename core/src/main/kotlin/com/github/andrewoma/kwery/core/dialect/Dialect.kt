@@ -42,6 +42,7 @@ interface Dialect {
 
     val supportsArrayBasedIn: Boolean
     val supportsAllocateIds: Boolean
+    val supportsFetchingGeneratedKeysByName: Boolean
 
     fun arrayBasedIn(name: String): String
 

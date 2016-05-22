@@ -46,4 +46,6 @@ open class HsqlDialect : Dialect {
 
     override fun allocateIds(count: Int, sequence: String, columnName: String) =
             "select next value for $sequence as $columnName from unnest(sequence_array(1, $count, 1))"
+
+    override val supportsFetchingGeneratedKeysByName = true
 }

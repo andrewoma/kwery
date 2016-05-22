@@ -47,4 +47,6 @@ open class PostgresDialect : Dialect {
 
     override fun allocateIds(count: Int, sequence: String, columnName: String) =
             "select nextval('$sequence') as $columnName from generate_series(1, $count)"
+
+    override val supportsFetchingGeneratedKeysByName = true
 }

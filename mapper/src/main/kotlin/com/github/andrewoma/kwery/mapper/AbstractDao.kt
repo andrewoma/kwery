@@ -23,10 +23,7 @@
 package com.github.andrewoma.kwery.mapper
 
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
-import com.github.andrewoma.kwery.core.Cache
-import com.github.andrewoma.kwery.core.ConcurrentHashMapCache
-import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.core.StatementOptions
+import com.github.andrewoma.kwery.core.*
 import com.github.andrewoma.kwery.mapper.listener.*
 import java.sql.Array
 import java.sql.SQLFeatureNotSupportedException
@@ -235,7 +232,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         val inserted = if (generateKeys) {
             val list = session.batchInsert(sql, new.map { table.objectMap(session, it, columns, nf) }, options(name),
-                    { table.rowMapper(table.idColumns, nf)(it) })
+                    { row -> table.rowMapper(table.idColumns, nf)(generatedKeyRow(row)) })
 
             val count = list.map { it.first }.fold(0) { sum, value -> sum + value }
             check(count == new.size) { "$name inserted $count rows, but expected ${new.size}" }
@@ -269,7 +266,9 @@ abstract class AbstractDao<T : Any, ID : Any>(
         val parameters = table.objectMap(session, new, columns, nf)
 
         val (count, inserted) = if (generateKeys) {
-            val (count, key) = session.insert(sql, parameters, options(name), { table.rowMapper(table.idColumns, nf)(it) })
+            val (count, key) = session.insert(sql, parameters, options(name), { row ->
+                table.rowMapper(table.idColumns, nf)(generatedKeyRow(row))
+            })
             check(count == 1) { "$name failed to insert any rows" }
             count to table.copy(new, table.idColumns(id(key)).toMap()) // Generated key
         } else {
@@ -282,6 +281,8 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         return inserted
     }
+
+    private fun generatedKeyRow(row: Row) = if (session.dialect.supportsFetchingGeneratedKeysByName) row else KeyRow(row.resultSet)
 
     override fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>>): Map<ID, T> {
         val name = "findByIds"
@@ -325,7 +326,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
     protected fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, { f() })
 
-    override fun unsafeBatchUpdate(values: List<T>) : List<T> {
+    override fun unsafeBatchUpdate(values: List<T>): List<T> {
         val name = "unsafeBatchUpdate"
         val new = if (listeners.isEmpty()) values else values.map { value ->
             fireTransformingEvent(value) { PreUpdateEvent(table, id(value), value, null) }
