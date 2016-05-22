@@ -69,6 +69,6 @@ class KeyRow(resultSet: ResultSet) : Row(resultSet) {
     override fun binaryStreamOrNull(name: String) = unsupported()
 
     private fun unsupported(): Nothing {
-        throw UnsupportedOperationException("")
+        throw UnsupportedOperationException("Only Long and Int generated keys are supported")
     }
 }
