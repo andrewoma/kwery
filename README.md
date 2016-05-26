@@ -163,6 +163,11 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
+`0.11` Compatible with Kotlin 1.0.2.
+* Core: Fix logging of statements with bound values containing `$`
+* Core: Add experimental sqlite support
+* Mapper: Support generated keys for MySQL in DAOs
+
 `0.10` Compatible with Kotlin 1.0.2.
 
 `0.9` Compatible with Kotlin 1.0.0.
