@@ -43,7 +43,7 @@ internal inline fun replaceBindings(query: String, onBinding: (String) -> String
     val result = StringBuffer()
     while (matcher.find()) {
         val key = matcher.group(1)
-        matcher.appendReplacement(result, onBinding(key))
+        matcher.appendReplacement(result, onBinding(key).replace("$", "\\$")) // Must escape group references
     }
     matcher.appendTail(result)
     return result.toString()

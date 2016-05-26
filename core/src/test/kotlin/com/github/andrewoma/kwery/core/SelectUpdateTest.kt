@@ -115,6 +115,14 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
         assertEquals(ids, fetched)
     }
 
+    @Test fun `should support bound parameters with dollar sign`() {
+        val actor = Actor("Bi\$lly", "\$Thorn$")
+        val inserted = insert(actor)
+        val found = selectActors(setOf(inserted.id)).first()
+        assertEquals(found.firstName, actor.firstName)
+        assertEquals(found.lastName, actor.lastName)
+    }
+
     private fun assertValue(oldValue: Actor, newValue: Actor) {
         assertEquals(oldValue.copy(id = newValue.id), newValue)
 
