@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Andrew O'Malley
+ * Copyright (c) 2016 Andrew O'Malley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,37 @@
 
 package com.github.andrewoma.kwery.core
 
-import com.zaxxer.hikari.HikariDataSource
+import com.github.andrewoma.kwery.core.dialect.SqliteDialect
+import org.junit.Test
+import kotlin.test.assertEquals
 
-val hsqlDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:hsqldb:mem:kwery"
-}
+class SqliteDialectTest : AbstractDialectTest(sqliteDataSource, SqliteDialect()) {
+    //language=MySQL
+    override val sql = """
+            drop table if exists dialect_test;
 
-val postgresDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:postgresql://localhost:5432/kwery"
-}
+            create table dialect_test (
+              id            varchar(255),
+              time_col      time,
+              date_col      date,
+              timestamp_col timestamp,
+              binary_col    blob,
+              varchar_col   varchar(1000),
+              blob_col      blob,
+              clob_col      text,
+              array_col     text -- Not supported
+            );
 
-val mysqlDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:mysql://localhost:3306/kwery"
-    username = "kwery"
-    password = "kwery"
-}
+            drop table if exists test;
 
-val sqliteDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:sqlite::memory:"
+            create table test (
+              id            varchar(255),
+              value         varchar(255)
+            )
+        """
+
+    @Test fun `Limits should be applied to variable parameters`() {
+        assertEquals("'12'", dialect.bind("12345", 2))
+        assertEquals("X'3132'", dialect.bind("12345".toByteArray(), 2))
+    }
 }

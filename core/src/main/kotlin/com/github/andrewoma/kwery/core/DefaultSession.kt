@@ -263,7 +263,7 @@ class DefaultSession(override val connection: Connection,
     }
 
     private fun createStatementCacheKey(options: StatementOptions, sql: String, statement: ExecutingStatement): StatementCacheKey {
-        return  StatementCacheKey(sql, statement.inClauseSizes, if (options.applyNameToQuery) options.name else null,
+        return StatementCacheKey(sql, statement.inClauseSizes, if (options.applyNameToQuery) options.name else null,
                 options.limit != null, options.offset != null)
     }
 
@@ -281,7 +281,9 @@ class DefaultSession(override val connection: Connection,
         }
 
         statement.fetchSize = options.fetchSize
-        statement.fetchDirection = options.fetchDirection.value
+        if (options.fetchDirection != ResultSetFetchDirection.Forward) {
+            statement.fetchDirection = options.fetchDirection.value // Only override if not the default as sqlite won't accept it
+        }
         statement.isPoolable = options.poolable
         statement.maxFieldSize = options.maxFieldSize
         statement.queryTimeout = options.queryTimeout

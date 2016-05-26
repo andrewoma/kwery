@@ -138,6 +138,7 @@ project(':core') {
                 "org.hsqldb:hsqldb:$hsqlVersion",
                 "org.postgresql:postgresql:$postgresVersion",
                 "mysql:mysql-connector-java:$mysqlVersion",
+                "org.xerial:sqlite-jdbc:3.8.11.2",
         )
     }
 }

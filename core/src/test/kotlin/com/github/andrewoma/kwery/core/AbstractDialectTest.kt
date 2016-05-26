@@ -25,13 +25,13 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.dialect.MysqlDialect
 import com.github.andrewoma.kwery.core.dialect.PostgresDialect
+import com.github.andrewoma.kwery.core.dialect.SqliteDialect
 import com.zaxxer.hikari.pool.ProxyConnection
 import org.junit.Test
 import org.postgresql.largeobject.LargeObjectManager
 import java.io.ByteArrayInputStream
 import java.io.StringReader
 import java.sql.Date
-import java.sql.SQLFeatureNotSupportedException
 import java.sql.Time
 import java.sql.Timestamp
 import javax.sql.DataSource
@@ -39,7 +39,7 @@ import kotlin.test.assertEquals
 
 abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : AbstractSessionTest(dataSource, dialect) {
     abstract val sql: String
-    val nullLimit = if (dialect is MysqlDialect) Int.MAX_VALUE else null
+    val nullLimit = if (dialect is MysqlDialect || dialect is SqliteDialect) Int.MAX_VALUE else null
 
     override fun afterSessionSetup() {
         initialise(dialect.javaClass.name) {
@@ -75,28 +75,26 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
     }
 
     @Test fun `Bindings to blobs and clobs via streams`() {
-        try {
-            val now = System.currentTimeMillis()
-            val value = Value(Time(now), Date(now), Timestamp(now), "binary",
-                    "var'char", "blob", "clob", listOf(1, 2, 3))
+        if (session.dialect is PostgresDialect || session.dialect is SqliteDialect) return
 
-            val params = createParams(value) + mapOf(
-                    "id" to "streams",
-                    "blob_col" to ByteArrayInputStream(value.blob.toByteArray(Charsets.UTF_8)),
-                    "clob_col" to StringReader(value.clob)
-            )
+        val now = System.currentTimeMillis()
+        val value = Value(Time(now), Date(now), Timestamp(now), "binary",
+                "var'char", "blob", "clob", listOf(1, 2, 3))
 
-            assertEquals(1, session.update(insertSql, params))
+        val params = createParams(value) + mapOf(
+                "id" to "streams",
+                "blob_col" to ByteArrayInputStream(value.blob.toByteArray(Charsets.UTF_8)),
+                "clob_col" to StringReader(value.clob)
+        )
 
-            val (blobStream, clobStream) = session.select("select blob_col, clob_col from dialect_test") { row ->
-                row.binaryStream("blob_col") to row.characterStream("clob_col")
-            }.single()
+        assertEquals(1, session.update(insertSql, params))
 
-            assertEquals(value.blob, String(blobStream.readBytes()))
-            assertEquals(value.clob, clobStream.readText())
-        } catch(e: SQLFeatureNotSupportedException) {
-            // Postgres doesn't support stream methods
-        }
+        val (blobStream, clobStream) = session.select("select blob_col, clob_col from dialect_test") { row ->
+            row.binaryStream("blob_col") to row.characterStream("clob_col")
+        }.single()
+
+        assertEquals(value.blob, String(blobStream.readBytes()))
+        assertEquals(value.clob, clobStream.readText())
     }
 
     //language=SQL
@@ -206,7 +204,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
                     row.string("varchar_col"),
                     fromBlob(row, "blob_col"),
                     fromClob(row, "clob_col"),
-                    if (dialect is MysqlDialect) listOf() else row.array<Int>("array_col"))
+                    if (dialect is MysqlDialect || dialect is SqliteDialect) listOf() else row.array<Int>("array_col"))
         }.single()
     }
 
@@ -219,19 +217,25 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
             obj.close()
             oid
         }
-        else -> session.connection.createBlob().let { it.setBytes(1, data.toByteArray(Charsets.UTF_8)); it }
+        is SqliteDialect -> {
+            // Don't support createBlob
+            data.toByteArray(Charsets.UTF_8)
+        }
+        else -> session.connection.createBlob().apply { setBytes(1, data.toByteArray(Charsets.UTF_8)) }
     }
 
-    private fun fromBlob(row: Row, column: String) =
-            row.blob(column).let { String(it.getBytes(1, it.length().toInt()), Charsets.UTF_8) }
+    private fun fromBlob(row: Row, column: String) = when (session.dialect) {
+        is SqliteDialect -> String(row.bytes(column), Charsets.UTF_8)
+        else -> row.blob(column).let { String(it.getBytes(1, it.length().toInt()), Charsets.UTF_8) }
+    }
 
     private fun fromClob(row: Row, column: String): String = when (session.dialect) {
-        is PostgresDialect -> row.string(column)
+        is PostgresDialect, is SqliteDialect -> row.string(column)
         else -> row.clob(column).let { it.getSubString(1, it.length().toInt()).trim() }
     }
 
     private fun toClob(data: String): Any = when (session.dialect) {
-        is PostgresDialect -> data
+        is PostgresDialect, is SqliteDialect -> data
         else -> session.connection.createClob().let { it.setString(1, data); it }
     }
 
@@ -247,8 +251,11 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
         assertEquals(expected.blob, actual.blob)
         assertEquals(expected.clob, actual.clob)
 
-        if (dialect !is MysqlDialect) {
+        if (dialect !is MysqlDialect && dialect !is SqliteDialect) {
             assertEquals(expected.ints, actual.ints) // Arrays not supported
+        }
+
+        if (dialect !is MysqlDialect) {
             assertEquals(expected.timestamp.toString(), actual.timestamp.toString()) // travis doesn't support millis
         }
     }

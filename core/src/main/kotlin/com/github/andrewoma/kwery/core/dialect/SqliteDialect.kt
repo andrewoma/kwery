@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Andrew O'Malley
+ * Copyright (c) 2016 Andrew O'Malley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,24 +20,31 @@
  * THE SOFTWARE.
  */
 
-package com.github.andrewoma.kwery.core
+package com.github.andrewoma.kwery.core.dialect
 
-import com.zaxxer.hikari.HikariDataSource
+import java.sql.*
 
-val hsqlDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:hsqldb:mem:kwery"
-}
+open class SqliteDialect : Dialect {
 
-val postgresDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:postgresql://localhost:5432/kwery"
-}
+    override fun bind(value: Any, limit: Int) = when (value) {
+        is String -> escapeSingleQuotedString(value.truncate(limit))
+        is Timestamp -> timestampFormat.get().format(value)
+        is Date -> "'$value 00:00:00.000'"
+        is Time -> "'1970-01-01 $value.000'"
+        is java.sql.Array -> throw UnsupportedOperationException()
+        is Clob -> escapeSingleQuotedString(standardClob(value, limit))
+        is Blob -> standardBlob(value, limit)
+        is ByteArray -> standardByteArray(value, limit)
+        else -> value.toString()
+    }
 
-val mysqlDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:mysql://localhost:3306/kwery"
-    username = "kwery"
-    password = "kwery"
-}
+    override fun arrayBasedIn(name: String) = throw UnsupportedOperationException()
 
-val sqliteDataSource = HikariDataSource().apply {
-    jdbcUrl = "jdbc:sqlite::memory:"
+    override val supportsArrayBasedIn = false
+
+    override val supportsAllocateIds = false
+
+    override fun allocateIds(count: Int, sequence: String, columnName: String) = throw UnsupportedOperationException()
+
+    override val supportsFetchingGeneratedKeysByName = false
 }
