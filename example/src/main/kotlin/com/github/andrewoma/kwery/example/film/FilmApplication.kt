@@ -103,7 +103,6 @@ class FilmApplication : Application<FilmConfiguration>() {
         val fetcher = createFetcher(daos, caches)
 
         val jersey = environment.jersey()
-        environment.jersey().urlPattern = "/api/*";
         jersey.register(SqlExceptionMapper())
         jersey.register(LoggingListener())
         jersey.register(TransactionListener())
@@ -136,8 +135,7 @@ class FilmApplication : Application<FilmConfiguration>() {
     }
 
     override fun initialize(bootstrap: Bootstrap<FilmConfiguration>) {
-        // TODO ... work out why this isn't serving up
-        bootstrap.addBundle(AssetsBundle("/static/", "/static/", "index.html", "static"))
+        bootstrap.addBundle(AssetsBundle("/static", "/docs", "index.html"))
 
         val mapper = bootstrap.objectMapper
         mapper.registerModule(JavaTimeModule())

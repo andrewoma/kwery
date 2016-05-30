@@ -46,7 +46,7 @@ Assuming you've built Kwery as per [Building](../README.md#building), you can ru
 ```bash
 ./gradlew :example:run
 ```
-You can then browse the example home page at [http://localhost:9090](http://localhost:9090) and try out some queries.
+You can then browse the example home page at [http://localhost:9090/api/docs](http://localhost:9090/api/docs) and try out some queries.
 
 ##### Graph Fetching
 

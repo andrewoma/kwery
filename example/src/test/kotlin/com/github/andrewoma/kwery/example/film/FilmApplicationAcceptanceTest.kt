@@ -40,7 +40,6 @@ class FilmApplicationAcceptanceTest {
     fun target(url: String) = ClientBuilder.newClient().target("http://localhost:${rule.localPort}$url")
 
     @Test fun `Actors should find Scarlett`() {
-
         val response = target("/api/actors")
                 .queryParam("firstName", "Scarlett")
                 .queryParam("lastName", "Damon")
