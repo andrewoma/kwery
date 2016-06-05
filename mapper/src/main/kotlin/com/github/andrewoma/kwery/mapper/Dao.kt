@@ -29,6 +29,17 @@ interface Dao<T : Any, ID : Any> {
 
     fun findById(id: ID, columns: Set<Column<T, *>> = defaultColumns): T?
 
+    /**
+     * Selects the row using `SELECT ... FOR UPDATE` acquiring a pessimistic lock.
+     * In general, using optimistic locking via versioning is preferred and it is
+     * safe from deadlocks and allows safe updates to extend to external updates such as via a UI.
+     * However, pessimistic locks are occasionally required to ensure integrity when performing
+     * find followed by an update, e.g. updating an account balance.
+     * If acquiring multiple rows for update via this method, try to order the acquisition of locks
+     * by entity and ids within entity to avoid deadlocks.
+     */
+    fun findByIdForUpdate(id: ID, columns: Set<Column<T, *>> = defaultColumns): T?
+
     fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>> = defaultColumns): Map<ID, T>
 
     fun findAll(columns: Set<Column<T, *>> = defaultColumns): List<T>

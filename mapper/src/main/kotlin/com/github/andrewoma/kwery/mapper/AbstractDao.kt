@@ -98,6 +98,14 @@ abstract class AbstractDao<T : Any, ID : Any>(
         return session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
     }
 
+    override fun findByIdForUpdate(id: ID, columns: Set<Column<T, *>>): T? {
+        val name = "findByIdForUpdate"
+        val sql = sql(name to columns) {
+            "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.equate(" and ")}\nfor update"
+        }
+        return session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
+    }
+
     override fun findAll(columns: Set<Column<T, *>>): List<T> {
         val name = "findAll"
         val sql = sql(name to columns) { "select ${columns.join()} \nfrom ${table.name}" }

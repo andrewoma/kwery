@@ -268,4 +268,11 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
 
         assertEquals(count, ids.size)
     }
+
+    @Test fun `Find for update should find value`() {
+        val created = insert(1).first()
+        val found = dao.findByIdForUpdate(id(created))
+        assertTrue(contentsEqual(created, found!!))
+        assertTrue(id(created) == id(found))
+    }
 }
