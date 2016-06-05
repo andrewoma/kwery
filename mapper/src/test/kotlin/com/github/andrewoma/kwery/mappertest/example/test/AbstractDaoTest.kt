@@ -175,8 +175,6 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
 
     @Test fun `Versioned update should increment version`() {
         if (dao.table.versionColumn == null) return
-
-
     }
 
     @Test fun `Delete should remove a row`() {
@@ -186,7 +184,6 @@ abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : Ab
         assertNull(dao.findById(id(inserted)))
     }
 
-    //    test(expected = javaClass<OptimisticLockException>()) TODO - breaks incremental compiler
     @Test fun `Versioned update of same version should be rejected`() {
         if (dao.table.versionColumn == null) throw OptimisticLockException("")
 

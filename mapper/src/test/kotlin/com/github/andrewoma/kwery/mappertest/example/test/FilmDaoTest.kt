@@ -29,11 +29,9 @@ import com.github.andrewoma.kwery.mappertest.example.*
 import org.junit.Test
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.comparisons.compareBy
 import kotlin.properties.Delegates
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
     var graphFetcher: GraphFetcher by Delegates.notNull()
@@ -48,7 +46,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         super.afterSessionSetup()
     }
 
-    override val data by lazy(LazyThreadSafetyMode.NONE) {
+    override val data by lazy {
         listOf(
                 Film(-1, "Underworld", 2003, sd.languageEnglish, null, Duration.ofMinutes(121), FilmRating.NC_17,
                         LocalDateTime.now(), listOf("Commentaries", "Behind the Scenes")),
@@ -139,6 +137,42 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         for (film in fetched) {
             assertEquals(0, film.actors.size)
             assertEquals(sd.languageEnglish.name, film.language.name)
+        }
+    }
+
+    @Test fun `findByCriteria should filter films`() {
+        val inserted = insertAll()
+        for ((index, film) in inserted.withIndex()) {
+            val actorId = if (index % 2 == 0) sd.actorBrad.id else sd.actorKate.id
+            filmActorDao.insert(FilmActor(FilmActor.Id(film.id, actorId), LocalDateTime.now()))
+        }
+
+        val data = dao.findAll().sortedWith(compareBy(Film::title, Film::releaseYear)).fetch(Node(Node.all))
+
+        fun assert(criteria: FilmCriteria, expected: List<Film>) {
+            if (criteria != FilmCriteria()) {
+                assertNotEquals(data.size, expected.size, "Invalid filter - no values filtered")
+            }
+            assertNotEquals(0, expected.size, "Invalid filter - all values filtered")
+            assertEquals(expected.map(Film::id), dao.findByCriteria(criteria).map(Film::id))
+        }
+
+        fun assert(criteria: FilmCriteria, filter: (FilmCriteria, Film) -> Boolean) =
+            assert(criteria, data.filter { filter(criteria, it) })
+
+        assert(FilmCriteria()) { c, f -> true } // Default criteria should select everything
+
+        // Individual criteria
+        assert(FilmCriteria(releaseYear = 2003)) { c, f -> f.releaseYear == c.releaseYear }
+        assert(FilmCriteria(title = "lycans")) { c, f -> f.title.toLowerCase().contains(c.title!!.toLowerCase()) }
+        assert(FilmCriteria(maxDuration = Duration.ofHours(2))) { c, f -> f.duration == null || f.duration <= c.maxDuration }
+        assert(FilmCriteria(limit = 2, offset = 1), data.drop(1).take(2))
+        assert(FilmCriteria(actor = sd.actorKate)) { c, f -> c.actor in f.actors}
+        assert(FilmCriteria(ratings = setOf(FilmRating.R, FilmRating.G))) { c, f -> f.rating in c.ratings}
+
+        // Combinations
+        assert(FilmCriteria(ratings = setOf(FilmRating.R), maxDuration = Duration.ofHours(1).plusMinutes(32))) { c, f ->
+            f.rating in c.ratings && f.duration != null && f.duration <= c.maxDuration
         }
     }
 }

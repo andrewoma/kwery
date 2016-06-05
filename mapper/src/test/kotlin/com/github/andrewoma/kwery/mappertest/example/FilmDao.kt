@@ -24,7 +24,9 @@ package com.github.andrewoma.kwery.mappertest.example
 
 import com.github.andrewoma.kwery.core.Session
 import com.github.andrewoma.kwery.core.StatementOptions
+import com.github.andrewoma.kwery.core.builder.query
 import com.github.andrewoma.kwery.mapper.*
+import java.time.Duration
 import java.time.temporal.ChronoUnit
 import com.github.andrewoma.kwery.mappertest.example.Film as F
 
@@ -48,6 +50,16 @@ object filmTable : Table<F, Int>("film", tableConfig), VersionedWithTimestamp {
             value of Length, value of Rating, value of LastUpdate,
             value of SpecialFeatures)
 }
+
+data class FilmCriteria(
+        val ratings: Set<FilmRating> = setOf(),
+        val title: String? = null,
+        val releaseYear: Int? = null,
+        val maxDuration: Duration? = null,
+        val actor: Actor? = null,
+        val limit: Int? = null,
+        val offset: Int? = null
+)
 
 class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.id }, "int", defaultId = -1) {
     val f = filmTable.prefixed("f")
@@ -97,4 +109,37 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
 
     // An example of a partial select (title and release year only)
     fun findAllTitlesAndReleaseYears() = findAll(setOf(filmTable.Title, filmTable.ReleaseYear))
+
+    // An example of using a QueryBuilder to build a dynamic query
+    fun findByCriteria(criteria: FilmCriteria): List<F> {
+        val query = query {
+            select("select ${f.select} from film f")
+            whereGroup {
+                criteria.title?.let {
+                    where("lower(f.title) like :title")
+                    parameter("title", "%${it.toLowerCase()}%")
+                }
+                criteria.releaseYear?.let {
+                    where("f.release_year = :release_year")
+                    parameter("release_year", it)
+                }
+                criteria.actor?.let {
+                    where("exists (select 1 from film_actor where film_id = f.film_id and actor_id = :actor_id)")
+                    parameter("actor_id", it.id)
+                }
+                criteria.maxDuration?.let {
+                    where("(f.length is null or f.length <= :max_length)")
+                    parameter("max_length", filmTable.Length.converter.to(session.connection, it))
+                }
+                if (criteria.ratings.isNotEmpty()) {
+                    where("f.rating in (:ratings)")
+                    parameter("ratings", criteria.ratings.map { filmTable.Rating.converter.to(session.connection, it) })
+                }
+            }
+            orderBy("title, release_year")
+        }
+
+        return session.select(query.sql, query.parameters, StatementOptions("findByCriteria", limit = criteria.limit,
+                offset = criteria.offset), mapper = f.mapper)
+    }
 }

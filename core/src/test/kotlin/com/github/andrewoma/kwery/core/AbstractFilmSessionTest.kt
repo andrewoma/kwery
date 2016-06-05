@@ -29,6 +29,10 @@ data class Actor(val firstName: String, val lastName: String?, val id: Int = 0, 
 
 open class AbstractFilmSessionTest : AbstractSessionTest() {
 
+    val actorMapper: (Row) -> Actor = { row ->
+        Actor(row.string("first_name"), row.stringOrNull("last_name"), row.int("actor_id"), row.timestamp("last_update"))
+    }
+
     override fun afterSessionSetup() = initialise(AbstractFilmSessionTest::class.java.name) {
         //language=SQL
         val sql = """
@@ -43,6 +47,8 @@ open class AbstractFilmSessionTest : AbstractSessionTest() {
         for (statement in sql.split(";".toRegex())) {
             session.update(statement)
         }
+
+        session.update("delete from actor")
     }
 
     fun Actor.toMap(): Map<String, Any?> = mapOf(
@@ -78,8 +84,6 @@ open class AbstractFilmSessionTest : AbstractSessionTest() {
             params["ids"] = ids
             "where actor_id in (:ids) order by actor_id"
         }
-        return session.select(sql, params) { row ->
-            Actor(row.string("first_name"), row.stringOrNull("last_name"), row.int("actor_id"), row.timestamp("last_update"))
-        }
+        return session.select(sql, params, mapper = actorMapper)
     }
 }
