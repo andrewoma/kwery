@@ -163,6 +163,10 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
+`master` Compatible with Kotlin 1.0.2.
+* Core: QueryBuilder
+* Core: Fix collection binding when not first parameter
+
 `0.11` Compatible with Kotlin 1.0.2.
 * Core: Fix logging of statements with bound values containing `$`
 * Core: Add experimental sqlite support
