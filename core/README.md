@@ -245,3 +245,70 @@ session.transaction { t ->
     }
 }
 ```
+
+##### Query Builder
+
+Building dynamic query strings becomes a little painful - having to keep
+track of which conditions and parameters to apply, or adding join tables
+as a result of a condition.
+
+[`QueryBuilder`](src/main/kotlin/com/github/andrewoma/kwery/core/builder/QueryBuilder.kt)
+handles this kind of basic concatenation for you resulting in
+an SQL statement and parameters that can then be executed.
+
+Note: `QueryBuilder` is not a type safe builder - it merely concatenates
+SQL strings and accumulates parameters.
+
+A typical use case would be providing a search function where users may
+enter in one or more optional criteria to narrow down search results.
+
+e.g. Given the following criteria object:
+```kotlin
+data class FilmCriteria(
+        val ratings: Set<FilmRating> = setOf(),
+        val title: String? = null,
+        val releaseYear: Int? = null,
+        val maxDuration: Duration? = null,
+        val actor: Actor? = null,
+        val limit: Int? = null,
+        val offset: Int? = null
+)
+```
+We can then define a dynamic search function that `ANDs` together any parameters
+specified as follows:
+```kotlin
+fun findByCriteria(criteria: FilmCriteria): List<F> {
+    val query = query {
+        select("select f.* from film f")
+        whereGroup {
+            criteria.title?.let {
+                where("lower(f.title) like :title")
+                parameter("title", "%${it.toLowerCase()}%")
+            }
+            criteria.releaseYear?.let {
+                where("f.release_year = :release_year")
+                parameter("release_year", it)
+            }
+            criteria.actor?.let {
+                where("exists (select 1 from film_actor where film_id = f.film_id and actor_id = :actor_id)")
+                parameter("actor_id", it.id)
+            }
+            criteria.maxDuration?.let {
+                where("(f.length is null or f.length <= :max_length)")
+                parameter("max_length", durationConverter.to(session.connection, it))
+            }
+            if (criteria.ratings.isNotEmpty()) {
+                where("f.rating in (:ratings)")
+                parameter("ratings", criteria.ratings.map { ratingsConverter.to(session.connection, it) })
+            }
+        }
+        orderBy("title, release_year")
+    }
+
+    return session.select(query.sql, query.parameters, StatementOptions(limit = criteria.limit,
+            offset = criteria.offset), mapper = ...)
+}
+```
+
+See the [`tests`](src/test/kotlin/com/github/andrewoma/kwery/core/builder/QueryBuilderTest.kt)
+for more examples of builders.
