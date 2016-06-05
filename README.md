@@ -166,6 +166,7 @@ Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7
 `master` Compatible with Kotlin 1.0.2.
 * Core: QueryBuilder
 * Core: Fix collection binding when not first parameter
+* Mapper: Add Dao.findByIdForUpdate
 
 `0.11` Compatible with Kotlin 1.0.2.
 * Core: Fix logging of statements with bound values containing `$`
