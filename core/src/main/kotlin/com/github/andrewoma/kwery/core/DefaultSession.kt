@@ -312,19 +312,19 @@ class DefaultSession(override val connection: Connection,
                 is TypedParameter -> ps.setObject(i + 1, value.value, value.sqlType)
                 is InputStream -> ps.setBinaryStream(i + 1, value)
                 is Reader -> ps.setCharacterStream(i + 1, value)
-                is Collection<*> -> setInClause(ps, value, statement.inClauseSizes[key]!!)
+                is Collection<*> -> setInClause(ps, value, i, statement.inClauseSizes[key]!!)
                 else -> ps.setObject(i + 1, value)
             }
         }
         return ps
     }
 
-    private fun setInClause(ps: PreparedStatement, values: Collection<*>, size: Int) {
+    private fun setInClause(ps: PreparedStatement, values: Collection<*>, offset: Int, size: Int) {
         for ((i, value) in values.withIndex()) {
-            ps.setObject(i + 1, value)
+            ps.setObject(offset + i + 1, value)
         }
         for (i in values.size..size - 1) {
-            ps.setObject(i + 1, null)
+            ps.setObject(offset + i + 1, null)
         }
     }
 }
