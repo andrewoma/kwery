@@ -1,19 +1,19 @@
 buildscript {
     ext {
         kotlinVersion = '1.0.3'
-        kommonVersion = '0.10'
+        kommonVersion = '0.11'
         junitVersion = '4.12'
         slf4jVersion = '1.7.21'
         logbackVersion = '1.1.7'
         hsqlVersion = '2.3.4'
-        postgresVersion = '9.4-1206-jdbc42'
+        postgresVersion = '9.4.1208'
         mysqlVersion = '5.1.38'
-        jerseyVersion = '2.23'
+        jerseyVersion = '2.23.1'
         dropwizardVersion = '1.0.0-rc2'
-        jacksonVersion = '2.7.0-rc1'
+        jacksonVersion = '2.7.0'
         h2Version = '1.4.190'
         aopVersion = '1.0'
-        cglibVersion = '3.2.0'
+        cglibVersion = '3.2.4'
         hikariVersion = '2.4.6'
     }
     repositories {
