@@ -97,7 +97,6 @@ class TransactionalInterceptorTest {
 
     @Before fun initialise() {
         session.use(true) {
-            //language = SQL
             session.update("create table if not exists test(value varchar(200))")
             session.update("delete from test")
         }

@@ -25,6 +25,7 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
+import org.intellij.lang.annotations.Language
 import java.sql.Connection
 import javax.sql.DataSource
 
@@ -58,35 +59,35 @@ class ThreadLocalSession(val dataSource: DataSource,
         get() = threadLocalSession.get()?.connection ?:
                 throw UnsupportedOperationException("'connection' is only supported within a transaction in ThreadLocalSession")
 
-    override fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
+    override fun <R> select(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return withSession { it.select(sql, parameters, options, mapper) }
     }
 
-    override fun update(sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
+    override fun update(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
         return withSession { it.update(sql, parameters, options) }
     }
 
-    override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
+    override fun batchUpdate(@Language("SQL") sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
         return withSession { it.batchUpdate(sql, parametersList, options) }
     }
 
-    override fun <K> insert(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
+    override fun <K> insert(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
         return withSession { it.insert(sql, parameters, options, f) }
     }
 
-    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
+    override fun <K> batchInsert(@Language("SQL") sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
         return withSession { it.batchInsert(sql, parametersList, options, f) }
     }
 
-    override fun forEach(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit) {
+    override fun forEach(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit) {
         return withSession { it.forEach(sql, parameters, options, f) }
     }
 
-    override fun <R> asSequence(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Sequence<Row>) -> R): R {
+    override fun <R> asSequence(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Sequence<Row>) -> R): R {
         return withSession { it.asSequence(sql, parameters, options, f) }
     }
 
-    override fun bindParameters(sql: String,
+    override fun bindParameters(@Language("SQL") sql: String,
                                 parameters: Map<String, Any?>,
                                 closeParameters: Boolean,
                                 limit: Int,

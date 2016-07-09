@@ -29,7 +29,8 @@ buildscript {
                 'com.github.jengelman.gradle.plugins:shadow:1.2.2',
                 'com.bmuschko:gradle-nexus-plugin:2.3.1',
                 'net.researchgate:gradle-release:2.1.2',
-                'com.github.ben-manes:gradle-versions-plugin:0.11.3'
+                'com.github.ben-manes:gradle-versions-plugin:0.11.3',
+                'com.netflix.nebula:gradle-extra-configurations-plugin:3.0.3'
         )
     }
 }
@@ -128,10 +129,13 @@ project(':mapper') {
 }
 
 project(':core') {
+    apply plugin: 'nebula.optional-base'
+
     dependencies {
         compile(
                 "com.github.andrewoma.kommon:kommon:$kommonVersion",
         )
+        compile "org.jetbrains:annotations:15.0", optional
         testCompile(
                 "com.zaxxer:HikariCP:$hikariVersion",
                 "ch.qos.logback:logback-classic:$logbackVersion",

@@ -23,6 +23,7 @@
 package com.github.andrewoma.kwery.core
 
 import com.github.andrewoma.kwery.core.dialect.Dialect
+import org.intellij.lang.annotations.Language
 import java.sql.Connection
 
 /**
@@ -51,7 +52,7 @@ interface Session {
     /**
      * Executes a query returning the results as `List`
      */
-    fun <R> select(sql: String,
+    fun <R> select(@Language("SQL") sql: String,
                    parameters: Map<String, Any?> = mapOf(),
                    options: StatementOptions = defaultOptions,
                    mapper: (Row) -> R): List<R>
@@ -59,28 +60,28 @@ interface Session {
     /**
      * Executes an update returning the count of rows affected by the statement
      */
-    fun update(sql: String,
+    fun update(@Language("SQL") sql: String,
                parameters: Map<String, Any?> = mapOf(),
                options: StatementOptions = defaultOptions): Int
 
     /**
      * Executes an insert statement with generated keys, returning the keys
      */
-    fun <K> insert(sql: String,
+    fun <K> insert(@Language("SQL") sql: String,
                    parameters: Map<String, Any?> = mapOf(),
                    options: StatementOptions = defaultOptions, f: (Row) -> K): Pair<Int, K>
 
     /**
      * Executes a batch of update statements returning the counts of each statement executed
      */
-    fun batchUpdate(sql: String,
+    fun batchUpdate(@Language("SQL") sql: String,
                     parametersList: List<Map<String, Any?>>,
                     options: StatementOptions = defaultOptions): List<Int>
 
     /**
      * Executes a batch of insert statements with generated keys, returning the list of keys
      */
-    fun <K> batchInsert(sql: String,
+    fun <K> batchInsert(@Language("SQL") sql: String,
                         parametersList: List<Map<String, Any?>>,
                         options: StatementOptions = defaultOptions,
                         f: (Row) -> K): List<Pair<Int, K>>
@@ -89,7 +90,7 @@ interface Session {
      * Executes a query, providing the results as a sequence for streaming.
      * This is the most flexible method for handling large result sets without loading them into memory.
      */
-    fun <R> asSequence(sql: String,
+    fun <R> asSequence(@Language("SQL") sql: String,
                        parameters: Map<String, Any?> = mapOf(),
                        options: StatementOptions = defaultOptions,
                        f: (Sequence<Row>) -> R): R
@@ -98,7 +99,7 @@ interface Session {
      * Executes a query, invoking the supplied function for each row returned.
      * This is suitable for handling large result sets without loading them into memory.
      */
-    fun forEach(sql: String,
+    fun forEach(@Language("SQL") sql: String,
                 parameters: Map<String, Any?> = mapOf(),
                 options: StatementOptions = defaultOptions,
                 f: (Row) -> Unit): Unit
@@ -111,7 +112,7 @@ interface Session {
      * Be careful not to introduce SQL injections if binding strings. The dialect will attempt to escape
      * strings so they are safe, but it is probably not reliable for untrusted strings.
      */
-    fun bindParameters(sql: String,
+    fun bindParameters(@Language("SQL") sql: String,
                        parameters: Map<String, Any?>,
                        closeParameters: Boolean = true,
                        limit: Int = -1,

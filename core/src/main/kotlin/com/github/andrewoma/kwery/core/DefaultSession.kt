@@ -25,6 +25,7 @@ package com.github.andrewoma.kwery.core
 import com.github.andrewoma.kwery.core.dialect.Dialect
 import com.github.andrewoma.kwery.core.interceptor.StatementInterceptor
 import com.github.andrewoma.kwery.core.interceptor.noOpStatementInterceptor
+import org.intellij.lang.annotations.Language
 import java.io.InputStream
 import java.io.Reader
 import java.sql.Connection
@@ -62,7 +63,7 @@ class DefaultSession(override val connection: Connection,
 
     /*internal*/var transaction: Transaction? = null
 
-    override fun <R> select(sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
+    override fun <R> select(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, mapper: (Row) -> R): List<R> {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
 
@@ -82,7 +83,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun batchUpdate(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
+    override fun batchUpdate(@Language("SQL") sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions): List<Int> {
         require(!parametersList.isEmpty()) { "Parameters cannot be empty for batchUpdate" }
 
         return withPreparedStatement(sql, parametersList, options) { statement, ps ->
@@ -96,7 +97,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <K> batchInsert(sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
+    override fun <K> batchInsert(@Language("SQL") sql: String, parametersList: List<Map<String, Any?>>, options: StatementOptions, f: (Row) -> K): List<Pair<Int, K>> {
         require(!parametersList.isEmpty()) { "Parameters cannot be empty for batchUpdate" }
 
         return withPreparedStatement(sql, parametersList, options.copy(useGeneratedKeys = true)) { statement, ps ->
@@ -121,7 +122,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun update(sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
+    override fun update(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions): Int {
         return withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -130,7 +131,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <K> insert(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
+    override fun <K> insert(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> K): Pair<Int, K> {
         return withPreparedStatement(sql, listOf(parameters), options.copy(useGeneratedKeys = true)) { statement, ps ->
             bindParameters(parameters, statement)
             val rowsAffected = ps.executeUpdate()
@@ -146,7 +147,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun <R> asSequence(sql: String,
+    override fun <R> asSequence(@Language("SQL") sql: String,
                                 parameters: Map<String, Any?>,
                                 options: StatementOptions,
                                 f: (Sequence<Row>) -> R): R {
@@ -182,7 +183,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun forEach(sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit): Unit {
+    override fun forEach(@Language("SQL") sql: String, parameters: Map<String, Any?>, options: StatementOptions, f: (Row) -> Unit): Unit {
         withPreparedStatement(sql, listOf(parameters), options) { statement, ps ->
             bindParameters(parameters, statement)
             val rs = ps.executeQuery()
@@ -200,7 +201,7 @@ class DefaultSession(override val connection: Connection,
         }
     }
 
-    override fun bindParameters(sql: String,
+    override fun bindParameters(@Language("SQL") sql: String,
                                 parameters: Map<String, Any?>,
                                 closeParameters: Boolean,
                                 limit: Int,

@@ -84,7 +84,7 @@ class FilmApplication : Application<FilmConfiguration>() {
 
         environment.healthChecks().register("db", object : HealthCheck() {
             override fun check() = session.use {
-                session.select("select 1 from information_schema.system_users") { }
+                session.select("select 1 from information_schema.system_users" ) { }
                 HealthCheck.Result.healthy()
             }
         })

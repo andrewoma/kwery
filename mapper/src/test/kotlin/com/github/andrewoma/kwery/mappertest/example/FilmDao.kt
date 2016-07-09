@@ -69,7 +69,6 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
 
     // An example of a one to many join, fetching actors for a film via a join
     fun findWithActors(title: String, releaseYear: Int?): F? {
-        //language=SQL
         val sql = """
             select
               ${f.select},
@@ -89,7 +88,6 @@ class FilmDao(session: Session) : AbstractDao<F, Int>(session, filmTable, { it.i
 
     // An example of a one to one joins, including outer joins
     fun findWithLanguages(title: String, releaseYear: Int?): F? {
-        //language=SQL
         val sql = """
             select
               ${f.select},
