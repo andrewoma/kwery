@@ -1,6 +1,6 @@
 The transactional-jersey module provides transactional interceptors for kwery with Jersey 2.
 
-Note: the use of this module is discouraged - using a `ThreadLocalSession` with
+Note: the use of this module is discouraged as it may be removed - using a `ThreadLocalSession` with
 [transaction blocks](../core#transactions) is preferred as they work without interceptor
 configuration.
 

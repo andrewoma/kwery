@@ -246,6 +246,22 @@ session.transaction { t ->
 }
 ```
 
+`Transaction` blocks are re-entrant. This means that if a transaction block is invoked inside
+of another transaction block, it will join the existing transaction.
+
+This, together with `ThreadLocalSessions`, is the recommended way of combining services
+that use transactions.
+
+A useful idiom for wrapping an entire function in a transaction is to use Kotlin's single
+expression function body syntax:
+
+```
+fun myTransactionalFunction = session.transaction {
+    ...
+}
+```
+This provides a transaction without having to nest the entire function body.
+
 ##### Query Builder
 
 Building dynamic query strings becomes a little painful - having to keep
