@@ -60,7 +60,7 @@ class ActorDao(session: Session) : AbstractDao<Actor, Int>(session, actorTable, 
 
 // Now we can use the DAO
 val dao = ActorDao(session)
-val inserted = dao.insert(Actor(1, Name("Kate", "Beckinsale"), LocalDateTime.now())
+val inserted = dao.insert(Actor(1, Name("Kate", "Beckinsale"), LocalDateTime.now()))
 val actors = dao.findAll()
 ```
 
@@ -93,18 +93,18 @@ val actor = Type(Actor::id, { actorDao.findByIds(it) })
 // For types that reference other types describe how to apply fetched values
 val film = Type(Film::id, { filmDao.findByIds(it) }, listOf(
         // 1 to 1
-        Property(Film::language, language, { it.language.id }, {(f, l) -> f.copy(language = l) }),
+        Property(Film::language, language, { it.language.id }, { f, l -> f.copy(language = l) }),
 
         // 1 to many requires a function to describe how to fetch the related objects
-        CollectionProperty(Film::actors, actor, { it.id },
-                {(f, a) -> f.copy(actors = a.toSet()) },
+        CollectionProperty(Film::actors, actor, Film::id,
+                { f, a -> f.copy(actors = a.toSet()) },
                 { actorDao.findByFilmIds(it) })
 ))
 
 val fetcher = GraphFetcher(setOf(language, actor, film))
 
 // Extension function to fetch the graph for any List using fetcher defined above
-fun <T> Collection<T>.fetch(node: Node) = graphFetcher.fetch(this, Node(node))
+fun <T> Collection<T>.fetch(node: Node) = fetcher.fetch(this, Node(node))
 
 // We can now efficiently fetch various graphs for any list of films
 // The following fetches the films with actors and languages in 3 queries
