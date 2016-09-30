@@ -11,12 +11,6 @@
 .idea
 *.sublime-*
 .nb-gradle
-/core/build
-/example/build
-/fetcher/build
-/mapper/build
-/tomcat-pool/build
-/transactional/build
-/transactional-jersey/build
+build
 target
-classes/
+classes
