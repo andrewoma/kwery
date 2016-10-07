@@ -80,7 +80,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun Iterable<Column<T, *>>.equate(separator: String = ", ", f: (Column<T, *>) -> String = nf): String {
-        return this.map { "${f(it) } = :${f(it)}" }.joinToString(separator)
+        return this.map { "${f(it)} = :${f(it)}" }.joinToString(separator)
     }
 
     protected fun Collection<ID>.copyToSqlArray(): java.sql.Array {
@@ -126,14 +126,14 @@ abstract class AbstractDao<T : Any, ID : Any>(
             if (exampleColumns.isEmpty()) {
                 findAll(columns)
             } else withTransaction {
-                    val name = "findByExample"
+                val name = "findByExample"
 
-                    val exampleMap = table.objectMap(session, example, exampleColumns, nf)
-                    val sql = sql(Triple(name, exampleColumns, columns)) {
-                        "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
-                    }
-                    session.select(sql, exampleMap, options(name), table.rowMapper(columns))
+                val exampleMap = table.objectMap(session, example, exampleColumns, nf)
+                val sql = sql(Triple(name, exampleColumns, columns)) {
+                    "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
                 }
+                session.select(sql, exampleMap, options(name), table.rowMapper(columns))
+            }
 
     private fun isGeneratedKey(value: T?, strategy: IdStrategy): Boolean = when (strategy) {
         IdStrategy.Explicit -> false
