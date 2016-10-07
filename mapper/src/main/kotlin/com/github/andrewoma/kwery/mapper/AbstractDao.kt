@@ -80,7 +80,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun Iterable<Column<T, *>>.equate(separator: String = ", ", f: (Column<T, *>) -> String = nf): String {
-        return this.map { "${f(it)} = :${f(it)}" }.joinToString(separator)
+        return this.map { "${f(it) } = :${f(it)}" }.joinToString(separator)
     }
 
     protected fun Collection<ID>.copyToSqlArray(): java.sql.Array {
@@ -333,7 +333,6 @@ abstract class AbstractDao<T : Any, ID : Any>(
             values.map { id(it) to it }.toMap()
         }
     }
-
 
     private fun freeIfSupported(array: Array) {
         try {
