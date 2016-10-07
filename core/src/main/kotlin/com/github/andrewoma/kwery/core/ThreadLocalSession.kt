@@ -52,8 +52,7 @@ class ThreadLocalSession(val dataSource: DataSource,
     }
 
     override val currentTransaction: Transaction?
-        get() = threadLocalSession.get()?.currentTransaction ?:
-                throw UnsupportedOperationException("'currentTransaction' is only supported within a transaction in ThreadLocalSession")
+        get() = threadLocalSession.get()?.currentTransaction
 
     override val connection: Connection
         get() = threadLocalSession.get()?.connection ?:

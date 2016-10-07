@@ -80,7 +80,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun Iterable<Column<T, *>>.equate(separator: String = ", ", f: (Column<T, *>) -> String = nf): String {
-        return this.map { "${f(it) } = :${f(it)}" }.joinToString(separator)
+        return this.map { "${f(it)} = :${f(it)}" }.joinToString(separator)
     }
 
     protected fun Collection<ID>.copyToSqlArray(): java.sql.Array {
@@ -90,39 +90,50 @@ abstract class AbstractDao<T : Any, ID : Any>(
     protected fun options(name: String): StatementOptions =
             session.defaultOptions.copy(name = this.javaClass.simpleName + "." + name)
 
-    override fun findById(id: ID, columns: Set<Column<T, *>>): T? {
+
+    protected fun <R> withTransaction(block: () -> R): R {
+        if (session is ThreadLocalSession && session.currentTransaction == null) {
+            return session.transaction {
+                block.invoke()
+            }
+        }
+        return block.invoke()
+    }
+
+    override fun findById(id: ID, columns: Set<Column<T, *>>): T? = withTransaction {
         val name = "findById"
         val sql = sql(name to columns) {
             "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.equate(" and ")}"
         }
-        return session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
+        session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
     }
 
-    override fun findByIdForUpdate(id: ID, columns: Set<Column<T, *>>): T? {
+    override fun findByIdForUpdate(id: ID, columns: Set<Column<T, *>>): T? = withTransaction {
         val name = "findByIdForUpdate"
         val sql = sql(name to columns) {
             "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.equate(" and ")}\nfor update"
         }
-        return session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
+        session.select(sql, table.idMap(session, id, nf), options(name), table.rowMapper(columns)).firstOrNull()
     }
 
-    override fun findAll(columns: Set<Column<T, *>>): List<T> {
+    override fun findAll(columns: Set<Column<T, *>>): List<T> = withTransaction {
         val name = "findAll"
         val sql = sql(name to columns) { "select ${columns.join()} \nfrom ${table.name}" }
-        return session.select(sql, mapOf(), options(name), table.rowMapper(columns))
+        session.select(sql, mapOf(), options(name), table.rowMapper(columns))
     }
 
-    override fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>>): List<T> {
-        val name = "findByExample"
+    override fun findByExample(example: T, exampleColumns: Set<Column<T, *>>, columns: Set<Column<T, *>>): List<T> =
+            if (exampleColumns.isEmpty()) {
+                findAll(columns)
+            } else withTransaction {
+                    val name = "findByExample"
 
-        if (exampleColumns.isEmpty()) return findAll(columns)
-
-        val exampleMap = table.objectMap(session, example, exampleColumns, nf)
-        val sql = sql(Triple(name, exampleColumns, columns)) {
-            "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
-        }
-        return session.select(sql, exampleMap, options(name), table.rowMapper(columns))
-    }
+                    val exampleMap = table.objectMap(session, example, exampleColumns, nf)
+                    val sql = sql(Triple(name, exampleColumns, columns)) {
+                        "select ${columns.join()} \nfrom ${table.name}\nwhere ${exampleColumns.equate(" and ")}"
+                    }
+                    session.select(sql, exampleMap, options(name), table.rowMapper(columns))
+                }
 
     private fun isGeneratedKey(value: T?, strategy: IdStrategy): Boolean = when (strategy) {
         IdStrategy.Explicit -> false
@@ -133,7 +144,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
         }
     }
 
-    override fun update(oldValue: T, newValue: T, deltaOnly: Boolean): T {
+    override fun update(oldValue: T, newValue: T, deltaOnly: Boolean): T = withTransaction {
         val name = "update"
         val new = fireTransformingEvent(newValue) { PreUpdateEvent(table, id(oldValue), newValue, oldValue) }
 
@@ -184,7 +195,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         fireEvent { UpdateEvent(table, id(oldValue), result, oldValue) }
 
-        return result
+        result
     }
 
     private fun difference(lhs: Map<String, Any?>, rhs: Map<String, Any?>): Map<String, Any?> {
@@ -195,17 +206,17 @@ abstract class AbstractDao<T : Any, ID : Any>(
         return differences
     }
 
-    override fun delete(id: ID): Int {
+    override fun delete(id: ID): Int = withTransaction {
         val name = "delete"
         val sql = sql(name) { "delete from ${table.name} where ${table.idColumns.equate(" and ")}" }
         val count = session.update(sql, table.idMap(session, id, nf), options(name))
 
         fireEvent { DeleteEvent(table, id, null) }
 
-        return count
+        count
     }
 
-    override fun unsafeUpdate(newValue: T): T {
+    override fun unsafeUpdate(newValue: T): T = withTransaction {
         val name = "unsafeUpdate"
         val new = fireTransformingEvent(newValue) { PreUpdateEvent(table, id(newValue), newValue, null) }
 
@@ -219,10 +230,10 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         fireEvent { UpdateEvent(table, id(new), new, null) }
 
-        return new
+        new
     }
 
-    override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> {
+    override fun batchInsert(values: List<T>, idStrategy: IdStrategy): List<T> = withTransaction {
         val name = "batchInsert"
 
         val new = if (listeners.isEmpty()) values else values.map { value ->
@@ -260,10 +271,10 @@ abstract class AbstractDao<T : Any, ID : Any>(
             fireEvent { InsertEvent(table, id(value), value) }
         }
 
-        return inserted
+        inserted
     }
 
-    override fun insert(value: T, idStrategy: IdStrategy): T {
+    override fun insert(value: T, idStrategy: IdStrategy): T = withTransaction {
         val name = "insert"
 
         val new = fireTransformingEvent(value) { PreInsertEvent(table, id(value), value) }
@@ -287,42 +298,42 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
         fireEvent { InsertEvent(table, id(inserted), inserted) }
 
-        return inserted
+        inserted
     }
 
     private fun generatedKeyRow(row: Row) = if (session.dialect.supportsFetchingGeneratedKeysByName) row else KeyRow(row.resultSet)
 
-    override fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>>): Map<ID, T> {
-        val name = "findByIds"
-        if (ids.isEmpty()) return mapOf()
+    override fun findByIds(ids: Collection<ID>, columns: Set<Column<T, *>>): Map<ID, T> = when {
+        ids.isEmpty() -> mapOf()
+        ids.size == 1 -> findById(ids.first())?.let { mapOf(id(it) to it) } ?: mapOf()
+        else -> withTransaction {
+            val name = "findByIds"
 
-        if (ids.size == 1) {
-            return findById(ids.first())?.let { mapOf(id(it) to it) } ?: mapOf()
+            // TODO ... support compound ids? No nice way of doing this without spamming statement caches
+            if (table.idColumns.size != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
+
+            val values = if (session.dialect.supportsArrayBasedIn) {
+                val sql = sql(name to columns) {
+                    "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} " +
+                            session.dialect.arrayBasedIn("ids")
+                }
+                val array = ids.copyToSqlArray()
+                try {
+                    session.select(sql, mapOf("ids" to array), options(name), table.rowMapper(columns))
+                } finally {
+                    freeIfSupported(array)
+                }
+            } else {
+                val sql = sql(name to columns) {
+                    "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
+                }
+                session.select(sql, mapOf("ids" to ids), options(name), table.rowMapper(columns))
+            }
+
+            values.map { id(it) to it }.toMap()
         }
-
-        // TODO ... support compound ids? No nice way of doing this without spamming statement caches
-        if (table.idColumns.size != 1) throw UnsupportedOperationException("Find by ids with compound keys is currently unsupported")
-
-        val values = if (session.dialect.supportsArrayBasedIn) {
-            val sql = sql(name to columns) {
-                "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} " +
-                        session.dialect.arrayBasedIn("ids")
-            }
-            val array = ids.copyToSqlArray()
-            try {
-                session.select(sql, mapOf("ids" to array), options(name), table.rowMapper(columns))
-            } finally {
-                freeIfSupported(array)
-            }
-        } else {
-            val sql = sql(name to columns) {
-                "select ${columns.join()} \nfrom ${table.name} \nwhere ${table.idColumns.first().name} in (:ids)"
-            }
-            session.select(sql, mapOf("ids" to ids), options(name), table.rowMapper(columns))
-        }
-
-        return values.map { id(it) to it }.toMap()
     }
+
 
     private fun freeIfSupported(array: Array) {
         try {
@@ -334,7 +345,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
 
     protected fun sql(key: Any, f: () -> String): String = sqlCache.getOrPut(key, { f() })
 
-    override fun unsafeBatchUpdate(values: List<T>): List<T> {
+    override fun unsafeBatchUpdate(values: List<T>): List<T> = withTransaction {
         val name = "unsafeBatchUpdate"
         val new = if (listeners.isEmpty()) values else values.map { value ->
             fireTransformingEvent(value) { PreUpdateEvent(table, id(value), value, null) }
@@ -358,14 +369,14 @@ abstract class AbstractDao<T : Any, ID : Any>(
             fireEvent { UpdateEvent(table, id(value), value, null) }
         }
 
-        return new
+        new
     }
 
     protected fun version(value: T): Any {
         return table.objectMap(session, value, setOf(table.versionColumn!!)).values.first()!!
     }
 
-    override fun batchUpdate(values: List<Pair<T, T>>): List<T> {
+    override fun batchUpdate(values: List<Pair<T, T>>): List<T> = withTransaction {
         val name = "batchUpdate"
 
         require(table is Versioned<*>) { "table must be Versioned to use batchUpdate. Use unsafeBatchUpdate for unversioned tables" }
@@ -409,16 +420,16 @@ abstract class AbstractDao<T : Any, ID : Any>(
             }
         }
 
-        return updates.map { it.second }
+        updates.map { it.second }
     }
 
-    override fun allocateIds(count: Int): List<ID> {
+    override fun allocateIds(count: Int): List<ID> = withTransaction {
         require(session.dialect.supportsAllocateIds) { "Dialect does not support allocate ids" }
         require(table.sequence != null) { "Table sequence is not defined" }
         require(table.idColumns.size == 1) { "Compound ids are not supported" }
 
         val sql = session.dialect.allocateIds(count, table.sequence!!, table.idColumns.first().name)
-        return session.select(sql, mapOf(), options("allocateIds")) { row ->
+        session.select(sql, mapOf(), options("allocateIds")) { row ->
             id(table.rowMapper(table.idColumns, nf)(row))
         }
     }
