@@ -35,7 +35,7 @@ import org.junit.Rule
 import org.junit.rules.TestName
 import kotlin.properties.Delegates
 
-private val testDataSource = HikariDataSource().apply {
+val testDataSource = HikariDataSource().apply {
     driverClassName = "org.hsqldb.jdbc.JDBCDriver"
     jdbcUrl = "jdbc:hsqldb:mem:kwerydao"
 }
