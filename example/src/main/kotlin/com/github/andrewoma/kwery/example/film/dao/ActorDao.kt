@@ -37,13 +37,13 @@ object actorTable : Table<A, Int>("actor", tableConfig, "actor_seq"), VersionedW
     // @formatter:off
     val Id         by col(A::id, id = true)
     val FirstName  by col(N::first, { it.name })
-    val LastName   by col(N::last,  { it.name })
+    val LastName   by col(N::last, { it.name })
     val Version    by col(A::version, version = true)
     // @formatter:on
 
     override fun idColumns(id: Int) = setOf(Id of id)
 
-    override fun create(value: Value<A>) = A(value.of(Id), N(value.of(FirstName), value.of(LastName)),
+    override fun create(value: Value<A>) = A(value of Id, N(value of FirstName, value of LastName),
             value.of(Version))
 }
 

@@ -25,107 +25,11 @@ package com.github.andrewoma.kwery.mapper
 import com.github.andrewoma.kommon.collection.hashMapOfExpectedSize
 import com.github.andrewoma.kwery.core.Row
 import com.github.andrewoma.kwery.core.Session
-import com.github.andrewoma.kwery.mapper.util.camelToLowerUnderscore
 import java.lang.reflect.ParameterizedType
 import java.util.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.*
 import kotlin.reflect.jvm.javaType
-
-/**
- * Column defines a how to map an SQL column to and from an object property of type `T`
- * within a containing class `C`.
- *
- * While columns can be added directly it is more common to use the `col` methods on `Table`
- * to provide sensible defaults.
- */
-data class Column<C, T>(
-        /**
-         * A function to extract the property value from the containing object
-         */
-        val property: (C) -> T,
-
-        /**
-         * If a value is not `nullable` a default value must be provided to allow construction
-         * of partially selected objects
-         */
-        val defaultValue: T,
-
-        /**
-         * A converter between the SQL type and `T`
-         */
-        val converter: Converter<T>,
-
-        /**
-         * The name of the SQL column
-         */
-        val name: String,
-
-        /**
-         * True if the column is part of the primary key
-         */
-        val id: Boolean,
-
-        /**
-         * True if the column is used for versioning using optimistic locking
-         */
-        val version: Boolean,
-
-        /**
-         * True if the column is selected in queries by default.
-         * Generally true, but is useful to exclude `BLOBs` and `CLOBs` in some cases.
-         */
-        val selectByDefault: Boolean,
-
-        /**
-         * True if the column is nullable
-         */
-        val isNullable: Boolean
-) {
-    /**
-     * A type-safe variant of `to`
-     */
-    infix fun of(value: T): Pair<Column<C, T>, T> = Pair(this, value)
-
-    /**
-     * A type-safe variant of `to` with an optional value
-     */
-    @Suppress("BASE_WITH_NULLABLE_UPPER_BOUND")
-    infix fun optional(value: T?): Pair<Column<C, T>, T?> = Pair(this, value)
-
-    override fun toString(): String {
-        return "Column($name id=$id version=$version nullable=$isNullable)" // Prevent NPE in debugger on "property"
-    }
-}
-
-/**
- * Value allows extraction of column values by column.
- */
-interface Value<C> {
-    infix fun <T> of(column: Column<C, T>): T
-}
-
-/**
- * TableConfiguration defines configuration common to a set of tables.
- */
-class TableConfiguration(
-        /**
-         * Defines default values for types when the column is not null, but is not selected.
-         * Defaults to `standardDefaults`
-         */
-        val defaults: Map<KType, *> = standardDefaults + timeDefaults,
-
-        /**
-         * Defines converters from JDBC types to arbitrary Kotlin types.
-         * Defaults to `standardConverters` + `timeConverters`
-         */
-        val converters: Map<Class<*>, Converter<*>> = standardConverters + timeConverters,
-
-        /**
-         * Defines the naming convention for converting `Column` names to SQL column names.
-         * Defaults to `camelToLowerUnderscore`
-         */
-        val namingConvention: (String) -> String = camelToLowerUnderscore)
 
 
 /**
@@ -228,7 +132,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
 
     ): DelegatedColumn<R?> {
 
-        val column = Column<T, R?>({ path(it)?.let { property.get(it) }}, null, optional(converter), name ?: "", id, version, selectByDefault, true)
+        val column = Column<T, R?>({ path(it)?.let { property.get(it) } }, null, optional(converter), name ?: "", id, version, selectByDefault, true)
         return DelegatedColumn(column)
     }
 
