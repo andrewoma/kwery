@@ -37,11 +37,13 @@ import kotlin.reflect.jvm.javaType
  */
 abstract class Table<T : Any, ID>(val name: String, val config: TableConfiguration = TableConfiguration(), val sequence: String? = null) {
 
-    val allColumns: Set<Column<T, *>> = LinkedHashSet()
-    val defaultColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.selectByDefault }) }
-    val idColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filter { it.id }) }
-    val dataColumns: Set<Column<T, *>> by lazy { LinkedHashSet(allColumns.filterNot { it.id }) }
-    val versionColumn: Column<T, *>? by lazy { allColumns.firstOrNull { it.version } }
+    private val columns = LinkedHashSet<Column<T, *>>()
+
+    val allColumns: Set<Column<T, *>> by lazy { columns }
+    val defaultColumns: Set<Column<T, *>> by lazy { LinkedHashSet(columns.filter { it.selectByDefault }) }
+    val idColumns: Set<Column<T, *>> by lazy { LinkedHashSet(columns.filter { it.id }) }
+    val dataColumns: Set<Column<T, *>> by lazy { LinkedHashSet(columns.filterNot { it.id }) }
+    val versionColumn: Column<T, *>? by lazy { columns.firstOrNull { it.version } }
     val type: Class<T> by lazy { lazyType!! }
 
     private val columnName: (Column<T, *>) -> String = { it.name }
@@ -52,31 +54,29 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
     abstract fun idColumns(id: ID): Set<Pair<Column<T, *>, *>>
 
     fun <R> addColumn(column: Column<T, R>): Column<T, R> {
-        @Suppress("UNCHECKED_CAST")
-        (allColumns as MutableSet<Any?>).add(column)
+        check(!initialised) { "Columns cannot be added after table instance is used" }
+        columns.add(column)
         return column
     }
 
     private fun <T> lazy(f: () -> T) = kotlin.lazy(LazyThreadSafetyMode.NONE) { initialise(); f() }
 
-    // Indirectly calls "get" on all delegated columns, which then adds them to the "allColumns"
-    private fun initialise() {
-        synchronized(this) {
-            if (initialised) return
+    // Indirectly calls "get" on all delegated columns, which then adds them to the "columns"
+    private fun initialise(): Unit = synchronized(this) {
+        if (initialised) return
 
-            val instance: T
-            try {
-                instance = create(object : Value<T> {
-                    override fun <R> of(column: Column<T, R>): R {
-                        return column.defaultValue
-                    }
-                })
-            } catch(e: NullPointerException) {
-                throw RuntimeException("A table field is declared as nullable but the mapped field is non-null?", e)
-            }
-            lazyType = instance.javaClass
-            initialised = true
+        val instance: T = try {
+            create(object : Value<T> {
+                override fun <R> of(column: Column<T, R>): R {
+                    return column.defaultValue
+                }
+            })
+        } catch(e: NullPointerException) {
+            throw RuntimeException("A table field is declared as nullable but the mapped field is non-null?", e)
         }
+
+        lazyType = instance.javaClass
+        initialised = true
     }
 
     // A delegated property that gets the column name from the property name unless it is defined
