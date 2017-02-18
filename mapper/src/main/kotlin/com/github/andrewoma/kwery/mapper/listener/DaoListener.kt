@@ -80,7 +80,7 @@ abstract class DeferredListener(val postCommit: Boolean = true) : Listener {
     private fun addCommitHook(transaction: Transaction) {
         eventsByTransaction[transaction.id] = arrayListOf<Event>()
 
-        val onComplete: (Boolean, Session) -> Unit = { committed, session ->
+        val onComplete: (Boolean, Session) -> Unit = { committed, _ ->
             val events = eventsByTransaction[transaction.id]!!
             eventsByTransaction.remove(transaction.id)
             onCommit(committed, events)

@@ -101,11 +101,11 @@ open class RowTest : AbstractSessionTest() {
         session.select("select * from row_test where int_col is not null") { row ->
             assertEquals(1.toByte(), row.byte("int_col"))
             assertEquals(1.toShort(), row.short("int_col"))
-            assertEquals(1.toInt(), row.int("int_col"))
+            assertEquals(1, row.int("int_col"))
             assertEquals(1.toLong(), row.long("int_col"))
             assertEquals(true, row.boolean("boolean_col"))
             assertEquals(2.1.toFloat(), row.float("decimal_col"))
-            assertEquals(2.1.toDouble(), row.double("decimal_col"), 0.001)
+            assertEquals(2.1, row.double("decimal_col"), 0.001)
             assertEquals(BigDecimal("2.1"), row.bigDecimal("decimal_col"))
             assertEquals(Time.valueOf("13:01:02"), row.time("time_col"))
             assertEquals(LocalDate.of(2014, 12, 1), row.date("date_col").toLocalDate())

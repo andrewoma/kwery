@@ -27,7 +27,7 @@ import java.sql.Date
 import java.sql.Time
 import java.sql.Timestamp
 import kotlin.reflect.KType
-import kotlin.reflect.defaultType
+import kotlin.reflect.full.defaultType
 
 val standardDefaults: Map<KType, *> = listOf(
         reifiedValue(true),

@@ -42,7 +42,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
     val nullLimit = if (dialect is MysqlDialect || dialect is SqliteDialect) Int.MAX_VALUE else null
 
     override fun afterSessionSetup() {
-        initialise(dialect.javaClass.name) {
+        initialise(dialect::class.java.name) {
 
             for (statement in sql.split(";".toRegex())) {
                 session.update(statement)
@@ -53,8 +53,7 @@ abstract class AbstractDialectTest(dataSource: DataSource, dialect: Dialect) : A
     }
 
     data class Value(val time: Time, val date: Date, val timestamp: Timestamp, val binary: String,
-                     val varchar: String, val blob: String, val clob: String, val ints: List<Int>) {
-    }
+                     val varchar: String, val blob: String, val clob: String, val ints: List<Int>)
 
     @Test fun `Array based select should work inlined`() {
         if (!dialect.supportsArrayBasedIn) return

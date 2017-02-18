@@ -29,6 +29,7 @@ import java.lang.reflect.ParameterizedType
 import java.util.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.*
+import kotlin.reflect.full.defaultType
 import kotlin.reflect.jvm.javaType
 
 
@@ -75,7 +76,8 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
             throw RuntimeException("A table field is declared as nullable but the mapped field is non-null?", e)
         }
 
-        lazyType = instance.javaClass
+        @Suppress("UNCHECKED_CAST")
+        lazyType = instance::class.java as Class<T>
         initialised = true
     }
 

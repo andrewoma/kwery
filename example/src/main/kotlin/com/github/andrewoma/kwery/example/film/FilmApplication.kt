@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
 class FilmApplication : Application<FilmConfiguration>() {
-    val log = LoggerFactory.getLogger(javaClass)
+    val log = LoggerFactory.getLogger(this::class.java)
 
     override fun getName() = "film-app"
 

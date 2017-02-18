@@ -109,7 +109,7 @@ class DaoListenerPreCommitTest : AbstractSessionTest() {
             val audits = events.map { event ->
                 @Suppress("UNCHECKED_CAST") // TODO ... grok projections, why is casting needed?
                 val table = event.table as Table<Any, Any>
-                val operation = event.javaClass.simpleName.replace("Event$".toRegex(), "")
+                val operation = event::class.java.simpleName.replace("Event$".toRegex(), "")
                 Audit(transactionId, event.table.name, event.id as Int, operation, calculateChanges(event, session, table))
             }
 

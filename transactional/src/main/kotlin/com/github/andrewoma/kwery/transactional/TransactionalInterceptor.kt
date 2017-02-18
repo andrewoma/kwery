@@ -56,11 +56,9 @@ class TransactionalInterceptor : MethodInterceptor {
     // Hacks to work around annotations KClass to Class conversions not working in M12
     // TODO - Remove this when conversions via filter functions don't throw ClassCastException
     private fun isInstance(exceptions: Array<KClass<out Exception>>, exception: Exception): Boolean {
-        for (e in exceptions) {
-            val clazz: Class<out Exception> = e.java
-            if (clazz.isInstance(exception)) return true
-        }
-        return false
+        return exceptions
+                .map { it.java }
+                .any { it.isInstance(exception) }
     }
 
     private fun rollbackOnException(transactional: Transactional, e: Exception): Boolean {
@@ -69,6 +67,6 @@ class TransactionalInterceptor : MethodInterceptor {
 
     private fun getTransactional(invocation: MethodInvocation) =
             invocation.method.getAnnotation(Transactional::class.java)
-                    ?: invocation.`this`.javaClass.getAnnotation(Transactional::class.java)
+                    ?: invocation.`this`::class.java.getAnnotation(Transactional::class.java)
 }
 

@@ -36,7 +36,7 @@ class TimeConvertersTest : AbstractSessionTest() {
     val table = "time_converters"
 
     @Before fun before() {
-        initialise(this.javaClass.simpleName) {
+        initialise(this::class.java.simpleName) {
             session.update("""
                 create table $table(
                      timestamp_col timestamp,

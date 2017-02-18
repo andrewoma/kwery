@@ -65,7 +65,7 @@ class StatementInterceptorChainTest {
         }
     }
 
-    class MappedException() : Exception()
+    class MappedException : Exception()
 
     class ExceptionInterceptor : StatementInterceptor {
         override fun exception(statement: ExecutingStatement, e: Exception) = MappedException()

@@ -79,7 +79,7 @@ class TimeConvertersMappingTest : AbstractSessionTest() {
 
     @Before fun before() {
         dao = TimeTypesDao(session)
-        initialise(this.javaClass.simpleName) {
+        initialise(this::class.java.simpleName) {
             session.update("""
                 create table $timeTableName(
                      id                   int,

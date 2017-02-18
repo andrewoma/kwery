@@ -95,7 +95,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
             fun collectRequiredObjectIdsByType(): Map<Type<Any?, Any?>, Set<Any?>> {
                 val required: MutableMap<Type<Any?, Any?>, MutableSet<Any?>> = hashMapOf()
                 for (value in values) {
-                    for ((property, node) in properties) {
+                    for ((property, _) in properties) {
                         val id = property.id(value.get())
                         if (id != null && !(fetched[property.type]?.containsKey(id) ?: false)) {
                             required.getOrPut(property.type) { hashSetOf() }.add(id)
@@ -167,13 +167,8 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
 
             for ((property, node) in properties) {
                 // Collect all the ids
-                val required: MutableSet<Any?> = hashSetOf()
-                for (value in values) {
-                    val id = property.id(value.get())
-                    if (id != null) {
-                        required.add(id)
-                    }
-                }
+                val required = values.mapNotNull { property.id(it.get()) }.toSet()
+
                 debug { println("$indent Required collection ${property.name} for ids: $required") }
 
                 val fetchedById = property.fetch(required)
@@ -246,8 +241,8 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
     }
 
     fun findMatchingType(obj: Any): Type<*, *> {
-        val type = typeCache.getOrPut(obj.javaClass) { types.firstOrNull { it.supports(obj) } ?: noType }
-        require(type != noType) { "Unknown type: ${obj.javaClass.name}" }
+        val type = typeCache.getOrPut(obj::class.java) { types.firstOrNull { it.supports(obj) } ?: noType }
+        require(type != noType) { "Unknown type: ${obj::class.java.name}" }
         return type
     }
 }

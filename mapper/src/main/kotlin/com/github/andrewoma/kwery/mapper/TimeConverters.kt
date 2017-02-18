@@ -132,7 +132,7 @@ private val nanosInSecond: BigDecimal = BigDecimal.valueOf(1000000000L)
 fun BigDecimal.toDuration(): Duration {
     val seconds = this.toLong()
     val nanoseconds = this.remainder(BigDecimal.ONE).multiply(nanosInSecond).toLong()
-    return Duration.ofSeconds(seconds, nanoseconds);
+    return Duration.ofSeconds(seconds, nanoseconds)
 }
 
 fun Duration.toBigDecimal(): BigDecimal {

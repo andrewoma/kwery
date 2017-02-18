@@ -29,10 +29,10 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
 object transactionalFactory {
-    fun <T : Any> fromInterfaces(obj: T, interfaces: Array<Class<*>> = obj.javaClass.interfaces): T {
+    fun <T : Any> fromInterfaces(obj: T, interfaces: Array<Class<*>> = obj::class.java.interfaces): T {
         val enhancer = Enhancer()
         enhancer.setInterfaces(interfaces)
-        enhancer.setCallback(MethodInterceptor() { dontuse, method, args, proxy ->
+        enhancer.setCallback(MethodInterceptor { _, method, args, proxy ->
             TransactionalInterceptor().invoke(object : MethodInvocation {
                 override fun getThis() = obj
                 override fun getStaticPart() = method
@@ -52,8 +52,8 @@ object transactionalFactory {
 
     fun <T : Any> fromClass(obj: T, argTypes: Array<Class<*>>, args: Array<Any?>): T {
         val enhancer = Enhancer()
-        enhancer.setSuperclass(obj.javaClass)
-        enhancer.setCallback(MethodInterceptor() { dontuse, method, args, proxy ->
+        enhancer.setSuperclass(obj::class.java)
+        enhancer.setCallback(MethodInterceptor { _, method, args, proxy ->
             TransactionalInterceptor().invoke(object : MethodInvocation {
                 override fun getThis() = obj
                 override fun getStaticPart() = method

@@ -29,7 +29,7 @@ import com.github.andrewoma.kwery.mappertest.AbstractSessionTest
 import org.junit.Test
 import kotlin.test.*
 
-abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>>() : AbstractSessionTest() {
+abstract class AbstractDaoTest<T : Any, ID : Any, D : AbstractDao<T, ID>> : AbstractSessionTest() {
     abstract var dao: D
 
     abstract val data: List<T>

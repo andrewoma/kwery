@@ -34,5 +34,5 @@ class ConcurrentHashMapCache<K, V : Any> : Cache<K, V> {
     val underlying: ConcurrentMap<K, V> = ConcurrentHashMap()
 
     override fun get(key: K) = underlying[key]
-    override fun getOrPut(key: K, ifAbsent: (K) -> V) = underlying.computeIfAbsent(key, ifAbsent)
+    override fun getOrPut(key: K, ifAbsent: (K) -> V): V = underlying.computeIfAbsent(key, ifAbsent)
 }

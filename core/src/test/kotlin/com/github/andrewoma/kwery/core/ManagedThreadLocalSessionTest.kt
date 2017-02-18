@@ -128,7 +128,7 @@ class ManagedThreadLocalSessionTest {
 
     @Test fun `Use should allocate a session automatically`() {
         var count: Int? = null
-        val thread = Thread() {
+        val thread = Thread {
             count = session.use {
                 session.select("select count(*) c from sessions_test") { it.int("c") }
             }.single()

@@ -38,7 +38,7 @@ open class Type<T, ID>(
         val fetch: (Collection<ID>) -> Map<ID, T>,
         var properties: List<BaseProperty<*, *, *>> = listOf() // Mutable to support cycles
 ) {
-    open fun supports(obj: Any?) = obj?.javaClass?.isAssignableFrom(javaClass)!!
+    open fun supports(obj: Any?) = obj?.let { it::class.java }?.isAssignableFrom(javaClass)!!
 
     override fun toString() = javaClass.simpleName + "(" + properties.map { it.name }.joinToString(", ") + ")"
 }

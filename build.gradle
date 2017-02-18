@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        kotlinVersion = '1.0.4'
-        kommonVersion = '0.12'
+        kotlinVersion = '1.1.0-rc-91'
+        kommonVersion = '0.13-SNAPSHOT'
         junitVersion = '4.12'
         slf4jVersion = '1.7.21'
         logbackVersion = '1.1.7'
@@ -18,7 +18,7 @@ buildscript {
     }
     repositories {
         maven {
-            url "https://dl.bintray.com/kotlin/kotlin-eap/"
+            url "http://dl.bintray.com/kotlin/kotlin-eap-1.1"
         }
 
         jcenter()
@@ -54,7 +54,7 @@ subprojects {
 
     repositories {
         maven {
-            url "https://dl.bintray.com/kotlin/kotlin-eap/"
+            url "http://dl.bintray.com/kotlin/kotlin-eap-1.1"
         }
         mavenCentral()
         mavenLocal()
@@ -72,7 +72,7 @@ subprojects {
     }
 
     compileKotlin {
-        kotlinOptions.moduleName = "${project.group}.${project.name}"
+//        kotlinOptions.moduleName = "${project.group}.${project.name}"
     }
 
     task coverage(dependsOn: 'jacocoTestReport') << {

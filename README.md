@@ -148,7 +148,7 @@ as a Jersey provider allows the `transactional` attribute to declare resource cl
 
 ```kotlin
 Path("/films")
-@Transactional class FilmResource() : Resource {
+@Transactional class FilmResource : Resource {
     GET fun find(): List<Film> {
         ...
     }

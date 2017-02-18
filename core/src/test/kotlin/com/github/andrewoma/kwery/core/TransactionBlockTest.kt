@@ -41,7 +41,7 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
     @Test fun `exception should roll back transaction`() {
         var id: Int? = null
         try {
-            session.transaction { t ->
+            session.transaction { _ ->
                 val actor = insert(Actor("Kate", "Beckinsale"))
                 id = actor.id
                 assertEquals(1, selectActors(setOf(actor.id)).size)
@@ -54,7 +54,7 @@ class TransactionBlockTest : AbstractFilmSessionTest() {
     }
 
     @Test fun `block should be implicitly committed`() {
-        val actor = session.transaction { t ->
+        val actor = session.transaction { _ ->
             val inserted = insert(Actor("Kate", "Beckinsale"))
             assertEquals(1, selectActors(setOf(inserted.id)).size)
             inserted

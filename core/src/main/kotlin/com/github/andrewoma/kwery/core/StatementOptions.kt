@@ -119,24 +119,24 @@ data class StatementOptions(
         val offset: Int? = null
 )
 
-enum class ResultSetConcurrency private constructor(val value: Int) {
+enum class ResultSetConcurrency constructor(val value: Int) {
     ReadOnly(ResultSet.CONCUR_READ_ONLY),
     Updatable(ResultSet.CONCUR_UPDATABLE);
 }
 
-enum class ResultSetType private constructor(val value: Int) {
+enum class ResultSetType constructor(val value: Int) {
     ForwardOnly(ResultSet.TYPE_FORWARD_ONLY),
     ScrollInsensitive(ResultSet.TYPE_SCROLL_INSENSITIVE),
     ScrollSensitive(ResultSet.TYPE_SCROLL_SENSITIVE);
 }
 
-enum class ResultSetHoldability private constructor(val value: Int?) {
+enum class ResultSetHoldability constructor(val value: Int?) {
     HoldCursorsOverCommit(ResultSet.HOLD_CURSORS_OVER_COMMIT),
     CloseCursorsOverCommit(ResultSet.CLOSE_CURSORS_AT_COMMIT),
     ConnectionDefault(null);
 }
 
-enum class ResultSetFetchDirection private constructor(val value: Int) {
+enum class ResultSetFetchDirection constructor(val value: Int) {
     Forward(ResultSet.FETCH_FORWARD),
     Reverse(ResultSet.FETCH_REVERSE);
 }

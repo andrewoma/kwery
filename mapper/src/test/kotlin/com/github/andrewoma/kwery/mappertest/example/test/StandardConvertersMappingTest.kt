@@ -175,7 +175,7 @@ class StandardDao(session: Session) : AbstractDao<Standard, Int>(session, standa
 class StandardConvertersMappingTest : AbstractSessionTest() {
 
     @Before fun before() {
-        initialise(this.javaClass.simpleName) {
+        initialise(this::class.java.simpleName) {
             session.update("""
                 create table $table(
                      boolean_col   boolean not null,

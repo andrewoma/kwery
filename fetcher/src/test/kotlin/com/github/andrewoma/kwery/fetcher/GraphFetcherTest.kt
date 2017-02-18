@@ -127,7 +127,7 @@ class GraphFetcherTest {
         val properties = fetcher.findMatchingProperties(film.type, Node(Node.all))
 
         assertEquals(film.type.properties.size, properties.size)
-        for ((property, node) in properties) {
+        for ((_, node) in properties) {
             assertEquals(Node.all, node)
         }
     }
@@ -137,7 +137,7 @@ class GraphFetcherTest {
         val properties = fetcher.findMatchingProperties(film.type, Node(Node.allDescendants))
 
         assertEquals(film.type.properties.size, properties.size)
-        for ((property, node) in properties) {
+        for ((_, node) in properties) {
             assertEquals(Node.allDescendants, node)
         }
     }

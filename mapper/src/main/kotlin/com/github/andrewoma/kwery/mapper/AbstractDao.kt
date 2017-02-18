@@ -88,7 +88,7 @@ abstract class AbstractDao<T : Any, ID : Any>(
     }
 
     protected fun options(name: String): StatementOptions =
-            session.defaultOptions.copy(name = this.javaClass.simpleName + "." + name)
+            session.defaultOptions.copy(name = this::class.java.simpleName + "." + name)
 
 
     protected fun <R> withTransaction(block: () -> R): R {

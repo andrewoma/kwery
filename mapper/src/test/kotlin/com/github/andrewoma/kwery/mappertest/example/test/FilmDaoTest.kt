@@ -160,7 +160,7 @@ class FilmDaoTest : AbstractFilmDaoTest<Film, Int, FilmDao>() {
         fun assert(criteria: FilmCriteria, filter: (FilmCriteria, Film) -> Boolean) =
             assert(criteria, data.filter { filter(criteria, it) })
 
-        assert(FilmCriteria()) { c, f -> true } // Default criteria should select everything
+        assert(FilmCriteria()) { _, _ -> true } // Default criteria should select everything
 
         // Individual criteria
         assert(FilmCriteria(releaseYear = 2003)) { c, f -> f.releaseYear == c.releaseYear }

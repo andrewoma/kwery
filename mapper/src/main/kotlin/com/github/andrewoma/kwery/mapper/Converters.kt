@@ -34,7 +34,7 @@ open class Converter<R>(
         val to: (Connection, R) -> Any?
 )
 
-abstract class SimpleConverter<R>(from: (Row, String) -> R, to: (R) -> Any? = { it }) : Converter<R>(from, { c, v -> to(v) })
+abstract class SimpleConverter<R>(from: (Row, String) -> R, to: (R) -> Any? = { it }) : Converter<R>(from, { _, v -> to(v) })
 
 val standardConverters: Map<Class<*>, Converter<*>> = listOf(
         reifiedConverter(booleanConverter),

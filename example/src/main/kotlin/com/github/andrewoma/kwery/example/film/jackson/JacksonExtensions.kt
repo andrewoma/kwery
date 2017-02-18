@@ -56,9 +56,9 @@ class AttributeSetFilter : PropertyFilter {
     override fun serializeAsField(pojo: Any, generator: JsonGenerator, provider: SerializerProvider, writer: PropertyWriter) {
         val partial = pojo as HasAttributeSet
         if (partial.attributeSet() == AttributeSet.All || writer.name.equals("id")) {
-            writer.serializeAsField(pojo, generator, provider);
+            writer.serializeAsField(pojo, generator, provider)
         } else {
-            writer.serializeAsOmittedField(pojo, generator, provider);
+            writer.serializeAsOmittedField(pojo, generator, provider)
         }
     }
 
@@ -76,5 +76,4 @@ class AttributeSetFilter : PropertyFilter {
 }
 
 @JsonFilter("Attribute set filter")
-class AttributeSetFilterMixIn {
-}
+class AttributeSetFilterMixIn
