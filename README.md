@@ -163,6 +163,8 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
+`0.16` Compatible with Kotlin 1.1.0.
+
 `0.15` Compatible with Kotlin 1.0.4.
 * Mapper: Support ThreadLocalSessions in Dao by creating implicit transactions (thanks @brianmadden)
 
