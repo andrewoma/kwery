@@ -79,11 +79,7 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
     }
 
     @Test fun `forEach should call back for each row`() {
-        val actors = listOf(
-                insert(Actor("Kate", "Beckinsale")),
-                insert(Actor("Kate", "Winslet")),
-                insert(Actor("Tony", "Stark"))
-        )
+        val actors = insertActors()
 
         val ids = actors.map { it.id }.toSet()
 
@@ -98,11 +94,7 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
     }
 
     @Test fun `stream should collect all rows`() {
-        val actors = listOf(
-                insert(Actor("Kate", "Beckinsale")),
-                insert(Actor("Kate", "Winslet")),
-                insert(Actor("Tony", "Stark"))
-        )
+        val actors = insertActors()
 
         val ids = actors.map { it.id }.toSet()
 
@@ -129,4 +121,48 @@ class SelectUpdateTest : AbstractFilmSessionTest() {
         val fetched = selectActors(setOf(newValue.id)).first()
         assertEquals(newValue, fetched)
     }
+
+    @Test fun `should support multiple collection parameters`() {
+        val actors1 = insertActors()
+        val actors2 = insertActors()
+        val actors3 = insertActors()
+
+        val sql = "select actor_id from actor where actor_id in (:ids1) or actor_id in (:ids2) or actor_id in (:ids3)"
+
+        val params = mapOf("ids1" to actors1.ids, "ids2" to actors2.ids, "ids3" to actors3.ids)
+        val fetched = session.select(sql, params) { row -> row.int("actor_id") }
+
+        assertEquals(fetched, (actors1 + actors2 + actors3).ids)
+    }
+
+    @Test fun `should support mixture of parameters with collection last`() {
+        val actors = insertActors()
+
+        val sql = "select actor_id from actor where actor_id = :id or actor_id in (:ids)"
+
+        val params = mapOf("id" to actors.first().id, "ids" to actors.drop(1).ids)
+        val fetched = session.select(sql, params) { row -> row.int("actor_id") }
+
+        assertEquals(fetched, actors.ids)
+    }
+
+    @Test fun `should support mixture of parameters with collection first`() {
+        val actors = insertActors()
+
+        val sql = "select actor_id from actor where actor_id in (:ids) or actor_id = :id"
+
+        val params = mapOf("id" to actors.first().id, "ids" to actors.drop(1).ids)
+        val fetched = session.select(sql, params) { row -> row.int("actor_id") }
+
+        assertEquals(fetched, actors.ids)
+    }
+
+    private fun insertActors() = listOf(
+            insert(Actor("Kate", "Beckinsale")),
+            insert(Actor("Kate", "Winslet")),
+            insert(Actor("Tony", "Stark"))
+    )
+
+    private val List<Actor>.ids
+        get() = this.map { it.id }
 }

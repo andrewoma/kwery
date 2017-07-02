@@ -302,7 +302,8 @@ class DefaultSession(override val connection: Connection,
 
     private fun bindParameters(parameters: Map<String, Any?>, statement: ExecutingStatement): PreparedStatement {
         val ps = statement.statement as PreparedStatement
-        for ((i, key) in statement.preparedParameters.withIndex()) {
+        var i = 0
+        for (key in statement.preparedParameters) {
             val value = when (key) {
                 Dialect.OffsetParam -> statement.options.offset
                 Dialect.LimitParam -> statement.options.limit
@@ -310,11 +311,15 @@ class DefaultSession(override val connection: Connection,
             }
             require(value != null || parameters.containsKey(key)) { "Unknown query parameter: '$key'" }
             when (value) {
-                is TypedParameter -> ps.setObject(i + 1, value.value, value.sqlType)
-                is InputStream -> ps.setBinaryStream(i + 1, value)
-                is Reader -> ps.setCharacterStream(i + 1, value)
-                is Collection<*> -> setInClause(ps, value, i, statement.inClauseSizes[key]!!)
-                else -> ps.setObject(i + 1, value)
+                is TypedParameter -> ps.setObject(++i, value.value, value.sqlType)
+                is InputStream -> ps.setBinaryStream(++i, value)
+                is Reader -> ps.setCharacterStream(++i, value)
+                is Collection<*> -> {
+                    val inClauseSize = statement.inClauseSizes[key]!!
+                    setInClause(ps, value, i, inClauseSize)
+                    i += inClauseSize
+                }
+                else -> ps.setObject(++i, value)
             }
         }
         return ps

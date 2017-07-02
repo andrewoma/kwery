@@ -37,7 +37,7 @@ internal fun BoundQuery(query: String, inClauseSizes: Map<String, Int>): BoundQu
 }
 
 internal inline fun replaceBindings(query: String, onBinding: (String) -> String): String {
-    val pattern = Pattern.compile("""\:([a-zA-Z_]+)""")
+    val pattern = Pattern.compile("""\:([a-zA-Z_]+[0-9]*)""")
     val matcher = pattern.matcher(query)
 
     val result = StringBuffer()
