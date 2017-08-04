@@ -283,9 +283,14 @@ class DefaultSession(override val connection: Connection,
 
         statement.fetchSize = options.fetchSize
         if (options.fetchDirection != ResultSetFetchDirection.Forward) {
-            statement.fetchDirection = options.fetchDirection.value // Only override if not the default as sqlite won't accept it
+            // Only override if not the default as sqlite won't accept it
+            statement.fetchDirection = options.fetchDirection.value
         }
-        statement.isPoolable = options.poolable
+        if (options.poolable != options.usePreparedStatement) {
+            // Only override if not the default value (true for PreparedStatements and false for Statements)
+            // as some drivers (e.g. FileMaker) don't support setting of poolable
+            statement.isPoolable = options.poolable
+        }
         statement.maxFieldSize = options.maxFieldSize
         statement.queryTimeout = options.queryTimeout
 
