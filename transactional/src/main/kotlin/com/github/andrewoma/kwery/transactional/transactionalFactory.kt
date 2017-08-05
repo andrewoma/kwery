@@ -53,13 +53,13 @@ object transactionalFactory {
     fun <T : Any> fromClass(obj: T, argTypes: Array<Class<*>>, args: Array<Any?>): T {
         val enhancer = Enhancer()
         enhancer.setSuperclass(obj::class.java)
-        enhancer.setCallback(MethodInterceptor { _, method, args, proxy ->
+        enhancer.setCallback(MethodInterceptor { _, method, methodArgs, proxy ->
             TransactionalInterceptor().invoke(object : MethodInvocation {
                 override fun getThis() = obj
                 override fun getStaticPart() = method
-                override fun proceed() = proxy.invoke(obj, args)
+                override fun proceed() = proxy.invoke(obj, methodArgs)
                 override fun getMethod() = method
-                override fun getArguments() = args
+                override fun getArguments() = methodArgs
             })
         })
 

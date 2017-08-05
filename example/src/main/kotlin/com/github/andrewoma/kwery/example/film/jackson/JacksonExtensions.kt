@@ -55,7 +55,7 @@ inline fun <reified T : Any> ObjectMapper.withObjectStream(url: URL, f: (Sequenc
 class AttributeSetFilter : PropertyFilter {
     override fun serializeAsField(pojo: Any, generator: JsonGenerator, provider: SerializerProvider, writer: PropertyWriter) {
         val partial = pojo as HasAttributeSet
-        if (partial.attributeSet() == AttributeSet.All || writer.name.equals("id")) {
+        if (partial.attributeSet() == AttributeSet.All || writer.name == "id") {
             writer.serializeAsField(pojo, generator, provider)
         } else {
             writer.serializeAsOmittedField(pojo, generator, provider)

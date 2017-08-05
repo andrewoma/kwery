@@ -90,12 +90,12 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
             }
         }
 
-        fun fetchProperties(properties: List<Pair<Property<Any?, Any?, Any?>, Node>>) {
+        fun fetchProperties(props: List<Pair<Property<Any?, Any?, Any?>, Node>>) {
 
             fun collectRequiredObjectIdsByType(): Map<Type<Any?, Any?>, Set<Any?>> {
                 val required: MutableMap<Type<Any?, Any?>, MutableSet<Any?>> = hashMapOf()
                 for (value in values) {
-                    for ((property, _) in properties) {
+                    for ((property, _) in props) {
                         val id = property.id(value.get())
                         if (id != null && !(fetched[property.type]?.containsKey(id) ?: false)) {
                             required.getOrPut(property.type) { hashSetOf() }.add(id)
@@ -128,7 +128,7 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
                 // TODO ... invert looping (values within properties)
                 // Apply the fetched objects
                 for (value in values) {
-                    for ((property, node) in properties) {
+                    for ((property, node) in props) {
                         val id = property.id(value.get())
                         val existing = fetched[property.type]?.get(id) ?: continue // Continue if the object was deleted.
 
@@ -159,13 +159,13 @@ class GraphFetcher(val types: Set<Type<*, *>>) {
             fetchChildren(children)
         }
 
-        fun fetchCollectionProperties(properties: List<Pair<CollectionProperty<Any?, Any?, Any?>, Node>>) {
+        fun fetchCollectionProperties(props: List<Pair<CollectionProperty<Any?, Any?, Any?>, Node>>) {
             class Deferred(val property: CollectionProperty<Any?, Any?, Any?>, val value: Value<T>, val children: List<Value<Any?>>)
 
             val children = Children()
             val deferredList: MutableList<Deferred> = arrayListOf()
 
-            for ((property, node) in properties) {
+            for ((property, node) in props) {
                 // Collect all the ids
                 val required = values.mapNotNull { property.id(it.get()) }.toSet()
 

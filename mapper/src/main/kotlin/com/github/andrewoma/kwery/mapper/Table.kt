@@ -148,7 +148,7 @@ abstract class Table<T : Any, ID>(val name: String, val config: TableConfigurati
         // convert a nullable KType into its non-nullable equivalent
         // Try udalov's workaround: (t.javaType as Class<*>).kotlin.defaultType`
         val javaClass = type.javaType as Class<T>
-        val converter = config.converters[javaClass] ?: if (javaClass.isEnum) EnumByNameConverter(javaClass as Class<DummyEnum>) as T else null
+        val converter = config.converters[javaClass] ?: if (javaClass.isEnum) EnumByNameConverter(javaClass as Class<DummyEnum>) as Converter<T> else null
         checkNotNull(converter) { "Converter undefined for type $type as $javaClass" }
         return (if (type.isMarkedNullable) optional(converter!! as Converter<Any>) else converter) as Converter<T>
     }
