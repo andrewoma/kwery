@@ -163,6 +163,10 @@ Kwery is unstable. It's currently being developed for a side project, so feature
 
 Kwery is available in [Maven Central](http://search.maven.org/#search%7Cga%7C1%7Candrewoma.kwery)
 
+`0.17` Compatible with Kotlin 1.1.3-2.
+* Fix #14 - Incorrect parameter positions for collections
+* Lazily set `Statement.poolable`
+
 `0.16` Compatible with Kotlin 1.1.0.
 
 `0.15` Compatible with Kotlin 1.0.4.
